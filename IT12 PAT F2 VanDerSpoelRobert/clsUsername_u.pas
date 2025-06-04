@@ -62,7 +62,7 @@ begin
       // Generate the part of the username based on the year established
       iYearEstablished := YearOF(fYearEstablished);
       sYearEstablished := Copy(IntToStr(iYearEstablished), 3, 4 );
-
+      // Put it all together
       fUsername := fCompanyName + fCountryBased+ sYearEstablished + '_' + IntToStr(randomrange(100, 1000))
 end;
 
