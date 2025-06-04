@@ -2,7 +2,7 @@ object frmVolitant_Express: TfrmVolitant_Express
   Left = 368
   Top = 166
   Caption = 'Volitant Express'
-  ClientHeight = 664
+  ClientHeight = 663
   ClientWidth = 1250
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -6429,7 +6429,7 @@ object frmVolitant_Express: TfrmVolitant_Express
     Top = 16
     Width = 1234
     Height = 609
-    ActivePage = tsHome
+    ActivePage = tsRegister
     TabOrder = 0
     object tsWelcome: TTabSheet
       Caption = 'Welcome'
@@ -25251,7 +25251,7 @@ object frmVolitant_Express: TfrmVolitant_Express
       object mpIntroVideo: TMediaPlayer
         Left = 392
         Top = 3
-        Width = 0
+        Width = 29
         Height = 30
         VisibleButtons = []
         DoubleBuffered = True
