@@ -1,0 +1,15 @@
+unit clsDistance_u;
+
+interface
+type
+  TDistance = class(TObject)
+     private
+
+     public
+
+     end;
+
+implementation
+uses SysUtils, math;
+
+end.

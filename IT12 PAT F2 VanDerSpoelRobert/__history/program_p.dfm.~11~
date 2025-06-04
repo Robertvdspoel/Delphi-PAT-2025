@@ -1,0 +1,34 @@
+object Form1: TForm1
+  Left = 218
+  Top = 74
+  Caption = 'Form1'
+  ClientHeight = 568
+  ClientWidth = 1028
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -12
+  Font.Name = 'Segoe UI'
+  Font.Style = []
+  Position = poDesigned
+  OnActivate = FormActivate
+  TextHeight = 15
+  object conDB: TADOConnection
+    Connected = True
+    ConnectionString = 
+      'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=K:\Graad 12\IT12 PA' +
+      'T 2025 VanDerSpoelRobert\IT12 PAT F2 VanDerSpoelRobert\Win32\Deb' +
+      'ug\db_PT.mdb;Mode=ReadWrite;Persist Security Info=False'
+    LoginPrompt = False
+    Mode = cmReadWrite
+    Provider = 'Microsoft.Jet.OLEDB.4.0'
+    Left = 56
+    Top = 496
+  end
+  object tblCompany: TADOTable
+    Connection = conDB
+    TableName = 'tblCompany'
+    Left = 112
+    Top = 392
+  end
+end

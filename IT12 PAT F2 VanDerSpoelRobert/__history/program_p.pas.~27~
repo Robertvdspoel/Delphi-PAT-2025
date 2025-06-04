@@ -1,0 +1,72 @@
+unit program_p;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Data.DB, Data.Win.ADODB, Vcl.Grids,
+  Vcl.DBGrids;
+
+type
+  TForm1 = class(TForm)
+    conDB: TADOConnection;
+    tblCompany: TADOTable;
+    dsrCompany: TDataSource;
+    dbgTest: TDBGrid;
+    qrySQL: TADOQuery;
+    dsrSQL: TDataSource;
+    procedure FormActivate(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+
+{$R *.dfm}
+
+procedure TForm1.FormActivate(Sender: TObject);
+
+begin
+  // Form activate
+
+
+  // Database connnection
+  conDB.connected := False;
+  conDB.LoginPrompt := false;
+
+ // sDBConnect := 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=db_PT.mdb;Mode=ReadWrite;Persist Security Info=False' ;       // Remove large part of path
+
+  conDB.ConnectionString := 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=db_PT.mdb;Mode=ReadWrite;Persist Security Info=False' ;       // Remove large part of path
+
+
+  conDB.Open() ;
+
+  // tblCompany
+
+  tblCompany.Connection := conDB ;
+  tblCompany.TableName := 'tblCompany';
+  tblCompany.Active := True;
+
+  dsrCompany.DataSet := tblCompany ;
+
+  dbgtest.datasource := dsrCompany ;
+
+  // SQL Query
+
+  qrySQL.Connection := conDB ;
+
+  dsrSQL.DataSet := qrySQL ;
+
+
+
+
+
+end;
+
+end.

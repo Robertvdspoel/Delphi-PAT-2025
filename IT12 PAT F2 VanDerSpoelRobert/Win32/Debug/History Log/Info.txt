@@ -1,0 +1,1 @@
+The idea is to keep track of the prices of items/ planes fuel price before the price gets updated to be able to see the total price of a order at the time that it was places

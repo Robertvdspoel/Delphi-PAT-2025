@@ -1,0 +1,12 @@
+For Coordinates: https://developers.google.com/public-data/docs/canonical/countries_csv
+
+For Harversine Formula:  https://www.youtube.com/watch?v=HaGj0DjX8W8
+
+Play a video in delphi: https://www.youtube.com/watch?v=lbPIwgzhWCE 		(mr long)
+
+Used Chat GPT for the bulk of the email sending
+
+https://www.youtube.com/watch?v=XwOdBaExs1E
+
+IS empty was gotten by chatGPT
+

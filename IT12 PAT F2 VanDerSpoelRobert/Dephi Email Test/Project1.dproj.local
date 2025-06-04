@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2025/03/25 18:40:00.000.811,=C:\Code\Delphi\Unit1.pas</Transaction>
+    <Transaction>2025/03/25 18:40:27.000.538,Z:\Code\Random\Dephi Email Test\Unit1.dfm=C:\Code\Delphi\Unit1.dfm</Transaction>
+    <Transaction>2025/03/25 18:40:27.000.538,Z:\Code\Random\Dephi Email Test\Unit1.pas=C:\Code\Delphi\Unit1.pas</Transaction>
+    <Transaction>2025/03/25 18:40:29.000.750,Z:\Code\Random\Dephi Email Test\Project1.dproj=C:\Code\Delphi\Project1.dproj</Transaction>
+  </Transactions>
+</BorlandProject>
