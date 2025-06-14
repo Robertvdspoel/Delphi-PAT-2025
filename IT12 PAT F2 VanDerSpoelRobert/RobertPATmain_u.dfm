@@ -6429,7 +6429,7 @@ object frmVolitant_Express: TfrmVolitant_Express
     Top = 16
     Width = 1234
     Height = 609
-    ActivePage = tsRegister
+    ActivePage = tsWelcome
     TabOrder = 0
     object tsWelcome: TTabSheet
       Caption = 'Welcome'
@@ -14471,7 +14471,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 96
         Width = 1017
         Height = 473
-        ActivePage = tsRegConfirm
+        ActivePage = tsLastInfo
         TabOrder = 0
         object tsDetails: TTabSheet
           Caption = 'Company Details'

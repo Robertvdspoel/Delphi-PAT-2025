@@ -2,7 +2,7 @@ object frmVolitant_Express: TfrmVolitant_Express
   Left = 368
   Top = 166
   Caption = 'Volitant Express'
-  ClientHeight = 664
+  ClientHeight = 663
   ClientWidth = 1250
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -14471,7 +14471,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 96
         Width = 1017
         Height = 473
-        ActivePage = tsRegConfirm
+        ActivePage = tsLastInfo
         TabOrder = 0
         object tsDetails: TTabSheet
           Caption = 'Company Details'
