@@ -255,7 +255,7 @@ type
     lblWelcomeHome: TLabel;
     btnCInfoBack: TButton;
     btnLastInfoBack: TButton;
-    BitBtn1: TBitBtn;
+    bitbtnCloseProgram: TBitBtn;
     btnBackFromGallery: TButton;
     bitbtnRegHelp: TBitBtn;
     bitbtnLoginHelp: TBitBtn;
@@ -271,6 +271,11 @@ type
     BitBtnretryPaySelect: TBitBtn;
     BitBtnNextToLastInfo: TBitBtn;
     BitBtnNextToConfirm: TBitBtn;
+    pnlFlightAnimation: TPanel;
+    imgPlaneAnimation: TImage;
+    tFlightAnimation: TTimer;
+    lblSelectCountry: TLabel;
+    lblGalleryInfo: TLabel;
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnRegisterGOClick(Sender: TObject);
@@ -309,12 +314,13 @@ type
     procedure btnTOLogClick(Sender: TObject);
     procedure btnTOpaymentClick(Sender: TObject);
     procedure btnManageCompanyClick(Sender: TObject);
-    procedure BitBtn1Click(Sender: TObject);
+    procedure bitbtnCloseProgramClick(Sender: TObject);
     procedure btnBackFromGalleryClick(Sender: TObject);
     procedure BitBtnNextToConfirmClick(Sender: TObject);
     procedure btnCInfoBackClick(Sender: TObject);
     procedure BitBtnNextToLastInfoClick(Sender: TObject);
     procedure btnLastInfoBackClick(Sender: TObject);
+    procedure tFlightAnimationTimer(Sender: TObject);
 
   private
     { Private declarations }
@@ -324,6 +330,9 @@ type
     objUsername : TUsername ;
 
     Function ValidateEmail(pEmail: string): Boolean;
+
+
+    Procedure imgDynamicOnclick(Sender: TObject);    // For the dynamic object
     
   public
     { Public declarations }
@@ -339,17 +348,24 @@ type
   // Variable declararion
   sID : string ;
   iCountryCount,  iSpecialCharacterCount : integer ;
+  bTimer : boolean;
+
+    // For the gallery
+   iImageCount : integer;
+  arrFileNames : array[1..1000] of string;
+ 
 
   end;
 
 var
   frmVolitant_Express: TfrmVolitant_Express;
+  imgDynamicGallery : TImage ;
 
 implementation
 
 {$R *.dfm}
 
-procedure TfrmVolitant_Express.BitBtn1Click(Sender: TObject);
+procedure TfrmVolitant_Express.bitbtnCloseProgramClick(Sender: TObject);
 begin
 // Closes/ ends the program
 end;
@@ -612,8 +628,25 @@ begin
 end;
 
 procedure TfrmVolitant_Express.btnBackFromGalleryClick(Sender: TObject);
+var
+  I : integer;
 begin
 // Go back to the welcome page from the Gallery page
+tsGallery.TabVisible := False;
+
+  // Remove any existing dynamic compoents from the group box by freeing them from memory. I used this method in my Grade 11 PAT
+  for i := sbGallery.ControlCount - 1 downto 0 do
+  begin
+    // Check if the control is an Image
+    if sbGallery.Controls[i] is tImage then  // Is seems to be used when you are working with components and with shapes
+    begin
+      // Free the panel from memory and remove it from the parent owning it
+      sbGallery.Controls[i].Free;
+    end;
+  end;
+
+
+tsWelcome.TabVisible := True;
 end;
 
 procedure TfrmVolitant_Express.btnCInfoBackClick(Sender: TObject);
@@ -655,17 +688,106 @@ begin
 
 end;
 
-procedure TfrmVolitant_Express.btnGalleryClick(Sender: TObject);
+procedure TfrmVolitant_Express.btnGalleryClick(Sender: TObject);   // Dynamic Component
+const imgWidth = 480;
+const imgHeight = 250;
+var
+  i, iLeft, iTop, iPerLineCount  : integer;
+  bOne : boolean;
+  tGalleryFile : TextFile ;
 begin
-// Shows some pictures about the company
-// go to anotherr tab sheet
-// Use dynamic componets here: see my notes
+// Shows some pictures about the company   (some of this code will have come from my Grade 11 PAT)
+
+  // Create the dynamic components (images) that will be used to display the gallery
+
+  if iImageCount = 0 then // Only read the files into the array ones; the first time the button is clicked
+  begin
+
+    // Get the name of the images into an array
+
+    // Read image names from txt file to array
+    AssignFile(tGalleryFile, 'Gallery/ImageNames.txt');
+    if not FileExists('Gallery/ImageNames.txt')  then
+    begin // Create the file if it does not exits
+      Rewrite(tGalleryFile) ;
+      ShowMessage('Gallery/ImageNames.txt was not found; created')   ;
+      exit;
+    end;
+
+    Reset(tGalleryFile );
+     // Read the file names into the array
+    while not (Eof(tGalleryFile ) ) and (iImageCount < 1000) do
+    begin
+       Inc(iImageCount) ;
+
+       Readln(tGalleryFile , arrFileNames[iImageCount]);
+     //  ShowMessage(arrFileNames[imgWidth]);
+    end;
+    CloseFile(tGalleryFile ) ;
+  end;
+
+  // Create the image components and fill them with the images
+
+  iPerLineCount := 0;
+  iTop := 20;
+  bOne := True;
+  for I := 1 to iImageCount do
+    begin
+      if FileExists('Gallery/'+ arrFileNames[I])  then    // Check that the file can be opened by the system
+      begin
+    
+      // Create the image
+        imgDynamicGallery := TImage.Create(Self) ;
+        imgDynamicGallery.Width := imgWidth ;
+        imgDynamicGallery.Height := imgHeight ;
+        
+        imgDynamicGallery.OnClick	:= imgDynamicOnclick;
+
+        // The the image
+        imgDynamicGallery.Stretch := True;
+        imgDynamicGallery.Picture.LoadFromFile('Gallery/'+ arrFileNames[I]) ;
+
+        // Set the images locations
+
+        // Set the position in the horisontal
+        if bOne = True then
+        begin
+          iLeft := 20 ;
+          bOne := False;
+        end
+        else
+        begin
+          iLeft := sbGallery.Width - 20 - imgWidth	 {iLeft + imgWidth + 40} ;
+          bOne := True;
+        end;
+
+        Inc(iPerLineCount);
+
+        imgDynamicGallery.Left := iLeft;
+        imgDynamicGallery.Top := iTop;
+
+        // Change the POS of the image in the vertical
+        if iPerLineCount = 2 then
+        begin
+          iPerLineCount := 0;
+          iTop := iTop + imgHeight+ 25 ;
+        end;
+
+        // Set the parent
+        imgDynamicGallery.Parent := sbGallery ;
+      
+      end;
+    end;
+
+// go to the gallery tab sheet
+tsWelcome.TabVisible := False;
+tsGallery.TabVisible := true;
+
 end;
 
 procedure TfrmVolitant_Express.btnIntroVidClick(Sender: TObject);
 begin
 // Plays the recorded intro video about the company
-
 
 // go to anotherr tab sheet
 tsWelcome.TabVisible := False;
@@ -695,7 +817,9 @@ procedure TfrmVolitant_Express.btnLoginClick(Sender: TObject);
 begin
 // Login to the program
 
-  qrySQL.SQL.Text := 'Select CompanyID from tblCompany where (Username) = ' + QuotedStr(edtUsernameLogin.Text) + ' and Password = '+ QuotedStr(edtPasswordLogin.Text) ;               // SQL Query
+  // Perhaps add SQL Injection protection
+
+  qrySQL.SQL.Text := 'Select CompanyID from tblCompany where (Username = ' + QuotedStr(edtUsernameLogin.Text) + ') and Password = '+ QuotedStr(edtPasswordLogin.Text) ;  // SQL Query
 
    qrySQL.Open ;
 
@@ -1001,6 +1125,29 @@ sID := '';
        
         CloseFile(tFile) ;
       end;
+
+  if bTimer = false then // Only set this on the first time the activation code runs
+  begin
+
+  // Run the plane animation
+  imgPlaneAnimation.Stretch := True;
+  imgPlaneAnimation.Picture.LoadFromFile('Program Media/airplane-side-view-travel-passenger-commercial-vector-15881171.jpg') ;
+  imgPlaneAnimation.Left := 0 ;
+
+  {       // This is code from my grade 10 PAT
+    ProgressValue := 0;
+  ProgressBarStartUp.Min := 0;
+  ProgressBarStartUp.Max := 1000;
+  ProgressBarStartUp.Position := ProgressValue;   }
+
+  // Set the timers properties
+  tFlightAnimation.Interval := 250; // 1000 milliseconds (1 second)
+  tFlightAnimation.Enabled := True;
+    //  Countdown := 5  ;
+
+  bTimer := true ;
+  end;
+
     
 
 // Database Connection
@@ -1062,7 +1209,6 @@ sID := '';
 
 //dbgtest.datasource := dsrPlanes  ;
 
-
 end;
 
 procedure TfrmVolitant_Express.FormCreate(Sender: TObject);
@@ -1078,14 +1224,73 @@ tsGallery.TabVisible := False;
   tsContact.TabVisible := False;
   tsLastInfo.TabVisible := False;
   tsRegConfirm.TabVisible := False;
+
+  // Set sonme starting variablles
+  bTimer := False;
+  iImageCount := 0;
 end;
 
 
 
 
+procedure TfrmVolitant_Express.imgDynamicOnclick;
+var
+  sString : string;
+begin
+// Onclick for the dynamic images. Display something positive stat wise about volitant express
+
+  case RandomRange(1,6)  of      // When an image is clicked, a random message with stats wil be displayed 
+  1: begin     // Count how many successfull orders has taken place
+      qrySQL.SQL.Text := 'Select Count(*) as Result from tblOrders where status = "Delivered"';
+      qrySQL.open;
+       sString := (inttostr(qrySQL['Result']))  ;
+       ShowMessage('Total successfull orders: '+sString) ;
+    end;
+    
+  2: begin  // Count how many active planes the company have
+       qrySQL.SQL.Text := 'Select Count(*) as Result from tblPlanes where Retired = NO';
+      qrySQL.open;
+       sString := (inttostr(qrySQL['Result']))  ;
+       ShowMessage('Total Active Planes: ' + sString ) ; 
+    end;
+  3:     
+    begin // Count how many items are currently shipped by Volitant Express
+       qrySQL.SQL.Text := 'Select Count(*) as Result from tblItems where Retired = NO';
+      qrySQL.open;
+       sString := (inttostr(qrySQL['Result']))  ;
+       ShowMessage('We currently transport '+ sString + ' different items') ;
+    end;
+  4:
+    begin // Count how many companies are customers
+         qrySQL.SQL.Text := 'Select Count(*) as Result from tblCompany';
+      qrySQL.open;
+       sString := (inttostr(qrySQL['Result']))  ;
+       ShowMessage(sString +' companies trust us to transport their goods from locations around the world') ;
+    end;
+  5:
+    begin  // Display the country with the most Companies as customers of Volitant Express
+        qrySQL.SQL.Text := 'Select TOP 1 [Location Based] as Result from tblCompany Group By [Location Based] ORDER BY COUNT(*) DESC';
+      qrySQL.open;
+       sString := ((qrySQL['Result']))  ;
+       ShowMessage('Most of our Customer Companies are based in: '+ sString ) ;
+    end;
+  end;
+
+end;
+
 procedure TfrmVolitant_Express.lstSelectItemManageClick(Sender: TObject);
 begin
 // Update the Update components
+end;
+
+procedure TfrmVolitant_Express.tFlightAnimationTimer(Sender: TObject);
+begin
+ // Timer code
+ // Change the image location
+ imgPlaneAnimation.Left := imgPlaneAnimation.Left + 30;
+
+ if imgPlaneAnimation.Left > 1100 then
+ imgPlaneAnimation.Left := 0 ;
 end;
 
 function TfrmVolitant_Express.ValidateEmail(pEmail: string): Boolean;
@@ -1212,3 +1417,4 @@ begin
 end;
 
 end.
+// THE END OF THE FILE :)

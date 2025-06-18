@@ -7,7 +7,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, IdMessage, IdBaseComponent, IdComponent,
   IdTCPConnection, IdTCPClient, IdExplicitTLSClientServerBase, IdMessageClient,
   IdSMTPBase, IdSMTP, Vcl.StdCtrls, IdIOHandler, IdIOHandlerSocket,
-  IdIOHandlerStack, IdSSL, IdSSLOpenSSL,IdAttachmentFile, Idtext;
+  IdIOHandlerStack,  IdSSL, IdSSLOpenSSL, IdSSLOpenSSLHeaders, IdAttachmentFile, IdText, IdAttachment;
   // Add IdAttachmentFile here
 type
   TForm1 = class(TForm)
@@ -159,6 +159,9 @@ var
   HTMLTextPart: TIdText;
 begin
   try
+    GSSL_DLL_libcrypto := ExtractFilePath(ParamStr(0)) + 'libcrypto-1_1.dll';
+    GSSL_DLL_libssl := ExtractFilePath(ParamStr(0)) + 'libssl-1_1.dll';
+
     // Set up SMTP
     IdSMTP1.IOHandler := IdSSLIOHandlerSocketOpenSSL1;
     IdSMTP1.Host := 'smtp.mail.yahoo.com';
@@ -170,7 +173,7 @@ begin
     // Configure Email
     IdMessage1.ContentType := 'multipart/alternative';
     IdMessage1.From.Address := 'vrobert997@yahoo.com';
-    IdMessage1.Recipients.EmailAddresses :=  '' ; //'mpdejager2@gmail.com';
+    IdMessage1.Recipients.EmailAddresses :=  '10867@hsrandburg.co.za' ; //'mpdejager2@gmail.com';
     IdMessage1.Subject := 'Dangerous Mineral Transport Alert:   : HALLLO';
 
     // Create HTML content with a colored, custom background
