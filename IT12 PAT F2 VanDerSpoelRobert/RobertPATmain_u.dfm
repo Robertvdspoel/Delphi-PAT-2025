@@ -6429,7 +6429,7 @@ object frmVolitant_Express: TfrmVolitant_Express
     Top = 16
     Width = 1234
     Height = 609
-    ActivePage = tsWelcome
+    ActivePage = tsAdmin
     TabOrder = 0
     object tsWelcome: TTabSheet
       Caption = 'Welcome'
@@ -14434,7 +14434,7 @@ object frmVolitant_Express: TfrmVolitant_Express
           OnClick = btnAboutUsClick
         end
         object btnGallery: TButton
-          Left = 880
+          Left = 893
           Top = 40
           Width = 201
           Height = 65
@@ -14484,7 +14484,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 96
         Width = 1017
         Height = 473
-        ActivePage = tsDetails
+        ActivePage = tsLastInfo
         TabOrder = 0
         object tsDetails: TTabSheet
           Caption = 'Company Details'
@@ -16556,6 +16556,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               ParentShowHint = False
               ShowHint = False
               TabOrder = 0
+              Text = 'temp@temp.com'
               TextHint = 'Enter Email Address'
             end
           end
@@ -22848,7 +22849,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Style = []
               ParentFont = False
             end
-            object dptEstablishedDate: TDateTimePicker
+            object dtpEstablishedDate: TDateTimePicker
               Left = 24
               Top = 72
               Width = 377
@@ -23062,6 +23063,19 @@ object frmVolitant_Express: TfrmVolitant_Express
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clWindowText
             Font.Height = -17
+            Font.Name = 'Segoe UI'
+            Font.Style = []
+            ParentFont = False
+          end
+          object lblConfirmYears: TLabel
+            Left = 293
+            Top = 224
+            Width = 37
+            Height = 21
+            Caption = 'Years'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -16
             Font.Name = 'Segoe UI'
             Font.Style = []
             ParentFont = False
@@ -25374,6 +25388,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 75
         Width = 467
         Height = 21
+        Hint = 'Sometimes a'
         Caption = 
           '* Click on the image to reaveal a cool fact about Volitant Expre' +
           'ss'
@@ -25383,6 +25398,8 @@ object frmVolitant_Express: TfrmVolitant_Express
         Font.Name = 'Segoe UI Semibold'
         Font.Style = [fsBold]
         ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
       end
       object sbGallery: TScrollBox
         Left = 64
@@ -25415,7 +25432,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 56
         Width = 905
         Height = 481
-        ActivePage = tsItemsAdmin
+        ActivePage = tsAdminSum
         TabOrder = 0
         object tsItemsAdmin: TTabSheet
           Caption = 'Items'
@@ -26088,7 +26105,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                 object edtCompanyNameSearchOrders: TEdit
                   Left = 24
                   Top = 42
-                  Width = 210
+                  Width = 274
                   Height = 23
                   ParentShowHint = False
                   ShowHint = False
@@ -26110,7 +26127,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                   TabOrder = 2
                 end
                 object BitBtnClearOrderSearch: TBitBtn
-                  Left = 240
+                  Left = 304
                   Top = 41
                   Width = 75
                   Height = 25
@@ -26120,10 +26137,10 @@ object frmVolitant_Express: TfrmVolitant_Express
                   TabOrder = 3
                 end
                 object rgpOrderStatus: TRadioGroup
-                  Left = 560
-                  Top = 104
+                  Left = 551
+                  Top = 96
                   Width = 217
-                  Height = 153
+                  Height = 161
                   Caption = 'Select Order status'
                   Font.Charset = DEFAULT_CHARSET
                   Font.Color = clWindowText
@@ -26317,7 +26334,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             Left = 16
             Top = 142
             Width = 865
-            Height = 291
+            Height = 259
             Font.Charset = ANSI_CHARSET
             Font.Color = clWindowText
             Font.Height = -12
@@ -26332,6 +26349,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             Top = 78
             Width = 241
             Height = 49
+            Hint = 'List all of the companies and the orders that they have placed'
             Caption = 'Companies and their orders'
             Font.Charset = ANSI_CHARSET
             Font.Color = clWindowText
@@ -26339,6 +26357,8 @@ object frmVolitant_Express: TfrmVolitant_Express
             Font.Name = 'Segoe UI'
             Font.Style = [fsBold]
             ParentFont = False
+            ParentShowHint = False
+            ShowHint = True
             TabOrder = 1
             OnClick = btnCompanyOrderOutClick
           end
@@ -26561,6 +26581,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Style = []
               ParentFont = False
               TabOrder = 1
+              TextHint = 'Select table Here'
               OnChange = cmbSelectTableChange
               Items.Strings = (
                 'tblOrders'
@@ -26581,7 +26602,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Top = 16
               Width = 193
               Height = 30
-              Caption = 'Total Accounts:'
+              Caption = 'Total Accounts: '
               Font.Charset = ANSI_CHARSET
               Font.Color = clWindowText
               Font.Height = -13
@@ -26595,7 +26616,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Top = 52
               Width = 193
               Height = 30
-              Caption = 'Total Orders:'
+              Caption = 'Total Orders: '
               Font.Charset = ANSI_CHARSET
               Font.Color = clWindowText
               Font.Height = -13
@@ -26609,7 +26630,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Top = 88
               Width = 191
               Height = 30
-              Caption = 'Total Items:'
+              Caption = 'Total Items: '
               Font.Charset = ANSI_CHARSET
               Font.Color = clWindowText
               Font.Height = -13
@@ -26618,12 +26639,12 @@ object frmVolitant_Express: TfrmVolitant_Express
               ParentFont = False
               TabOrder = 2
             end
-            object pnlTotalActivePlanes: TPanel
+            object pnlTotalPlanes: TPanel
               Left = 24
               Top = 124
               Width = 192
               Height = 29
-              Caption = 'Total Active Plane Types:'
+              Caption = 'Total Planes: '
               Font.Charset = ANSI_CHARSET
               Font.Color = clWindowText
               Font.Height = -13
@@ -26634,8 +26655,8 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
           end
           object btnReloadSum: TButton
-            Left = 520
-            Top = 3
+            Left = 512
+            Top = 0
             Width = 345
             Height = 35
             Caption = 'Reload Page'
@@ -26658,9 +26679,9 @@ object frmVolitant_Express: TfrmVolitant_Express
             object lblTopPlain: TLabel
               Left = 3
               Top = 24
-              Width = 69
+              Width = 73
               Height = 21
-              Caption = 'Top Plain:'
+              Caption = 'Top Plain: '
               Font.Charset = ANSI_CHARSET
               Font.Color = clWindowText
               Font.Height = -16
@@ -26671,9 +26692,9 @@ object frmVolitant_Express: TfrmVolitant_Express
             object lblTopItem: TLabel
               Left = 3
               Top = 51
-              Width = 69
+              Width = 73
               Height = 21
-              Caption = 'Top Item:'
+              Caption = 'Top Item: '
               Font.Charset = ANSI_CHARSET
               Font.Color = clWindowText
               Font.Height = -16
@@ -26684,9 +26705,9 @@ object frmVolitant_Express: TfrmVolitant_Express
             object lblTotalRevenue: TLabel
               Left = 3
               Top = 132
-              Width = 106
+              Width = 110
               Height = 21
-              Caption = 'Total Revenue:'
+              Caption = 'Total Revenue: '
               Font.Charset = ANSI_CHARSET
               Font.Color = clWindowText
               Font.Height = -16
@@ -26697,9 +26718,9 @@ object frmVolitant_Express: TfrmVolitant_Express
             object lblTopPickupC: TLabel
               Left = 3
               Top = 78
-              Width = 146
+              Width = 150
               Height = 21
-              Caption = 'Top Pickup Country:'
+              Caption = 'Top Pickup Country: '
               Font.Charset = ANSI_CHARSET
               Font.Color = clWindowText
               Font.Height = -16
@@ -26723,9 +26744,9 @@ object frmVolitant_Express: TfrmVolitant_Express
             object lblAverageWeight: TLabel
               Left = 3
               Top = 159
-              Width = 169
+              Width = 173
               Height = 21
-              Caption = 'Average Order Weight:'
+              Caption = 'Average Order Weight: '
               Font.Charset = ANSI_CHARSET
               Font.Color = clWindowText
               Font.Height = -16
@@ -26739,7 +26760,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             Top = 238
             Width = 385
             Height = 187
-            Caption = 'Process To Goals'
+            Caption = 'Process To Yearly Goals'
             TabOrder = 4
             object lblRevenueProgress: TLabel
               Left = 32
@@ -26832,6 +26853,7 @@ object frmVolitant_Express: TfrmVolitant_Express
           Height = 49
           Caption = 'Summary'
           TabOrder = 5
+          OnClick = btnToSummaryClick
         end
         object btnToCustom: TButton
           Left = 16
@@ -27076,13 +27098,13 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 83
         Width = 1137
         Height = 406
-        ActivePage = tsOrderSummary
+        ActivePage = tsPlaceOrder
         TabOrder = 0
         object tsPlaceOrder: TTabSheet
           Caption = 'Place  Oder'
           object ListBox1: TListBox
-            Left = 184
-            Top = 88
+            Left = 288
+            Top = 104
             Width = 121
             Height = 97
             ItemHeight = 15

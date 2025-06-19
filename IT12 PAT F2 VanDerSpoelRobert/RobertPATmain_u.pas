@@ -14,7 +14,8 @@ uses
   IdTCPClient, IdExplicitTLSClientServerBase, IdMessageClient, IdIMAP4,
   Vcl.DBCtrls, Vcl.CheckLst, Soap.InvokeRegistry, Soap.WSDLIntf,
   Soap.SOAPPasInv, Soap.SOAPHTTPPasInv, VclTee.TeeGDIPlus, VCLTee.TeEngine,
-  VCLTee.Series, VCLTee.TeeProcs, VCLTee.Chart, DateUtils, math, clsDistance_u, clsUsername_u;
+  VCLTee.Series, VCLTee.TeeProcs, VCLTee.Chart, DateUtils, math, clsDistance_u, clsUsername_u,
+  Vcl.FileCtrl;
 
 type
   TfrmVolitant_Express = class(TForm)
@@ -64,7 +65,7 @@ type
     chkNewsLetter: TCheckBox;
     tsRegConfirm: TTabSheet;
     pnlLastRegInfo: TPanel;
-    dptEstablishedDate: TDateTimePicker;
+    dtpEstablishedDate: TDateTimePicker;
     lblEstabDate: TLabel;
     lblRegDefaultHours: TLabel;
     sedRegDefaultHours: TSpinEdit;
@@ -195,7 +196,7 @@ type
     pnlTotalAccounts: TPanel;
     pnlTotalOrders: TPanel;
     pnlTotalItems: TPanel;
-    pnlTotalActivePlanes: TPanel;
+    pnlTotalPlanes: TPanel;
     btnReloadSum: TButton;
     grbStatistics: TGroupBox;
     lblTopPlain: TLabel;
@@ -276,6 +277,7 @@ type
     tFlightAnimation: TTimer;
     lblSelectCountry: TLabel;
     lblGalleryInfo: TLabel;
+    lblConfirmYears: TLabel;
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnRegisterGOClick(Sender: TObject);
@@ -321,6 +323,8 @@ type
     procedure BitBtnNextToLastInfoClick(Sender: TObject);
     procedure btnLastInfoBackClick(Sender: TObject);
     procedure tFlightAnimationTimer(Sender: TObject);
+    procedure btnToSummaryClick(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -383,12 +387,15 @@ end;
 
 
 procedure TfrmVolitant_Express.BitBtnNextToConfirmClick(Sender: TObject);
+var
+  bUsernameFound : boolean;
+  sUsernameCreated : string;
 begin
     // go to the reg confirmation page from the last info page
       redConfirmRegInfo.Clear ;
      // Check to make sure that the date of the companies establishment is in the past and NOT in the furure
 
-     if dptEstablishedDate.Date > date then
+     if dtpEstablishedDate.Date > date then
      begin
        ShowMessage('Invalid date of establishment') ;
       Exit;
@@ -398,7 +405,7 @@ begin
      // Fill the fields on the registration page
 
      pnlConfirmPass.Caption := 'You Password: ' + edtCreatePassword.Text ;
-     sedCompanyAgeConfirm.Value := YearsBetween(date, dptEstablishedDate.Date) ;
+     sedCompanyAgeConfirm.Value := YearsBetween(date, dtpEstablishedDate.Date) ;
 
      // Richedit
      //Government agency
@@ -421,6 +428,32 @@ begin
      tsLastInfo.TabVisible := False ;
      tsRegConfirm.TabVisible := True;
 
+    // Inisiate the username class
+    objUsername := TUsername.Create(edtCName.Text , cmbCountryBased.Items[cmbCountrybased.ItemIndex],dtpEstablishedDate.Date );
+
+    sUsernameCreated := objUsername.ToString ;
+    edtGUsername.Text := sUsernameCreated ;
+    
+    // Check to make sure that the username does not exist. (IT can be possible, as you cant register a company twice, however, a company starting with the same word can technically generate twice )
+    repeat
+      bUsernameFound := False;
+      tblCompany.First ;
+      while not tblCompany.eof do
+      begin
+        if tblCompany['Username'] = sUsernameCreated then // Check for a duplicate username
+        begin
+          sUsernameCreated := Copy(sUsernameCreated ,1, Pos('_', sUsernameCreated) ); // Just keep everything beforee the uudnerscore
+          bUsernameFound := True; // Change to true as the username has been found
+          sUsernameCreated := sUsernameCreated + IntToStr(RandomRange(1, 1000) ) ;   // Generate a new random number for after the undersocre
+
+            objUsername.SetUsername(sUsernameCreated) ; // Update the username to the object
+            break; // exit the loop to save time
+        end;
+        tblCompany.Next ;
+      end;
+      
+    until bUsernameFound = False; // If no duplicate username was found, then no need to check again
+    
 end;
 
 procedure TfrmVolitant_Express.BitBtnNextToLastInfoClick(Sender: TObject);
@@ -442,7 +475,10 @@ end;
 
 procedure TfrmVolitant_Express.BitBtnRegisterClick(Sender: TObject);
 var
-  sCName: string;
+  sCName, sCRegPassword, sUsernameGenerated, sRegEmail, sLocationBasedReg: string;
+  bGovernment, bNewsLetter : boolean;
+  dDateEnstablished, dRegDate : tDate;
+  iDefaultHours : integer ;
 begin
 // register the company
 
@@ -456,8 +492,47 @@ begin
 
   // Read values into variables
   sCName := edtCName.Text ;
+  sCRegPassword := edtCreatePassword.Text ;
+  sUsernameGenerated := objUsername.GetUsername ;
+  sRegEmail := edtRegEmail.Text ;
+
+   //Government agency
+     if chkGovernment.Checked then
+      bGovernment := True
+     else
+      bGovernment := false;
+
+   dDateEnstablished := dtpEstablishedDate.Date;
+
+   sLocationBasedReg := cmbCountryBased.Items[cmbCountryBased.ItemIndex];
+
+
+    // NEwsletter
+     if chkNewsLetter.Checked then
+    bNewsLetter := true
+      else
+    bNewsLetter := False;
+
+    dRegDate := Date;
+
+    iDefaultHours := sedRegDefaultHours.Value ;
 
 // Write to the db
+
+  tblCompany.Insert ;
+
+  tblCompany['CompanyName']:= sCName;
+  tblCompany['Password'] := sCRegPassword ;
+  tblCompany['Username']:= sUsernameGenerated ;
+  tblCompany['Email']:= sRegEmail ;
+  tblCompany['Goverment Agency']:= bGovernment ;
+  tblCompany['RegDate'] := dRegDate ;
+  tblCompany['Location Based'] := sLocationBasedReg ;
+  tblCompany['Newsletter'] := bNewsLetter ;
+  tblCompany['Establishment Date'] := dDateEnstablished ;
+  tblCompany['Defualt Hours'] := iDefaultHours ;
+
+  tblCompany.Post ;
 
 // Go to the Home page
 end;
@@ -517,7 +592,7 @@ begin
       tblCompany.Next ;
     end;    
 
-    // CountryBased
+    // CountryBased. Make sure that a country was entered
     if cmbCountryBased.ItemIndex = -1 then
     begin
       ShowMessage('Please Select/Enter a valid Country');
@@ -757,7 +832,7 @@ begin
         end
         else
         begin
-          iLeft := sbGallery.Width - 20 - imgWidth	 {iLeft + imgWidth + 40} ;
+          iLeft := sbGallery.Width - 40 - imgWidth	 {iLeft + imgWidth + 40} ;
           bOne := True;
         end;
 
@@ -901,18 +976,125 @@ tsDetails.TabVisible := True ;
 end;
 
 procedure TfrmVolitant_Express.btnReloadSumClick(Sender: TObject);
+const RevenueGoal = 1000000000;
+const OrdersGoal = 100;
+var
+  iNum, iYearlyOrdersGoal : integer ;
+  sString : string;
+  rRevenue, rHours, rYearlyRevenueGoal : real;
+  bFound : boolean;
 begin
 // Reloads the page; updating the info
 
+ // Total Accounts
+ pnlTotalAccounts.Caption := 'Total Accounts: ' + IntToStr(tblCompany.RecordCount); 
+ // total Orders
+ pnlTotalOrders.Caption :='Total Orders: '+ IntToStr(tblOrders.RecordCount );
+ // Total Items
+ pnlTotalItems.Caption := 'Total Items: ' + IntToStr(tblItems.RecordCount) ;
+ // Total Planes 
+ pnlTotalPlanes.Caption := 'Total Planes: ' + IntToStr(tblPlanes.RecordCount) ;
 
-// This is only temporary
-PBrevenue.Min := 0;
-PBrevenue.Max := 100;
-PBrevenue.Position := 75;
+ // Top plain
+ qrySQL.SQL.Text := 'SELECT TOP 1 PlaneID AS Result FROM tblOrders Group By PlaneID ORDER BY Count(*) DESC';
+  qrySQL.Open ;  
+ iNum := qrySQL['Result'];
+ qrySQL.SQL.Text := 'Select [Plane Name] as Result from tblPlanes where PlaneID = '+ IntToStr(iNum);
+ qrySQL.Open ; 
+ sString := qrySQL['Result'];
+  lblTopPlain.Caption := 'Top Plain: ' + sString ;
 
-PBOrders.Min := 0 ;
-PBOrders.Max := 100;
-PBOrders.Position := 63;
+  //  Top Item  
+  qrySQL.SQL.Text := 'Select TOP 1 [Item Name] As Result from tblItems, tblOrders where tblOrders.ItemID = tblItems.itemID Group By tblItems.[Item Name] ORDER BY Count(*) DESC'; 
+  qrySQL.Open ;
+  lblTopItem.Caption := 'Top Item: ' + qrySQL['Result']; 
+
+  // Top Pickup Country
+  qrySQL.SQL.Text := 'Select TOP 1 [Pickup Country] as Result from tblOrders Group By [Pickup Country] Order By Count(*) DESC'  ;
+   qrySQL.Open ;
+   lblTopPickupC.Caption := 'Top Pickup Country: ' + qrySQL['Result'] ;
+
+   // Drop of Country
+   qrySQL.SQL.Text := 'Select TOP 1 [Drop of Country] as Result from tblOrders Group By [Drop of Country] Order By Count(*) DESC'  ;
+   qrySQL.Open ;
+   lblTopDropoffC.Caption := 'Top Drop-Off Country: ' + qrySQL['Result'] ;
+
+   // Total Revenue for all time calculation
+   rRevenue := 0 ;
+   rYearlyRevenueGoal := 0 ;
+   iYearlyOrdersGoal := 0;
+   tblOrders.First ;
+   while not tblOrders.eof do   // Loop thru tblOrders
+   begin
+      if tblOrders['Paid'] = true then   // Checks that the order has been paid, before adding it to revenue sum
+      begin
+
+        rRevenue := rRevenue + tblOrders['Base Cost'] ; // Add the base cost to total revenue
+        tblItems.First ;
+
+        if (YearOF(tblOrders['Pickup Date']) = YearOf(Date))  then // inc the orders that occured this year specificaly counter
+        Inc(iYearlyOrdersGoal) ;
+
+
+        bFound := False;
+        while not tblItems.eof and (bFound = false) do // Loop thru items table to get the price for an item per kg
+        begin
+
+          if tblItems['ItemID'] = tblOrders['ItemID'] then
+          begin
+          bFound := true;
+            rRevenue := rRevenue + tblItems['T_Cost/kg'] * tblOrders['Weight'] ;
+
+             if (YearOF(tblOrders['Pickup Date']) = YearOf(Date))  then  // increase the revenue that was made this year only
+             rYearlyRevenueGoal := rYearlyRevenueGoal +  tblItems['T_Cost/kg'] * tblOrders['Weight'] ;
+          end;
+
+          tblItems.Next ;
+        end;
+        bFound := False;
+        // Loop thru plane table to get feul price
+
+        tblPlanes.First;
+        while not tblPlanes.Eof and (bFound = false) do
+        begin
+           if tblPlanes['PlaneID'] = tblOrders['PlaneID'] then
+           begin
+              bFound := True;
+              // Calculate the hours that the flight will last
+              rHours  := (tblOrders['E/D Date'] - tblOrders['Pickup Date']) * 24 ; // Get the difference in time and convert it to hours
+              rRevenue := rRevenue + tblPlanes['FuelCost']  * rHours  ; // times by the hours of the flight
+
+                 if (YearOF(tblOrders['Pickup Date']) = YearOf(Date))  then  // increase the revenue that was made this year only
+             rYearlyRevenueGoal := rYearlyRevenueGoal +  tblPlanes['FuelCost']  * rHours  ;
+           end;
+
+          tblPlanes.Next ;
+        end;
+      
+      end;
+      tblOrders.Next ;
+   end;
+   lblTotalRevenue.Caption := 'Total Revenue: ' + FloatToStrF(rRevenue , ffCurrency ,10,2)  ;
+
+   // Average Order Weight
+    qrySQL.SQL.Text := 'Select AVG(Weight) as Result from tblOrders'  ;
+   qrySQL.Open ;
+   lblAverageWeight.Caption := 'Average Order Weight: ' + floattostrf((qrySQL['Result']), ffFixed, 10,2) + ' kg';
+   
+  // Set the progress bars for the yearly goals
+
+  // For revenue goal
+  PBrevenue.Min := 0;
+  PBrevenue.Max := 100;
+
+PBrevenue.Position := Floor(rYearlyRevenueGoal / RevenueGoal* 100 ) ;
+
+
+
+  // For the order goal
+  PBOrders.Min := 0 ;
+  PBOrders.Max := 100;
+PBOrders.Position := Floor(iYearlyOrdersGoal / OrdersGoal *100);
 end;
 
 procedure TfrmVolitant_Express.btnRestartVidClick(Sender: TObject);
@@ -970,6 +1152,14 @@ tsPayment.TabVisible := True ;
 
 end;
 
+procedure TfrmVolitant_Express.btnToSummaryClick(Sender: TObject);
+begin
+// Go to the summary page and load the info on the page
+  pgcAdmin.ActivePage.TabVisible := false;
+  tsAdminSum.TabVisible := True;
+  btnReloadSum.Click  ;
+end;
+
 procedure TfrmVolitant_Express.btnUpdateItemClick(Sender: TObject);
 begin
 // Update the item
@@ -986,17 +1176,36 @@ begin
 // if the retire plane button was selected, display a confirmation dialogue to confirm that they want to retire the plane
 end;
 
-
+procedure TfrmVolitant_Express.Button1Click(Sender: TObject);
+var
+  tFlightHours : integer;
+  rHours : real;
+begin
+ tFlightHours := HoursBetween(tblOrders['Pickup Date'], tblOrders['E/D Date']) ;
+              //rRevenue := rRevenue + tblPlanes['FuelCost']  * tFlightHours ; // times by the hours of the flight
+      // rHours := (tblOrders['E/D Date'] - tblOrders['Pickup Date']) * 24;  // TDateTime difference * 24
+          rHours  := HoursBetween(tblOrders['Pickup Date'], tblOrders['E/D Date']) ;
+    ShowMessage(FloatToStr(rHours) ) ;
+ ShowMessage(intToStr(tFlightHours) ) ;
+end;
 
 procedure TfrmVolitant_Express.cmbCountryBasedChange(Sender: TObject);
+var
+  sFileName, sCountryName : string;
+  I: Integer;
 begin
 // Display the flag of the selected Based country in the image component
 
-  try // atemp to display the country flag
-    imgBasedFlag.Picture.LoadFromFile('Flags/' + arrCountryCode[cmbCountryBased.ItemIndex+1] + '.jpg') ;  
-   Except // Display the flag not found image if the flag for a country could not be found
-    imgBasedFlag.Picture.LoadFromFile('Flags/Not_Found.jpg') ;
-  end;
+  if cmbCountryBased.ItemIndex >=0 then // Make sure than an option was selected
+  begin
+    sFileName := 'Flags/' + arrCountryCode[cmbCountryBased.ItemIndex+1] + '.jpg';  // Create the name of the file to open
+    if FileExists(sFileName) then
+    imgBasedFlag.Picture.LoadFromFile(sFileName) // Load the image
+    else
+    imgBasedFlag.Picture.LoadFromFile('Flags/Not_Found.jpg') ;    // If, for some reason, The file cannot be found, display not found
+  end
+  else
+   imgBasedFlag.Picture.LoadFromFile('Flags/Not_Found.jpg') ; // If no valid images was selected
 
 end;
 

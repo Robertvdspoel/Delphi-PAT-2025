@@ -1,0 +1,86 @@
+unit clsUsername_u;
+// Create the Username
+interface
+type
+  TUsername = class(TObject)
+    Private
+    fCompanyName, fCountryBased, fUsername: string;
+    fYearEstablished: tDate;
+    {
+    Function NameUse(pCName: string): string;
+    Function CountryBased(pCountryBased: string): string;
+    Function Year(pYearEstablished: Tdate) : string;
+     }
+    Procedure GenerateUsername;
+
+    public
+     Constructor Create(pCompanyName, pCountryBased: string; pYearEstablished: tDate) ;
+     Function ToString: string;
+
+     Function GetUsername : string;
+
+    end;
+
+implementation
+Uses SysUtils, DateUtils, Math ;
+
+{ TUsername }
+
+
+constructor TUsername.Create(pCompanyName, pCountryBased: string;
+  pYearEstablished: tDate);
+begin
+ // Constructor create
+  fCompanyName := pCompanyName ;
+  fCountryBased := pCountryBased ;
+  fYearEstablished := pYearEstablished ;
+
+
+end;
+
+procedure TUsername.GenerateUsername;
+var
+  iPos, iYearEstablished : integer;
+  sYearEstablished : string;
+begin
+// Generate the username
+
+    // Create the part of the username based on the CompanyName
+
+      if Length(fCompanyName) > 14 then    // if lenth is longer than 14 then keep only the first 14 characters
+      begin
+           fCompanyName := Copy(fCompanyName, 1, 14);
+      end;
+
+      iPos := Pos(' ', fCompanyName)  ;
+      if (Ipos >  0) then  // Check if the Username has a space
+      begin    // If more than one word; a space
+         fCompanyName := Copy(fCompanyName, 1, Ipos-1); // Copy only the first word
+      end;
+
+      // generate the part of the username based on the Country Based
+      fCountryBased:=Uppercase(fCountryBased[1] +fCountryBased[Length(fCountryBased)]) ;
+
+      // Generate the part of the username based on the year established
+      iYearEstablished := YearOF(fYearEstablished);
+      sYearEstablished := Copy(IntToStr(iYearEstablished), 3, 4 );
+      // Put it all together
+      fUsername := fCompanyName + fCountryBased+ sYearEstablished + '_' + IntToStr(randomrange(100, 1000)) ;
+end;
+
+
+
+function TUsername.GetUsername: string;
+begin
+  Result := fUsername ;
+end;
+
+function TUsername.ToString: string;
+begin
+// ToString allows the Username to be accessed by the main form
+  GenerateUsername ;
+  Result := fUsername ;
+end;
+
+
+end.
