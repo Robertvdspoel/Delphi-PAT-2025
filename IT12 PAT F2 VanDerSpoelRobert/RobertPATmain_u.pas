@@ -325,6 +325,7 @@ type
     procedure tFlightAnimationTimer(Sender: TObject);
     procedure btnToSummaryClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
+    procedure btnToEmailsClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -614,7 +615,7 @@ begin
     // Check that the password is a valid passowrd
     for cChar  in sPassword  do
     begin
-       
+
        bErrorCharacter := true;
       for c in arrSpecialCharacters do    // Checks that all the characters are valid
       begin
@@ -732,8 +733,94 @@ tsDetails.TabVisible := True ;
 end;
 
 procedure TfrmVolitant_Express.btnCompanyOrderOutClick(Sender: TObject);
+var
+  sGovernment, sPaid : string;
+  bItemFound, bFirst : boolean;
 begin
 // Displays a list of the companies and the orders that they have places
+  redCompanyOut.Clear ;
+
+   bFirst := True;
+  tblCompany.First ;
+  while not tblCompany.eof do // Loop thru the companies table
+  begin
+   // Set the tabstops
+     redCompanyOut.SelAttributes.Color := clRed;
+     redCompanyOut.Paragraph.TabCount := 4;
+     redCompanyOut.Paragraph.Tab[0] := 75;
+     redCompanyOut.Paragraph.Tab[1] := 225;
+     redCompanyOut.Paragraph.Tab[2] := 375;
+     redCompanyOut.Paragraph.Tab[3] := 445;
+   if bFirst = True then // Display main heading
+   begin
+       redCompanyOut.Lines.Add('CompanyID'+ #9+ 'Company Name'+ #9+'LocationBased'+#9+ 'Government'+ #9+'Company Age(Years)') ;
+       bFirst := False;
+   end;
+
+    // Company Info display
+    redCompanyOut.SelAttributes.Color := clRed ;
+    if tblCompany['Goverment Agency'] = True then
+    sGovernment := 'Yes'
+    else
+    sGovernment := 'No' ;
+    redCompanyOut.Lines.Add(#13+inttostr(tblCompany['CompanyID'])+#9+tblCompany['CompanyName']+ #9+tblCompany['Location Based']+ #9+sGovernment+ #9+IntToStr(YearsBetween(Date, tblCompany['Establishment Date']) ) );
+
+
+     // Setup tabstops for display of orders
+    redCompanyOut.SelAttributes.Color := clGreen;
+    redCompanyOut.Paragraph.TabCount := 7;
+     redCompanyOut.Paragraph.Tab[0] := 65;
+      redCompanyOut.Paragraph.Tab[1] := 175;
+       redCompanyOut.Paragraph.Tab[2] := 300;
+        redCompanyOut.Paragraph.Tab[3] := 450;
+         redCompanyOut.Paragraph.Tab[4] := 550;
+      redCompanyOut.Paragraph.Tab[5] := 600;
+      redCompanyOut.Paragraph.Tab[6] := 690;
+     redCompanyOut.Lines.Add('OrderID'+ #9+ 'Weight(kg)'+ #9 + 'Pickup Country'+ #9+'Drop-Off Country'+#9+'Status'+ #9+'Paid'+#9+'Date of Placement'+#9+'Item Name') ;
+
+    // Get the Orders info
+    tblOrders.First ;
+    while not tblOrders.eof do
+    begin
+
+      if tblOrders['CompanyID'] = tblCompany['CompanyID'] then // If a order was found that is listed under the company
+      begin
+
+        // Search for the Item that's to get transported in the order
+        tblItems.First ;
+        bItemFound := False;
+        while not tblItems.eof and (bItemFound = False) do
+        begin
+
+          if tblOrders['ItemID'] = tblItems['ItemID']  then
+          begin
+            bItemFound := True;
+
+            if tblOrders['Paid'] = True then
+            sPaid := 'Yes'
+            else
+            sPaid := 'No';
+
+            // Set the display to display the orders info
+            redCompanyOut.SelAttributes.Color := clBlack ;
+            redCompanyOut.Lines.Add(inttostr(tblOrders['OrderID'])+ #9+ inttostr(tblOrders['weight'])+ #9+ tblOrders['Pickup Country']+#9+ tblOrders['Drop of Country']+#9 +tblOrders['Status']+#9+ sPaid+#9+DateToStr(tblOrders['Order Date'])+#9+tblItems['Item Name']  )   ;
+
+
+          end;
+
+        tblItems.Next;
+        end;
+
+      end;
+
+
+    tblOrders.Next ;
+    end;
+
+    tblCompany.Next;
+  end;
+
+
 end;
 
 procedure TfrmVolitant_Express.btnCustomSQLClick(Sender: TObject);
@@ -913,7 +1000,6 @@ begin
     Showmessage('Invalid Password or username!') ;
     Exit;
   end;
-
 
 end;
 
@@ -1111,9 +1197,31 @@ begin
 end;
 
 procedure TfrmVolitant_Express.btnToCustomClick(Sender: TObject);
+var
+  sCustomPagePass : string;
 begin
 // Go to the custom SQL page, ask for a special password to gain access to this part of the website
 
+  sCustomPagePass := IntToStr(RandomRange(1000, 10000) )  ;
+
+  if sCustomPagePass = InputBox('Enter Password to access Custom SQL page', 'The Custom Passowd is: (For PAT purposes it is given)', sCustomPagePass)  then
+  begin
+   pgcAdmin.ActivePage.TabVisible := False;
+   tsCustomAdmin.TabVisible := True;
+  end
+  else
+  begin
+    ShowMessage('You got the Password WRONG') ;
+   Exit;
+  end;
+
+end;
+
+procedure TfrmVolitant_Express.btnToEmailsClick(Sender: TObject);
+begin
+// Go to the admin email page from any of the other pages
+pgcAdmin.ActivePage.TabVisible := False;
+tsEmailsAdmin.TabVisible := True;
 end;
 
 procedure TfrmVolitant_Express.btnTOLogClick(Sender: TObject);
