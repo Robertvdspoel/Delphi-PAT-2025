@@ -14484,7 +14484,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 96
         Width = 1017
         Height = 473
-        ActivePage = tsRegConfirm
+        ActivePage = tsDetails
         TabOrder = 0
         object tsDetails: TTabSheet
           Caption = 'Company Details'
@@ -25432,7 +25432,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 56
         Width = 905
         Height = 481
-        ActivePage = tsCustomAdmin
+        ActivePage = tsItemsAdmin
         TabOrder = 0
         object tsItemsAdmin: TTabSheet
           Caption = 'Items'
@@ -25601,7 +25601,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
           end
           object btnAddCategoty: TButton
-            Left = 304
+            Left = 303
             Top = 12
             Width = 217
             Height = 36
@@ -26332,7 +26332,7 @@ object frmVolitant_Express: TfrmVolitant_Express
           end
           object redCompanyOut: TRichEdit
             Left = 16
-            Top = 142
+            Top = 133
             Width = 865
             Height = 259
             Font.Charset = ANSI_CHARSET
@@ -26342,6 +26342,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             Font.Style = []
             ParentFont = False
             ReadOnly = True
+            ScrollBars = ssBoth
             TabOrder = 0
           end
           object btnCompanyOrderOut: TButton
@@ -26808,7 +26809,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         TabOrder = 1
         object btnToItems: TButton
           Left = 16
-          Top = 31
+          Top = 26
           Width = 153
           Height = 49
           Caption = 'Items'
@@ -26832,7 +26833,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         end
         object btnToCompanies: TButton
           Left = 16
-          Top = 232
+          Top = 240
           Width = 153
           Height = 49
           Caption = 'Companies'
@@ -26840,11 +26841,12 @@ object frmVolitant_Express: TfrmVolitant_Express
         end
         object btnToEmails: TButton
           Left = 16
-          Top = 287
+          Top = 295
           Width = 153
           Height = 49
           Caption = 'Emails'
           TabOrder = 4
+          OnClick = btnToEmailsClick
         end
         object btnToSummary: TButton
           Left = 16

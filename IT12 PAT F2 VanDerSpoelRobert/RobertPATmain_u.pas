@@ -326,6 +326,7 @@ type
     procedure btnToSummaryClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure btnToEmailsClick(Sender: TObject);
+    procedure btnToItemsClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -681,16 +682,54 @@ end;
 
 procedure TfrmVolitant_Express.btnAddCategotyClick(Sender: TObject);
 var
-  sCategoryAdd : string ;
+  sCategoryAdd, sLine : string ;
+  tFile : TextFile ;
 begin
 // Add an item category
 
   sCategoryAdd := InputBox('Please type the category you would like to add:','*No duplicates allowed','') ;
-
+  // Check that a category was entered
+  if (sCategoryAdd = '') or (sCategoryAdd = ' ') then
+  begin
+    ShowMessage('No category entered');
+    exit;
+  end;
+  // Check that the category is in Range
+  if Length(sCategoryAdd) > 40  then
+  begin
+      ShowMessage('Category should be shorter or equel to 40 characters');
+    exit;
+  end;
 // Check that the category does not exit already
+    AssignFile(tFile, 'Item_Categories.txt');
 
+  if not FileExists('Item_Categories.txt')  then  // Check that the file exists
+  begin
+    ShowMessage('Item_Categories.txt not Found, created');
+    Rewrite(Tfile)  ;
+  end;
+  Reset(tFile) ;
+     // Search for categories
+  while not Eof(tfile)  do
+  begin
+    Readln(tFile, sLine) ;
 
+    if UpperCase(sLine) = UpperCase(sCategoryAdd)   then // If the category already exists
+    begin
+      ShowMessage('Category already exists!') ;
+      CloseFile(tFile) ;
+      Exit;
+    end;
+  end;
+
+  // Add item t otxt file if category does not exist
+  Append(tFile);
+  Writeln(tFile, sCategoryAdd) ;
+
+  CloseFile(tFile);
+  ShowMessage('Item added to combobox') ;
 // Update the combobox in the end when the category has been added
+cmbItemCategoryAdd.Items.Add(sCategoryAdd) ;
 end;
 
 procedure TfrmVolitant_Express.btnAddItemClick(Sender: TObject);
@@ -699,6 +738,8 @@ begin
 // Add a new item to the Items table
 
 // Validation
+
+
 // Remember to also validate that the description entered is shorted than the amount of characters that is allowed in that field in the db (120 at this time of writing)
 
 end;
@@ -1224,6 +1265,21 @@ pgcAdmin.ActivePage.TabVisible := False;
 tsEmailsAdmin.TabVisible := True;
 end;
 
+procedure TfrmVolitant_Express.btnToItemsClick(Sender: TObject);
+begin
+ // Go to the Items page from any of the other pages
+ pgcAdmin.ActivePage.TabVisible := False;
+ tsItemsAdmin.TabVisible := True;
+
+   if not FileExists('Item_Categories.txt')  then
+  begin
+    ShowMessage('Item_Categories.txt not Found. Add categories to resolve this problem');
+    Exit;
+  end;
+
+ cmbItemCategoryAdd.Items.LoadFromFile('Item_Categories.txt') ;
+end;
+
 procedure TfrmVolitant_Express.btnTOLogClick(Sender: TObject);
 begin
 // Go to the page to View logs page from the home page
@@ -1537,6 +1593,14 @@ tsLogin.TabVisible := False;
 tsIntroVideo.TabVisible := False;
 tsGallery.TabVisible := False;
 }
+      {                              // Dont add the sum page to list, will cause errors due to activepage.tabvisible
+  tsItemsAdmin.TabVisible := False;
+  tsPlanesAdmin.TabVisible := False;
+  tsOrdersAdmin.TabVisible := False;
+  tsCompaniesAdmin.TabVisible := False;
+  tsEmailsAdmin.TabVisible := False;
+  tsCustomAdmin.TabVisible := False;
+               }
 
   tsContact.TabVisible := False;
   tsLastInfo.TabVisible := False;

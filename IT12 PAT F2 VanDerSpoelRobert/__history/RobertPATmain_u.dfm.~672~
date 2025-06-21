@@ -14484,7 +14484,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 96
         Width = 1017
         Height = 473
-        ActivePage = tsRegConfirm
+        ActivePage = tsDetails
         TabOrder = 0
         object tsDetails: TTabSheet
           Caption = 'Company Details'
@@ -25432,7 +25432,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 56
         Width = 905
         Height = 481
-        ActivePage = tsItemsAdmin
+        ActivePage = tsCompaniesAdmin
         TabOrder = 0
         object tsItemsAdmin: TTabSheet
           Caption = 'Items'
@@ -26332,7 +26332,7 @@ object frmVolitant_Express: TfrmVolitant_Express
           end
           object redCompanyOut: TRichEdit
             Left = 16
-            Top = 142
+            Top = 133
             Width = 865
             Height = 259
             Font.Charset = ANSI_CHARSET
@@ -26342,6 +26342,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             Font.Style = []
             ParentFont = False
             ReadOnly = True
+            ScrollBars = ssBoth
             TabOrder = 0
           end
           object btnCompanyOrderOut: TButton

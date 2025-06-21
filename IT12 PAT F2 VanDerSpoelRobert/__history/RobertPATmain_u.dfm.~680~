@@ -14484,7 +14484,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 96
         Width = 1017
         Height = 473
-        ActivePage = tsLastInfo
+        ActivePage = tsDetails
         TabOrder = 0
         object tsDetails: TTabSheet
           Caption = 'Company Details'
@@ -23217,7 +23217,7 @@ object frmVolitant_Express: TfrmVolitant_Express
       Caption = 'Login'
       ImageIndex = 2
       object lblLogin: TLabel
-        Left = 336
+        Left = 400
         Top = 48
         Width = 428
         Height = 47
@@ -23230,8 +23230,8 @@ object frmVolitant_Express: TfrmVolitant_Express
         ParentFont = False
       end
       object lblUsernameLogin: TLabel
-        Left = 440
-        Top = 168
+        Left = 496
+        Top = 160
         Width = 187
         Height = 37
         Caption = 'Enter Username'
@@ -23243,7 +23243,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         ParentFont = False
       end
       object lblPasswordLogin: TLabel
-        Left = 448
+        Left = 504
         Top = 296
         Width = 179
         Height = 37
@@ -23265,7 +23265,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         OnClick = btnLoginBackClick
       end
       object edtUsernameLogin: TEdit
-        Left = 232
+        Left = 303
         Top = 221
         Width = 612
         Height = 45
@@ -23278,7 +23278,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         TabOrder = 1
       end
       object edtPasswordLogin: TEdit
-        Left = 232
+        Left = 303
         Top = 352
         Width = 612
         Height = 45
@@ -23291,7 +23291,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         TabOrder = 2
       end
       object btnLogin: TButton
-        Left = 232
+        Left = 303
         Top = 432
         Width = 612
         Height = 73
@@ -25289,7 +25289,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Stretch = True
       end
       object mpIntroVideo: TMediaPlayer
-        Left = 392
+        Left = 384
         Top = 3
         Width = 29
         Height = 30
@@ -25432,7 +25432,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 56
         Width = 905
         Height = 481
-        ActivePage = tsCompaniesAdmin
+        ActivePage = tsItemsAdmin
         TabOrder = 0
         object tsItemsAdmin: TTabSheet
           Caption = 'Items'
@@ -25601,10 +25601,11 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
           end
           object btnAddCategoty: TButton
-            Left = 304
-            Top = 12
+            Left = 287
+            Top = 7
             Width = 217
             Height = 36
+            Hint = 'See ComboBox for existing categories'
             Caption = 'Add Category'
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clWindowText
@@ -25612,6 +25613,8 @@ object frmVolitant_Express: TfrmVolitant_Express
             Font.Name = 'Segoe UI'
             Font.Style = []
             ParentFont = False
+            ParentShowHint = False
+            ShowHint = True
             TabOrder = 1
             OnClick = btnAddCategotyClick
           end
@@ -26063,7 +26066,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             Top = 62
             Width = 849
             Height = 371
-            ActivePage = tsOrderUpdate
+            ActivePage = tsOrderOutput
             TabOrder = 0
             object tsOrderUpdate: TTabSheet
               Caption = 'Update an Order'
@@ -26105,7 +26108,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                 object edtCompanyNameSearchOrders: TEdit
                   Left = 24
                   Top = 42
-                  Width = 210
+                  Width = 274
                   Height = 23
                   ParentShowHint = False
                   ShowHint = False
@@ -26127,7 +26130,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                   TabOrder = 2
                 end
                 object BitBtnClearOrderSearch: TBitBtn
-                  Left = 240
+                  Left = 304
                   Top = 41
                   Width = 75
                   Height = 25
@@ -26332,7 +26335,7 @@ object frmVolitant_Express: TfrmVolitant_Express
           end
           object redCompanyOut: TRichEdit
             Left = 16
-            Top = 142
+            Top = 133
             Width = 865
             Height = 259
             Font.Charset = ANSI_CHARSET
@@ -26342,6 +26345,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             Font.Style = []
             ParentFont = False
             ReadOnly = True
+            ScrollBars = ssBoth
             TabOrder = 0
           end
           object btnCompanyOrderOut: TButton
@@ -26581,6 +26585,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Style = []
               ParentFont = False
               TabOrder = 1
+              TextHint = 'Select table Here'
               OnChange = cmbSelectTableChange
               Items.Strings = (
                 'tblOrders'
@@ -26812,6 +26817,7 @@ object frmVolitant_Express: TfrmVolitant_Express
           Height = 49
           Caption = 'Items'
           TabOrder = 0
+          OnClick = btnToItemsClick
         end
         object btnToPlanes: TButton
           Left = 16
@@ -26831,7 +26837,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         end
         object btnToCompanies: TButton
           Left = 16
-          Top = 232
+          Top = 240
           Width = 153
           Height = 49
           Caption = 'Companies'
@@ -26839,11 +26845,12 @@ object frmVolitant_Express: TfrmVolitant_Express
         end
         object btnToEmails: TButton
           Left = 16
-          Top = 287
+          Top = 295
           Width = 153
           Height = 49
           Caption = 'Emails'
           TabOrder = 4
+          OnClick = btnToEmailsClick
         end
         object btnToSummary: TButton
           Left = 16

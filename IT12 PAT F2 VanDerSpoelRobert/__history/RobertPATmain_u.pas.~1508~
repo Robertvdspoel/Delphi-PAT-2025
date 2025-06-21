@@ -326,6 +326,7 @@ type
     procedure btnToSummaryClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure btnToEmailsClick(Sender: TObject);
+    procedure btnToItemsClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -681,16 +682,57 @@ end;
 
 procedure TfrmVolitant_Express.btnAddCategotyClick(Sender: TObject);
 var
-  sCategoryAdd : string ;
+  sCategoryAdd, sLine : string ;
+  tFile : TextFile ;
 begin
 // Add an item category
 
   sCategoryAdd := InputBox('Please type the category you would like to add:','*No duplicates allowed','') ;
+  // Check that a category was entered
+  if (sCategoryAdd = '') or (sCategoryAdd = ' ') then
+  begin
+    ShowMessage('No category entered');
+    exit;
+  end;
+  // Check that the category is in Range
+  if Length(sCategoryAdd) > 40  then
+  begin
+      ShowMessage('Category should be shorter or equel to 40 characters');
+    exit;
+  end;
+
 
 // Check that the category does not exit already
+    AssignFile(tFile, 'Item_Categories.txt');
 
+  if not FileExists('Item_Categories.txt')  then  // Check that the file exists
+  begin
+    ShowMessage('Item_Categories.txt not Found, created');
+    Rewrite(Tfile)  ;
+  end;
+  Reset(tFile) ;
+     // Search for categories
+  while not Eof(tfile)  do
+  begin
+    Readln(tFile, sLine) ;
 
+    if UpperCase(sLine) = UpperCase(sCategoryAdd)   then // If the category already exists
+    begin
+      ShowMessage('Category already exists!') ;
+      CloseFile(tFile) ;
+      Exit;
+    end;
+  end;
+
+  // Add item t otxt file if category does not exist
+
+  Append(tFile);
+  Writeln(tFile, sCategoryAdd) ;
+
+  CloseFile(tFile);
+  ShowMessage('Item added to combobox') ;
 // Update the combobox in the end when the category has been added
+cmbItemCategoryAdd.Items.Add(sCategoryAdd) ;
 end;
 
 procedure TfrmVolitant_Express.btnAddItemClick(Sender: TObject);
@@ -775,8 +817,8 @@ begin
         redCompanyOut.Paragraph.Tab[3] := 450;
          redCompanyOut.Paragraph.Tab[4] := 550;
       redCompanyOut.Paragraph.Tab[5] := 600;
-      redCompanyOut.Paragraph.Tab[6] := 700;
-     redCompanyOut.Lines.Add('OrderID'+ #9+ 'Weight(kg)'+ #9 + 'Pickup Country'+ #9+'Drop-Off Country'+#9+'Status'+ #9+'Paid'+#9+'Item'+#9+'Date of Placement') ;
+      redCompanyOut.Paragraph.Tab[6] := 690;
+     redCompanyOut.Lines.Add('OrderID'+ #9+ 'Weight(kg)'+ #9 + 'Pickup Country'+ #9+'Drop-Off Country'+#9+'Status'+ #9+'Paid'+#9+'Date of Placement'+#9+'Item Name') ;
 
     // Get the Orders info
     tblOrders.First ;
@@ -803,7 +845,7 @@ begin
 
             // Set the display to display the orders info
             redCompanyOut.SelAttributes.Color := clBlack ;
-            redCompanyOut.Lines.Add(inttostr(tblOrders['OrderID'])+ #9+ inttostr(tblOrders['weight'])+ #9+ tblOrders['Pickup Country']+#9+ tblOrders['Drop of Country']+#9 +tblOrders['Status']+#9+ sPaid+#9+DateToStr(tblOrders['Order Date'])+#9+tblItems['Item Name'] +#9+ )   ;
+            redCompanyOut.Lines.Add(inttostr(tblOrders['OrderID'])+ #9+ inttostr(tblOrders['weight'])+ #9+ tblOrders['Pickup Country']+#9+ tblOrders['Drop of Country']+#9 +tblOrders['Status']+#9+ sPaid+#9+DateToStr(tblOrders['Order Date'])+#9+tblItems['Item Name']  )   ;
 
 
           end;
@@ -1224,6 +1266,21 @@ pgcAdmin.ActivePage.TabVisible := False;
 tsEmailsAdmin.TabVisible := True;
 end;
 
+procedure TfrmVolitant_Express.btnToItemsClick(Sender: TObject);
+begin
+ // Go to the Items page from any of the other pages
+ pgcAdmin.ActivePage.TabVisible := False;
+ tsItemsAdmin.TabVisible := True;
+
+   if not FileExists('Item_Categories.txt')  then
+  begin
+    ShowMessage('Item_Categories.txt not Found. Add categories to resolve this problem');
+    Exit;
+  end;
+
+ cmbItemCategoryAdd.Items.LoadFromFile('Item_Categories.txt') ;
+end;
+
 procedure TfrmVolitant_Express.btnTOLogClick(Sender: TObject);
 begin
 // Go to the page to View logs page from the home page
@@ -1537,6 +1594,14 @@ tsLogin.TabVisible := False;
 tsIntroVideo.TabVisible := False;
 tsGallery.TabVisible := False;
 }
+      {                              // Dont add the sum page to list, will cause errors due to activepage.tabvisible
+  tsItemsAdmin.TabVisible := False;
+  tsPlanesAdmin.TabVisible := False;
+  tsOrdersAdmin.TabVisible := False;
+  tsCompaniesAdmin.TabVisible := False;
+  tsEmailsAdmin.TabVisible := False;
+  tsCustomAdmin.TabVisible := False;
+               }
 
   tsContact.TabVisible := False;
   tsLastInfo.TabVisible := False;

@@ -1,1 +1,4 @@
 Minerals
+Flowers
+Food
+Biological samplesVehicles
