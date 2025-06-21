@@ -25577,7 +25577,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Height = -15
               Font.Name = 'Segoe UI'
               Font.Style = []
-              MaxValue = 0
+              MaxValue = 50000
               MinValue = 0
               ParentFont = False
               TabOrder = 5
@@ -25593,7 +25593,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Height = -15
               Font.Name = 'Segoe UI'
               Font.Style = []
-              MaxValue = 0
+              MaxValue = 99
               MinValue = 0
               ParentFont = False
               TabOrder = 6
@@ -25601,10 +25601,11 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
           end
           object btnAddCategoty: TButton
-            Left = 304
-            Top = 12
+            Left = 295
+            Top = 7
             Width = 217
             Height = 36
+            Hint = 'See ComboBox for existing categories'
             Caption = 'Add Category'
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clWindowText
@@ -25612,6 +25613,8 @@ object frmVolitant_Express: TfrmVolitant_Express
             Font.Name = 'Segoe UI'
             Font.Style = []
             ParentFont = False
+            ParentShowHint = False
+            ShowHint = True
             TabOrder = 1
             OnClick = btnAddCategotyClick
           end
@@ -26809,11 +26812,12 @@ object frmVolitant_Express: TfrmVolitant_Express
         TabOrder = 1
         object btnToItems: TButton
           Left = 16
-          Top = 26
+          Top = 31
           Width = 153
           Height = 49
           Caption = 'Items'
           TabOrder = 0
+          OnClick = btnToItemsClick
         end
         object btnToPlanes: TButton
           Left = 16

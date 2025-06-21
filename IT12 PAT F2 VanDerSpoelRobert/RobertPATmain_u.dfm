@@ -25577,7 +25577,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Height = -15
               Font.Name = 'Segoe UI'
               Font.Style = []
-              MaxValue = 0
+              MaxValue = 50000
               MinValue = 0
               ParentFont = False
               TabOrder = 5
@@ -25593,7 +25593,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Height = -15
               Font.Name = 'Segoe UI'
               Font.Style = []
-              MaxValue = 0
+              MaxValue = 99
               MinValue = 0
               ParentFont = False
               TabOrder = 6

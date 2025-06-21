@@ -700,8 +700,6 @@ begin
       ShowMessage('Category should be shorter or equel to 40 characters');
     exit;
   end;
-
-
 // Check that the category does not exit already
     AssignFile(tFile, 'Item_Categories.txt');
 
@@ -710,9 +708,8 @@ begin
     ShowMessage('Item_Categories.txt not Found, created');
     Rewrite(Tfile)  ;
   end;
-
   Reset(tFile) ;
-
+     // Search for categories
   while not Eof(tfile)  do
   begin
     Readln(tFile, sLine) ;
@@ -726,22 +723,81 @@ begin
   end;
 
   // Add item t otxt file if category does not exist
-
   Append(tFile);
   Writeln(tFile, sCategoryAdd) ;
 
   CloseFile(tFile);
+  ShowMessage('Item added to combobox') ;
 // Update the combobox in the end when the category has been added
 cmbItemCategoryAdd.Items.Add(sCategoryAdd) ;
 end;
 
 procedure TfrmVolitant_Express.btnAddItemClick(Sender: TObject);
-
+var
+  sItemname : string;
+  rPrice : real;
+  bDangerous : boolean;
 begin
 // Add a new item to the Items table
 
 // Validation
+
+   // Check that a new item name was entered and that it is in range
+   sItemname := edtItemAddName.Text ;
+   if (sItemname = '') or (sItemname = ' ') or (Length(sItemname) > 40 ) then
+   begin
+      ShowMessage('No item name entered or length longer than 40 character') ;
+      exit;
+   end;
+  // Check that the item name does not already exist
+  tblItems.First ;
+  while not tblItems.Eof do
+  begin
+    if Uppercase(sItemName) = Uppercase(tblItems['Item Name']) then
+    begin
+      ShowMessage('Item already exists. Update item to change anything') ;
+      exit;
+    end;
+
+    tblItems.Next ;
+  end;
+
+  // Check that category is selected
+  if cmbItemCategoryAdd.ItemIndex = -1 then
+  begin
+    ShowMessage('Please select item category') ;
+    exit;
+  end;
+
+  // Check that a price is entered
+  if not sedAddItemRands.Value = 0 then
+  begin
+    ShowMessage('Enter the cost per kg for the item in Rands');
+    exit;
+  end;
+
 // Remember to also validate that the description entered is shorted than the amount of characters that is allowed in that field in the db (120 at this time of writing)
+  if Length(redAddDescription.Text) > 120  then
+  begin
+    ShowMessage('Item description should not exeed a length of 120 characters. (Currently: '+IntToStr(length(redAddDescription.Text)) +')');
+    exit;
+  end;
+
+  // Add item to the database
+  if chkDangerousItemAdd.Checked then
+  bDangerous := true
+  else
+  bDangerous := False;
+
+
+  rPrice :=sedAddItemRands.Value + (sedItemAddCents.Value  * 0.01);
+{ qrySQL.SQL.Text := 'INSERT INTO tblItems (Item Name, Category, T_Cost/kg, Dangerous, Note, Retired) VALUES ('+QuotedStr(sItemname)+','+ QuotedStr(cmbItemCategoryAdd.Items[cmbItemCategoryAdd.ItemIndex]) +','+ FloatToStr(rPrice)+',' + BoolToStr(bDangerous) +','+ quotedStr(redAddDescription.Text)+','+ 'False' + ')';
+  qrySQL.ExecSQL ;  }
+
+  tblItems.Insert ;
+
+
+  tblItems.Post ;
 
 end;
 
