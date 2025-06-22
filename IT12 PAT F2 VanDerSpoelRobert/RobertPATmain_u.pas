@@ -14,7 +14,8 @@ uses
   IdTCPClient, IdExplicitTLSClientServerBase, IdMessageClient, IdIMAP4,
   Vcl.DBCtrls, Vcl.CheckLst, Soap.InvokeRegistry, Soap.WSDLIntf,
   Soap.SOAPPasInv, Soap.SOAPHTTPPasInv, VclTee.TeeGDIPlus, VCLTee.TeEngine,
-  VCLTee.Series, VCLTee.TeeProcs, VCLTee.Chart, DateUtils, math, clsDistance_u, clsUsername_u;
+  VCLTee.Series, VCLTee.TeeProcs, VCLTee.Chart, DateUtils, math, clsDistance_u, clsUsername_u,
+  Vcl.FileCtrl;
 
 type
   TfrmVolitant_Express = class(TForm)
@@ -64,7 +65,7 @@ type
     chkNewsLetter: TCheckBox;
     tsRegConfirm: TTabSheet;
     pnlLastRegInfo: TPanel;
-    dptEstablishedDate: TDateTimePicker;
+    dtpEstablishedDate: TDateTimePicker;
     lblEstabDate: TLabel;
     lblRegDefaultHours: TLabel;
     sedRegDefaultHours: TSpinEdit;
@@ -195,7 +196,7 @@ type
     pnlTotalAccounts: TPanel;
     pnlTotalOrders: TPanel;
     pnlTotalItems: TPanel;
-    pnlTotalActivePlanes: TPanel;
+    pnlTotalPlanes: TPanel;
     btnReloadSum: TButton;
     grbStatistics: TGroupBox;
     lblTopPlain: TLabel;
@@ -255,7 +256,7 @@ type
     lblWelcomeHome: TLabel;
     btnCInfoBack: TButton;
     btnLastInfoBack: TButton;
-    BitBtn1: TBitBtn;
+    bitbtnCloseProgram: TBitBtn;
     btnBackFromGallery: TButton;
     bitbtnRegHelp: TBitBtn;
     bitbtnLoginHelp: TBitBtn;
@@ -271,6 +272,12 @@ type
     BitBtnretryPaySelect: TBitBtn;
     BitBtnNextToLastInfo: TBitBtn;
     BitBtnNextToConfirm: TBitBtn;
+    pnlFlightAnimation: TPanel;
+    imgPlaneAnimation: TImage;
+    tFlightAnimation: TTimer;
+    lblSelectCountry: TLabel;
+    lblGalleryInfo: TLabel;
+    lblConfirmYears: TLabel;
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnRegisterGOClick(Sender: TObject);
@@ -309,12 +316,17 @@ type
     procedure btnTOLogClick(Sender: TObject);
     procedure btnTOpaymentClick(Sender: TObject);
     procedure btnManageCompanyClick(Sender: TObject);
-    procedure BitBtn1Click(Sender: TObject);
+    procedure bitbtnCloseProgramClick(Sender: TObject);
     procedure btnBackFromGalleryClick(Sender: TObject);
     procedure BitBtnNextToConfirmClick(Sender: TObject);
     procedure btnCInfoBackClick(Sender: TObject);
     procedure BitBtnNextToLastInfoClick(Sender: TObject);
     procedure btnLastInfoBackClick(Sender: TObject);
+    procedure tFlightAnimationTimer(Sender: TObject);
+    procedure btnToSummaryClick(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure btnToEmailsClick(Sender: TObject);
+    procedure btnToItemsClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -324,6 +336,9 @@ type
     objUsername : TUsername ;
 
     Function ValidateEmail(pEmail: string): Boolean;
+
+
+    Procedure imgDynamicOnclick(Sender: TObject);    // For the dynamic object
     
   public
     { Public declarations }
@@ -339,17 +354,24 @@ type
   // Variable declararion
   sID : string ;
   iCountryCount,  iSpecialCharacterCount : integer ;
+  bTimer : boolean;
+
+    // For the gallery
+   iImageCount : integer;
+  arrFileNames : array[1..1000] of string;
+ 
 
   end;
 
 var
   frmVolitant_Express: TfrmVolitant_Express;
+  imgDynamicGallery : TImage ;
 
 implementation
 
 {$R *.dfm}
 
-procedure TfrmVolitant_Express.BitBtn1Click(Sender: TObject);
+procedure TfrmVolitant_Express.bitbtnCloseProgramClick(Sender: TObject);
 begin
 // Closes/ ends the program
 end;
@@ -367,12 +389,15 @@ end;
 
 
 procedure TfrmVolitant_Express.BitBtnNextToConfirmClick(Sender: TObject);
+var
+  bUsernameFound : boolean;
+  sUsernameCreated : string;
 begin
     // go to the reg confirmation page from the last info page
       redConfirmRegInfo.Clear ;
      // Check to make sure that the date of the companies establishment is in the past and NOT in the furure
 
-     if dptEstablishedDate.Date > date then
+     if dtpEstablishedDate.Date > date then
      begin
        ShowMessage('Invalid date of establishment') ;
       Exit;
@@ -382,7 +407,7 @@ begin
      // Fill the fields on the registration page
 
      pnlConfirmPass.Caption := 'You Password: ' + edtCreatePassword.Text ;
-     sedCompanyAgeConfirm.Value := YearsBetween(date, dptEstablishedDate.Date) ;
+     sedCompanyAgeConfirm.Value := YearsBetween(date, dtpEstablishedDate.Date) ;
 
      // Richedit
      //Government agency
@@ -405,6 +430,32 @@ begin
      tsLastInfo.TabVisible := False ;
      tsRegConfirm.TabVisible := True;
 
+    // Inisiate the username class
+    objUsername := TUsername.Create(edtCName.Text , cmbCountryBased.Items[cmbCountrybased.ItemIndex],dtpEstablishedDate.Date );
+
+    sUsernameCreated := objUsername.ToString ;
+    edtGUsername.Text := sUsernameCreated ;
+    
+    // Check to make sure that the username does not exist. (IT can be possible, as you cant register a company twice, however, a company starting with the same word can technically generate twice )
+    repeat
+      bUsernameFound := False;
+      tblCompany.First ;
+      while not tblCompany.eof do
+      begin
+        if tblCompany['Username'] = sUsernameCreated then // Check for a duplicate username
+        begin
+          sUsernameCreated := Copy(sUsernameCreated ,1, Pos('_', sUsernameCreated) ); // Just keep everything beforee the uudnerscore
+          bUsernameFound := True; // Change to true as the username has been found
+          sUsernameCreated := sUsernameCreated + IntToStr(RandomRange(1, 1000) ) ;   // Generate a new random number for after the undersocre
+
+            objUsername.SetUsername(sUsernameCreated) ; // Update the username to the object
+            break; // exit the loop to save time
+        end;
+        tblCompany.Next ;
+      end;
+      
+    until bUsernameFound = False; // If no duplicate username was found, then no need to check again
+    
 end;
 
 procedure TfrmVolitant_Express.BitBtnNextToLastInfoClick(Sender: TObject);
@@ -426,7 +477,10 @@ end;
 
 procedure TfrmVolitant_Express.BitBtnRegisterClick(Sender: TObject);
 var
-  sCName: string;
+  sCName, sCRegPassword, sUsernameGenerated, sRegEmail, sLocationBasedReg: string;
+  bGovernment, bNewsLetter : boolean;
+  dDateEnstablished, dRegDate : tDate;
+  iDefaultHours : integer ;
 begin
 // register the company
 
@@ -440,8 +494,47 @@ begin
 
   // Read values into variables
   sCName := edtCName.Text ;
+  sCRegPassword := edtCreatePassword.Text ;
+  sUsernameGenerated := objUsername.GetUsername ;
+  sRegEmail := edtRegEmail.Text ;
+
+   //Government agency
+     if chkGovernment.Checked then
+      bGovernment := True
+     else
+      bGovernment := false;
+
+   dDateEnstablished := dtpEstablishedDate.Date;
+
+   sLocationBasedReg := cmbCountryBased.Items[cmbCountryBased.ItemIndex];
+
+
+    // NEwsletter
+     if chkNewsLetter.Checked then
+    bNewsLetter := true
+      else
+    bNewsLetter := False;
+
+    dRegDate := Date;
+
+    iDefaultHours := sedRegDefaultHours.Value ;
 
 // Write to the db
+
+  tblCompany.Insert ;
+
+  tblCompany['CompanyName']:= sCName;
+  tblCompany['Password'] := sCRegPassword ;
+  tblCompany['Username']:= sUsernameGenerated ;
+  tblCompany['Email']:= sRegEmail ;
+  tblCompany['Goverment Agency']:= bGovernment ;
+  tblCompany['RegDate'] := dRegDate ;
+  tblCompany['Location Based'] := sLocationBasedReg ;
+  tblCompany['Newsletter'] := bNewsLetter ;
+  tblCompany['Establishment Date'] := dDateEnstablished ;
+  tblCompany['Defualt Hours'] := iDefaultHours ;
+
+  tblCompany.Post ;
 
 // Go to the Home page
 end;
@@ -501,7 +594,7 @@ begin
       tblCompany.Next ;
     end;    
 
-    // CountryBased
+    // CountryBased. Make sure that a country was entered
     if cmbCountryBased.ItemIndex = -1 then
     begin
       ShowMessage('Please Select/Enter a valid Country');
@@ -523,7 +616,7 @@ begin
     // Check that the password is a valid passowrd
     for cChar  in sPassword  do
     begin
-       
+
        bErrorCharacter := true;
       for c in arrSpecialCharacters do    // Checks that all the characters are valid
       begin
@@ -589,31 +682,149 @@ end;
 
 procedure TfrmVolitant_Express.btnAddCategotyClick(Sender: TObject);
 var
-  sCategoryAdd : string ;
+  sCategoryAdd, sLine : string ;
+  tFile : TextFile ;
 begin
 // Add an item category
 
   sCategoryAdd := InputBox('Please type the category you would like to add:','*No duplicates allowed','') ;
-
+  // Check that a category was entered
+  if (sCategoryAdd = '') or (sCategoryAdd = ' ') then
+  begin
+    ShowMessage('No category entered');
+    exit;
+  end;
+  // Check that the category is in Range
+  if Length(sCategoryAdd) > 40  then
+  begin
+      ShowMessage('Category should be shorter or equel to 40 characters');
+    exit;
+  end;
 // Check that the category does not exit already
+    AssignFile(tFile, 'Item_Categories.txt');
 
+  if not FileExists('Item_Categories.txt')  then  // Check that the file exists
+  begin
+    ShowMessage('Item_Categories.txt not Found, created');
+    Rewrite(Tfile)  ;
+  end;
+  Reset(tFile) ;
+     // Search for categories
+  while not Eof(tfile)  do
+  begin
+    Readln(tFile, sLine) ;
 
+    if UpperCase(sLine) = UpperCase(sCategoryAdd)   then // If the category already exists
+    begin
+      ShowMessage('Category already exists!') ;
+      CloseFile(tFile) ;
+      Exit;
+    end;
+  end;
+
+  // Add item t otxt file if category does not exist
+  Append(tFile);
+  Writeln(tFile, sCategoryAdd) ;
+
+  CloseFile(tFile);
+  ShowMessage('Item added to combobox') ;
 // Update the combobox in the end when the category has been added
+cmbItemCategoryAdd.Items.Add(sCategoryAdd) ;
 end;
 
 procedure TfrmVolitant_Express.btnAddItemClick(Sender: TObject);
-
+var
+  sItemname : string;
+  rPrice : real;
+  bDangerous : boolean;
 begin
 // Add a new item to the Items table
 
 // Validation
-// Remember to also validate that the description entered is shorted than the amount of characters that is allowed in that field in the db (120 at this time of writing)
 
+   // Check that a new item name was entered and that it is in range
+   sItemname := edtItemAddName.Text ;
+   if (sItemname = '') or (sItemname = ' ') or (Length(sItemname) > 40 ) then
+   begin
+      ShowMessage('No item name entered or length longer than 40 character') ;
+      exit;
+   end;
+  // Check that the item name does not already exist
+  tblItems.First ;
+  while not tblItems.Eof do
+  begin
+    if Uppercase(sItemName) = Uppercase(tblItems['Item Name']) then
+    begin
+      ShowMessage('Item already exists. Update item to change anything') ;
+      exit;
+    end;
+
+    tblItems.Next ;
+  end;
+
+  // Check that category is selected
+  if cmbItemCategoryAdd.ItemIndex = -1 then
+  begin
+    ShowMessage('Please select item category') ;
+    exit;
+  end;
+
+  // Check that a price is entered
+  if sedAddItemRands.Value = 0 then
+  begin
+    ShowMessage('Enter the cost per kg for the item in Rands');
+    exit;
+  end;
+
+// Remember to also validate that the description entered is shorted than the amount of characters that is allowed in that field in the db (120 at this time of writing)
+  if Length(redAddDescription.Text) > 120  then
+  begin
+    ShowMessage('Item description should not exeed a length of 120 characters. (Currently: '+IntToStr(length(redAddDescription.Text)) +')');
+    exit;
+  end;
+
+  // Add item to the database
+  if chkDangerousItemAdd.Checked then
+  bDangerous := true
+  else
+  bDangerous := False;
+       // Get the price for the item
+  rPrice :=sedAddItemRands.Value + (sedItemAddCents.Value  * 0.01);
+{ qrySQL.SQL.Text := 'INSERT INTO tblItems (Item Name, Category, T_Cost/kg, Dangerous, Note, Retired) VALUES ('+QuotedStr(sItemname)+','+ QuotedStr(cmbItemCategoryAdd.Items[cmbItemCategoryAdd.ItemIndex]) +','+ FloatToStr(rPrice)+',' + BoolToStr(bDangerous) +','+ quotedStr(redAddDescription.Text)+','+ 'False' + ')';
+  qrySQL.ExecSQL ;  }
+        // ADO coding
+  tblItems.Insert ;
+   tblItems['Item Name'] := sItemname ;
+   tblItems['Category']:= cmbItemCategoryAdd.Items[cmbItemCategoryAdd.ItemIndex];
+   tblItems['T_Cost/kg'] := rPrice;
+   tblItems['Dangerous']  := bDangerous ;
+   tblItems['Note']:= redAddDescription.Text ;
+   tblItems['Retired'] := False;
+  tblItems.Post ;
+
+  ShowMessage('Item successfully added');
 end;
 
 procedure TfrmVolitant_Express.btnBackFromGalleryClick(Sender: TObject);
+var
+  I : integer;
 begin
 // Go back to the welcome page from the Gallery page
+tsGallery.TabVisible := False;
+
+  // Remove any existing dynamic compoents from the group box by freeing them from memory. I used this method in my Grade 11 PAT
+  for i := sbGallery.ControlCount - 1 downto 0 do
+  begin
+    // Check if the control is an Image
+    if sbGallery.Controls[i] is tImage then  // Is seems to be used when you are working with components and with shapes
+    begin
+      // Free the panel from memory and remove it from the parent owning it
+      sbGallery.Controls[i].Free;
+    end;
+  end;
+
+
+tsWelcome.TabVisible := True;
 end;
 
 procedure TfrmVolitant_Express.btnCInfoBackClick(Sender: TObject);
@@ -624,8 +835,94 @@ tsDetails.TabVisible := True ;
 end;
 
 procedure TfrmVolitant_Express.btnCompanyOrderOutClick(Sender: TObject);
+var
+  sGovernment, sPaid : string;
+  bItemFound, bFirst : boolean;
 begin
 // Displays a list of the companies and the orders that they have places
+  redCompanyOut.Clear ;
+
+   bFirst := True;
+  tblCompany.First ;
+  while not tblCompany.eof do // Loop thru the companies table
+  begin
+   // Set the tabstops
+     redCompanyOut.SelAttributes.Color := clRed;
+     redCompanyOut.Paragraph.TabCount := 4;
+     redCompanyOut.Paragraph.Tab[0] := 75;
+     redCompanyOut.Paragraph.Tab[1] := 225;
+     redCompanyOut.Paragraph.Tab[2] := 375;
+     redCompanyOut.Paragraph.Tab[3] := 445;
+   if bFirst = True then // Display main heading
+   begin
+       redCompanyOut.Lines.Add('CompanyID'+ #9+ 'Company Name'+ #9+'LocationBased'+#9+ 'Government'+ #9+'Company Age(Years)') ;
+       bFirst := False;
+   end;
+
+    // Company Info display
+    redCompanyOut.SelAttributes.Color := clRed ;
+    if tblCompany['Goverment Agency'] = True then
+    sGovernment := 'Yes'
+    else
+    sGovernment := 'No' ;
+    redCompanyOut.Lines.Add(#13+inttostr(tblCompany['CompanyID'])+#9+tblCompany['CompanyName']+ #9+tblCompany['Location Based']+ #9+sGovernment+ #9+IntToStr(YearsBetween(Date, tblCompany['Establishment Date']) ) );
+
+
+     // Setup tabstops for display of orders
+    redCompanyOut.SelAttributes.Color := clGreen;
+    redCompanyOut.Paragraph.TabCount := 7;
+     redCompanyOut.Paragraph.Tab[0] := 65;
+      redCompanyOut.Paragraph.Tab[1] := 175;
+       redCompanyOut.Paragraph.Tab[2] := 300;
+        redCompanyOut.Paragraph.Tab[3] := 450;
+         redCompanyOut.Paragraph.Tab[4] := 550;
+      redCompanyOut.Paragraph.Tab[5] := 600;
+      redCompanyOut.Paragraph.Tab[6] := 690;
+     redCompanyOut.Lines.Add('OrderID'+ #9+ 'Weight(kg)'+ #9 + 'Pickup Country'+ #9+'Drop-Off Country'+#9+'Status'+ #9+'Paid'+#9+'Date of Placement'+#9+'Item Name') ;
+
+    // Get the Orders info
+    tblOrders.First ;
+    while not tblOrders.eof do
+    begin
+
+      if tblOrders['CompanyID'] = tblCompany['CompanyID'] then // If a order was found that is listed under the company
+      begin
+
+        // Search for the Item that's to get transported in the order
+        tblItems.First ;
+        bItemFound := False;
+        while not tblItems.eof and (bItemFound = False) do
+        begin
+
+          if tblOrders['ItemID'] = tblItems['ItemID']  then
+          begin
+            bItemFound := True;
+
+            if tblOrders['Paid'] = True then
+            sPaid := 'Yes'
+            else
+            sPaid := 'No';
+
+            // Set the display to display the orders info
+            redCompanyOut.SelAttributes.Color := clBlack ;
+            redCompanyOut.Lines.Add(inttostr(tblOrders['OrderID'])+ #9+ inttostr(tblOrders['weight'])+ #9+ tblOrders['Pickup Country']+#9+ tblOrders['Drop of Country']+#9 +tblOrders['Status']+#9+ sPaid+#9+DateToStr(tblOrders['Order Date'])+#9+tblItems['Item Name']  )   ;
+
+
+          end;
+
+        tblItems.Next;
+        end;
+
+      end;
+
+
+    tblOrders.Next ;
+    end;
+
+    tblCompany.Next;
+  end;
+
+
 end;
 
 procedure TfrmVolitant_Express.btnCustomSQLClick(Sender: TObject);
@@ -655,17 +952,106 @@ begin
 
 end;
 
-procedure TfrmVolitant_Express.btnGalleryClick(Sender: TObject);
+procedure TfrmVolitant_Express.btnGalleryClick(Sender: TObject);   // Dynamic Component
+const imgWidth = 480;
+const imgHeight = 250;
+var
+  i, iLeft, iTop, iPerLineCount  : integer;
+  bOne : boolean;
+  tGalleryFile : TextFile ;
 begin
-// Shows some pictures about the company
-// go to anotherr tab sheet
-// Use dynamic componets here: see my notes
+// Shows some pictures about the company   (some of this code will have come from my Grade 11 PAT)
+
+  // Create the dynamic components (images) that will be used to display the gallery
+
+  if iImageCount = 0 then // Only read the files into the array ones; the first time the button is clicked
+  begin
+
+    // Get the name of the images into an array
+
+    // Read image names from txt file to array
+    AssignFile(tGalleryFile, 'Gallery/ImageNames.txt');
+    if not FileExists('Gallery/ImageNames.txt')  then
+    begin // Create the file if it does not exits
+      Rewrite(tGalleryFile) ;
+      ShowMessage('Gallery/ImageNames.txt was not found; created')   ;
+      exit;
+    end;
+
+    Reset(tGalleryFile );
+     // Read the file names into the array
+    while not (Eof(tGalleryFile ) ) and (iImageCount < 1000) do
+    begin
+       Inc(iImageCount) ;
+
+       Readln(tGalleryFile , arrFileNames[iImageCount]);
+     //  ShowMessage(arrFileNames[imgWidth]);
+    end;
+    CloseFile(tGalleryFile ) ;
+  end;
+
+  // Create the image components and fill them with the images
+
+  iPerLineCount := 0;
+  iTop := 20;
+  bOne := True;
+  for I := 1 to iImageCount do
+    begin
+      if FileExists('Gallery/'+ arrFileNames[I])  then    // Check that the file can be opened by the system
+      begin
+    
+      // Create the image
+        imgDynamicGallery := TImage.Create(Self) ;
+        imgDynamicGallery.Width := imgWidth ;
+        imgDynamicGallery.Height := imgHeight ;
+        
+        imgDynamicGallery.OnClick	:= imgDynamicOnclick;
+
+        // The the image
+        imgDynamicGallery.Stretch := True;
+        imgDynamicGallery.Picture.LoadFromFile('Gallery/'+ arrFileNames[I]) ;
+
+        // Set the images locations
+
+        // Set the position in the horisontal
+        if bOne = True then
+        begin
+          iLeft := 20 ;
+          bOne := False;
+        end
+        else
+        begin
+          iLeft := sbGallery.Width - 40 - imgWidth	 {iLeft + imgWidth + 40} ;
+          bOne := True;
+        end;
+
+        Inc(iPerLineCount);
+
+        imgDynamicGallery.Left := iLeft;
+        imgDynamicGallery.Top := iTop;
+
+        // Change the POS of the image in the vertical
+        if iPerLineCount = 2 then
+        begin
+          iPerLineCount := 0;
+          iTop := iTop + imgHeight+ 25 ;
+        end;
+
+        // Set the parent
+        imgDynamicGallery.Parent := sbGallery ;
+      
+      end;
+    end;
+
+// go to the gallery tab sheet
+tsWelcome.TabVisible := False;
+tsGallery.TabVisible := true;
+
 end;
 
 procedure TfrmVolitant_Express.btnIntroVidClick(Sender: TObject);
 begin
 // Plays the recorded intro video about the company
-
 
 // go to anotherr tab sheet
 tsWelcome.TabVisible := False;
@@ -695,7 +1081,9 @@ procedure TfrmVolitant_Express.btnLoginClick(Sender: TObject);
 begin
 // Login to the program
 
-  qrySQL.SQL.Text := 'Select CompanyID from tblCompany where (Username) = ' + QuotedStr(edtUsernameLogin.Text) + ' and Password = '+ QuotedStr(edtPasswordLogin.Text) ;               // SQL Query
+  // Perhaps add SQL Injection protection
+
+  qrySQL.SQL.Text := 'Select CompanyID from tblCompany where (Username = ' + QuotedStr(edtUsernameLogin.Text) + ') and Password = '+ QuotedStr(edtPasswordLogin.Text) ;  // SQL Query
 
    qrySQL.Open ;
 
@@ -714,7 +1102,6 @@ begin
     Showmessage('Invalid Password or username!') ;
     Exit;
   end;
-
 
 end;
 
@@ -777,18 +1164,125 @@ tsDetails.TabVisible := True ;
 end;
 
 procedure TfrmVolitant_Express.btnReloadSumClick(Sender: TObject);
+const RevenueGoal = 1000000000;
+const OrdersGoal = 100;
+var
+  iNum, iYearlyOrdersGoal : integer ;
+  sString : string;
+  rRevenue, rHours, rYearlyRevenueGoal : real;
+  bFound : boolean;
 begin
 // Reloads the page; updating the info
 
+ // Total Accounts
+ pnlTotalAccounts.Caption := 'Total Accounts: ' + IntToStr(tblCompany.RecordCount); 
+ // total Orders
+ pnlTotalOrders.Caption :='Total Orders: '+ IntToStr(tblOrders.RecordCount );
+ // Total Items
+ pnlTotalItems.Caption := 'Total Items: ' + IntToStr(tblItems.RecordCount) ;
+ // Total Planes 
+ pnlTotalPlanes.Caption := 'Total Planes: ' + IntToStr(tblPlanes.RecordCount) ;
 
-// This is only temporary
-PBrevenue.Min := 0;
-PBrevenue.Max := 100;
-PBrevenue.Position := 75;
+ // Top plain
+ qrySQL.SQL.Text := 'SELECT TOP 1 PlaneID AS Result FROM tblOrders Group By PlaneID ORDER BY Count(*) DESC';
+  qrySQL.Open ;  
+ iNum := qrySQL['Result'];
+ qrySQL.SQL.Text := 'Select [Plane Name] as Result from tblPlanes where PlaneID = '+ IntToStr(iNum);
+ qrySQL.Open ; 
+ sString := qrySQL['Result'];
+  lblTopPlain.Caption := 'Top Plain: ' + sString ;
 
-PBOrders.Min := 0 ;
-PBOrders.Max := 100;
-PBOrders.Position := 63;
+  //  Top Item  
+  qrySQL.SQL.Text := 'Select TOP 1 [Item Name] As Result from tblItems, tblOrders where tblOrders.ItemID = tblItems.itemID Group By tblItems.[Item Name] ORDER BY Count(*) DESC'; 
+  qrySQL.Open ;
+  lblTopItem.Caption := 'Top Item: ' + qrySQL['Result']; 
+
+  // Top Pickup Country
+  qrySQL.SQL.Text := 'Select TOP 1 [Pickup Country] as Result from tblOrders Group By [Pickup Country] Order By Count(*) DESC'  ;
+   qrySQL.Open ;
+   lblTopPickupC.Caption := 'Top Pickup Country: ' + qrySQL['Result'] ;
+
+   // Drop of Country
+   qrySQL.SQL.Text := 'Select TOP 1 [Drop of Country] as Result from tblOrders Group By [Drop of Country] Order By Count(*) DESC'  ;
+   qrySQL.Open ;
+   lblTopDropoffC.Caption := 'Top Drop-Off Country: ' + qrySQL['Result'] ;
+
+   // Total Revenue for all time calculation
+   rRevenue := 0 ;
+   rYearlyRevenueGoal := 0 ;
+   iYearlyOrdersGoal := 0;
+   tblOrders.First ;
+   while not tblOrders.eof do   // Loop thru tblOrders
+   begin
+      if tblOrders['Paid'] = true then   // Checks that the order has been paid, before adding it to revenue sum
+      begin
+
+        rRevenue := rRevenue + tblOrders['Base Cost'] ; // Add the base cost to total revenue
+        tblItems.First ;
+
+        if (YearOF(tblOrders['Pickup Date']) = YearOf(Date))  then // inc the orders that occured this year specificaly counter
+        Inc(iYearlyOrdersGoal) ;
+
+
+        bFound := False;
+        while not tblItems.eof and (bFound = false) do // Loop thru items table to get the price for an item per kg
+        begin
+
+          if tblItems['ItemID'] = tblOrders['ItemID'] then
+          begin
+          bFound := true;
+            rRevenue := rRevenue + tblItems['T_Cost/kg'] * tblOrders['Weight'] ;
+
+             if (YearOF(tblOrders['Pickup Date']) = YearOf(Date))  then  // increase the revenue that was made this year only
+             rYearlyRevenueGoal := rYearlyRevenueGoal +  tblItems['T_Cost/kg'] * tblOrders['Weight'] ;
+          end;
+
+          tblItems.Next ;
+        end;
+        bFound := False;
+        // Loop thru plane table to get feul price
+
+        tblPlanes.First;
+        while not tblPlanes.Eof and (bFound = false) do
+        begin
+           if tblPlanes['PlaneID'] = tblOrders['PlaneID'] then
+           begin
+              bFound := True;
+              // Calculate the hours that the flight will last
+              rHours  := (tblOrders['E/D Date'] - tblOrders['Pickup Date']) * 24 ; // Get the difference in time and convert it to hours
+              rRevenue := rRevenue + tblPlanes['FuelCost']  * rHours  ; // times by the hours of the flight
+
+                 if (YearOF(tblOrders['Pickup Date']) = YearOf(Date))  then  // increase the revenue that was made this year only
+             rYearlyRevenueGoal := rYearlyRevenueGoal +  tblPlanes['FuelCost']  * rHours  ;
+           end;
+
+          tblPlanes.Next ;
+        end;
+      
+      end;
+      tblOrders.Next ;
+   end;
+   lblTotalRevenue.Caption := 'Total Revenue: ' + FloatToStrF(rRevenue , ffCurrency ,10,2)  ;
+
+   // Average Order Weight
+    qrySQL.SQL.Text := 'Select AVG(Weight) as Result from tblOrders'  ;
+   qrySQL.Open ;
+   lblAverageWeight.Caption := 'Average Order Weight: ' + floattostrf((qrySQL['Result']), ffFixed, 10,2) + ' kg';
+   
+  // Set the progress bars for the yearly goals
+
+  // For revenue goal
+  PBrevenue.Min := 0;
+  PBrevenue.Max := 100;
+
+PBrevenue.Position := Floor(rYearlyRevenueGoal / RevenueGoal* 100 ) ;
+
+
+
+  // For the order goal
+  PBOrders.Min := 0 ;
+  PBOrders.Max := 100;
+PBOrders.Position := Floor(iYearlyOrdersGoal / OrdersGoal *100);
 end;
 
 procedure TfrmVolitant_Express.btnRestartVidClick(Sender: TObject);
@@ -805,9 +1299,46 @@ begin
 end;
 
 procedure TfrmVolitant_Express.btnToCustomClick(Sender: TObject);
+var
+  sCustomPagePass : string;
 begin
 // Go to the custom SQL page, ask for a special password to gain access to this part of the website
 
+  sCustomPagePass := IntToStr(RandomRange(1000, 10000) )  ;
+
+  if sCustomPagePass = InputBox('Enter Password to access Custom SQL page', 'The Custom Passowd is: (For PAT purposes it is given)', sCustomPagePass)  then
+  begin
+   pgcAdmin.ActivePage.TabVisible := False;
+   tsCustomAdmin.TabVisible := True;
+  end
+  else
+  begin
+    ShowMessage('You got the Password WRONG') ;
+   Exit;
+  end;
+
+end;
+
+procedure TfrmVolitant_Express.btnToEmailsClick(Sender: TObject);
+begin
+// Go to the admin email page from any of the other pages
+pgcAdmin.ActivePage.TabVisible := False;
+tsEmailsAdmin.TabVisible := True;
+end;
+
+procedure TfrmVolitant_Express.btnToItemsClick(Sender: TObject);
+begin
+ // Go to the Items page from any of the other pages
+ pgcAdmin.ActivePage.TabVisible := False;
+ tsItemsAdmin.TabVisible := True;
+
+   if not FileExists('Item_Categories.txt')  then
+  begin
+    ShowMessage('Item_Categories.txt not Found. Add categories to resolve this problem');
+    Exit;
+  end;
+
+ cmbItemCategoryAdd.Items.LoadFromFile('Item_Categories.txt') ;
 end;
 
 procedure TfrmVolitant_Express.btnTOLogClick(Sender: TObject);
@@ -846,6 +1377,14 @@ tsPayment.TabVisible := True ;
 
 end;
 
+procedure TfrmVolitant_Express.btnToSummaryClick(Sender: TObject);
+begin
+// Go to the summary page and load the info on the page
+  pgcAdmin.ActivePage.TabVisible := false;
+  tsAdminSum.TabVisible := True;
+  btnReloadSum.Click  ;
+end;
+
 procedure TfrmVolitant_Express.btnUpdateItemClick(Sender: TObject);
 begin
 // Update the item
@@ -862,17 +1401,36 @@ begin
 // if the retire plane button was selected, display a confirmation dialogue to confirm that they want to retire the plane
 end;
 
-
+procedure TfrmVolitant_Express.Button1Click(Sender: TObject);
+var
+  tFlightHours : integer;
+  rHours : real;
+begin
+ tFlightHours := HoursBetween(tblOrders['Pickup Date'], tblOrders['E/D Date']) ;
+              //rRevenue := rRevenue + tblPlanes['FuelCost']  * tFlightHours ; // times by the hours of the flight
+      // rHours := (tblOrders['E/D Date'] - tblOrders['Pickup Date']) * 24;  // TDateTime difference * 24
+          rHours  := HoursBetween(tblOrders['Pickup Date'], tblOrders['E/D Date']) ;
+    ShowMessage(FloatToStr(rHours) ) ;
+ ShowMessage(intToStr(tFlightHours) ) ;
+end;
 
 procedure TfrmVolitant_Express.cmbCountryBasedChange(Sender: TObject);
+var
+  sFileName, sCountryName : string;
+  I: Integer;
 begin
 // Display the flag of the selected Based country in the image component
 
-  try // atemp to display the country flag
-    imgBasedFlag.Picture.LoadFromFile('Flags/' + arrCountryCode[cmbCountryBased.ItemIndex+1] + '.jpg') ;  
-   Except // Display the flag not found image if the flag for a country could not be found
-    imgBasedFlag.Picture.LoadFromFile('Flags/Not_Found.jpg') ;
-  end;
+  if cmbCountryBased.ItemIndex >=0 then // Make sure than an option was selected
+  begin
+    sFileName := 'Flags/' + arrCountryCode[cmbCountryBased.ItemIndex+1] + '.jpg';  // Create the name of the file to open
+    if FileExists(sFileName) then
+    imgBasedFlag.Picture.LoadFromFile(sFileName) // Load the image
+    else
+    imgBasedFlag.Picture.LoadFromFile('Flags/Not_Found.jpg') ;    // If, for some reason, The file cannot be found, display not found
+  end
+  else
+   imgBasedFlag.Picture.LoadFromFile('Flags/Not_Found.jpg') ; // If no valid images was selected
 
 end;
 
@@ -1001,6 +1559,29 @@ sID := '';
        
         CloseFile(tFile) ;
       end;
+
+  if bTimer = false then // Only set this on the first time the activation code runs
+  begin
+
+  // Run the plane animation
+  imgPlaneAnimation.Stretch := True;
+  imgPlaneAnimation.Picture.LoadFromFile('Program Media/airplane-side-view-travel-passenger-commercial-vector-15881171.jpg') ;
+  imgPlaneAnimation.Left := 0 ;
+
+  {       // This is code from my grade 10 PAT
+    ProgressValue := 0;
+  ProgressBarStartUp.Min := 0;
+  ProgressBarStartUp.Max := 1000;
+  ProgressBarStartUp.Position := ProgressValue;   }
+
+  // Set the timers properties
+  tFlightAnimation.Interval := 250; // 1000 milliseconds (1 second)
+  tFlightAnimation.Enabled := True;
+    //  Countdown := 5  ;
+
+  bTimer := true ;
+  end;
+
     
 
 // Database Connection
@@ -1062,7 +1643,6 @@ sID := '';
 
 //dbgtest.datasource := dsrPlanes  ;
 
-
 end;
 
 procedure TfrmVolitant_Express.FormCreate(Sender: TObject);
@@ -1074,18 +1654,85 @@ tsLogin.TabVisible := False;
 tsIntroVideo.TabVisible := False;
 tsGallery.TabVisible := False;
 }
+      {                              // Dont add the sum page to list, will cause errors due to activepage.tabvisible
+  tsItemsAdmin.TabVisible := False;
+  tsPlanesAdmin.TabVisible := False;
+  tsOrdersAdmin.TabVisible := False;
+  tsCompaniesAdmin.TabVisible := False;
+  tsEmailsAdmin.TabVisible := False;
+  tsCustomAdmin.TabVisible := False;
+               }
 
   tsContact.TabVisible := False;
   tsLastInfo.TabVisible := False;
   tsRegConfirm.TabVisible := False;
+
+  // Set sonme starting variablles
+  bTimer := False;
+  iImageCount := 0;
 end;
 
 
 
 
+procedure TfrmVolitant_Express.imgDynamicOnclick;
+var
+  sString : string;
+begin
+// Onclick for the dynamic images. Display something positive stat wise about volitant express
+
+  case RandomRange(1,6)  of      // When an image is clicked, a random message with stats wil be displayed 
+  1: begin     // Count how many successfull orders has taken place
+      qrySQL.SQL.Text := 'Select Count(*) as Result from tblOrders where status = "Delivered"';
+      qrySQL.open;
+       sString := (inttostr(qrySQL['Result']))  ;
+       ShowMessage('Total successfull orders: '+sString) ;
+    end;
+    
+  2: begin  // Count how many active planes the company have
+       qrySQL.SQL.Text := 'Select Count(*) as Result from tblPlanes where Retired = NO';
+      qrySQL.open;
+       sString := (inttostr(qrySQL['Result']))  ;
+       ShowMessage('Total Active Planes: ' + sString ) ; 
+    end;
+  3:     
+    begin // Count how many items are currently shipped by Volitant Express
+       qrySQL.SQL.Text := 'Select Count(*) as Result from tblItems where Retired = NO';
+      qrySQL.open;
+       sString := (inttostr(qrySQL['Result']))  ;
+       ShowMessage('We currently transport '+ sString + ' different items') ;
+    end;
+  4:
+    begin // Count how many companies are customers
+         qrySQL.SQL.Text := 'Select Count(*) as Result from tblCompany';
+      qrySQL.open;
+       sString := (inttostr(qrySQL['Result']))  ;
+       ShowMessage(sString +' companies trust us to transport their goods from locations around the world') ;
+    end;
+  5:
+    begin  // Display the country with the most Companies as customers of Volitant Express
+        qrySQL.SQL.Text := 'Select TOP 1 [Location Based] as Result from tblCompany Group By [Location Based] ORDER BY COUNT(*) DESC';
+      qrySQL.open;
+       sString := ((qrySQL['Result']))  ;
+       ShowMessage('Most of our Customer Companies are based in: '+ sString ) ;
+    end;
+  end;
+
+end;
+
 procedure TfrmVolitant_Express.lstSelectItemManageClick(Sender: TObject);
 begin
 // Update the Update components
+end;
+
+procedure TfrmVolitant_Express.tFlightAnimationTimer(Sender: TObject);
+begin
+ // Timer code
+ // Change the image location
+ imgPlaneAnimation.Left := imgPlaneAnimation.Left + 30;
+
+ if imgPlaneAnimation.Left > 1100 then
+ imgPlaneAnimation.Left := 0 ;
 end;
 
 function TfrmVolitant_Express.ValidateEmail(pEmail: string): Boolean;
@@ -1212,3 +1859,4 @@ begin
 end;
 
 end.
+// THE END OF THE FILE :)

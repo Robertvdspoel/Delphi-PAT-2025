@@ -17,6 +17,9 @@ type
      Constructor Create(pCompanyName, pCountryBased: string; pYearEstablished: tDate) ;
      Function ToString: string;
 
+     Function GetUsername : string;
+     Procedure SetUsername(pUsernameUpdated : string) ;
+
     end;
 
 implementation
@@ -51,8 +54,8 @@ begin
       end;
 
       iPos := Pos(' ', fCompanyName)  ;
-      if  (Ipos =  0) then  // Check if the Username has a space
-      begin    // If more than one word
+      if (Ipos >  0) then  // Check if the Username has a space
+      begin    // If more than one word; a space
          fCompanyName := Copy(fCompanyName, 1, Ipos-1); // Copy only the first word
       end;
 
@@ -63,15 +66,26 @@ begin
       iYearEstablished := YearOF(fYearEstablished);
       sYearEstablished := Copy(IntToStr(iYearEstablished), 3, 4 );
       // Put it all together
-      fUsername := fCompanyName + fCountryBased+ sYearEstablished + '_' + IntToStr(randomrange(100, 1000))
+      fUsername := fCompanyName + fCountryBased+ sYearEstablished + '_' + IntToStr(randomrange(100, 1000)) ;
 end;
 
 
 
+function TUsername.GetUsername: string;
+begin
+  Result := fUsername ;
+end;
+
+procedure TUsername.SetUsername(pUsernameUpdated: string);
+begin
+  // Update the username if there was another one like it found
+  fUsername := pUsernameUpdated ;
+end;
+
 function TUsername.ToString: string;
 begin
 // ToString allows the Username to be accessed by the main form
-
+  GenerateUsername ;
   Result := fUsername ;
 end;
 
