@@ -6429,7 +6429,7 @@ object frmVolitant_Express: TfrmVolitant_Express
     Top = 16
     Width = 1234
     Height = 609
-    ActivePage = tsAdmin
+    ActivePage = tsWelcome
     TabOrder = 0
     object tsWelcome: TTabSheet
       Caption = 'Welcome'
@@ -25432,7 +25432,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 56
         Width = 905
         Height = 481
-        ActivePage = tsItemsAdmin
+        ActivePage = tsThemeAdmin
         TabOrder = 0
         object tsItemsAdmin: TTabSheet
           Caption = 'Items'
@@ -25948,12 +25948,13 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Style = [fsBold]
               ParentFont = False
               TabOrder = 6
+              OnClick = btnAddPlaneClick
             end
           end
           object grbManagePlanes: TGroupBox
-            Left = 528
+            Left = 488
             Top = 65
-            Width = 329
+            Width = 369
             Height = 352
             Caption = 'Manage Planes'
             TabOrder = 1
@@ -25979,21 +25980,21 @@ object frmVolitant_Express: TfrmVolitant_Express
               Caption = 'Cents'
             end
             object lblSelectPlaneUpdate: TLabel
-              Left = 24
+              Left = 3
               Top = 29
               Width = 127
               Height = 15
               Caption = 'Select a plane to Update'
             end
             object chkRetirePlane: TCheckBox
-              Left = 40
-              Top = 240
+              Left = 32
+              Top = 248
               Width = 137
               Height = 17
               Caption = 'Retire Plane'
               Font.Charset = DEFAULT_CHARSET
               Font.Color = clWindowText
-              Font.Height = -16
+              Font.Height = -19
               Font.Name = 'Segoe UI'
               Font.Style = []
               ParentFont = False
@@ -26032,9 +26033,9 @@ object frmVolitant_Express: TfrmVolitant_Express
               Value = 0
             end
             object ListBox2: TListBox
-              Left = 24
+              Left = 3
               Top = 50
-              Width = 281
+              Width = 350
               Height = 79
               Font.Charset = DEFAULT_CHARSET
               Font.Color = clWindowText
@@ -26048,7 +26049,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             object btnUpdatePlane: TButton
               Left = 24
               Top = 296
-              Width = 281
+              Width = 321
               Height = 41
               Caption = 'Update Plane'
               Font.Charset = DEFAULT_CHARSET
@@ -26816,6 +26817,118 @@ object frmVolitant_Express: TfrmVolitant_Express
         object tsThemeAdmin: TTabSheet
           Caption = 'Change Theme'
           ImageIndex = 7
+          object lblThemePage: TLabel
+            Left = 200
+            Top = 15
+            Width = 362
+            Height = 47
+            Caption = 'Change System Theme'
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clTeal
+            Font.Height = -35
+            Font.Name = 'Segoe UI Semibold'
+            Font.Style = [fsBold]
+            ParentFont = False
+          end
+          object grbUpdateFormTheme: TGroupBox
+            Left = 3
+            Top = 68
+            Width = 185
+            Height = 125
+            Caption = 'Change Form Theme'
+            TabOrder = 0
+            object btnChangeFORMtheme: TButton
+              Left = 3
+              Top = 24
+              Width = 179
+              Height = 50
+              Caption = 'Change Form Theme'
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -16
+              Font.Name = 'Segoe UI'
+              Font.Style = [fsBold]
+              ParentFont = False
+              TabOrder = 0
+              OnClick = btnChangeFORMthemeClick
+            end
+            object btnFormThemeDefault: TButton
+              Left = 56
+              Top = 80
+              Width = 75
+              Height = 25
+              Caption = 'Default'
+              TabOrder = 1
+              OnClick = btnFormThemeDefaultClick
+            end
+          end
+          object grpChangeHomeTheme: TGroupBox
+            Left = 213
+            Top = 68
+            Width = 406
+            Height = 261
+            Caption = 'Change Home Theme'
+            ParentShowHint = False
+            ShowHint = False
+            TabOrder = 1
+            object lblColorGridInfo: TLabel
+              Left = 16
+              Top = 19
+              Width = 280
+              Height = 15
+              Caption = 'Left Click for Foreground. Right Click for Background'
+            end
+            object lblHomeThemeInfo: TLabel
+              Left = 16
+              Top = 40
+              Width = 270
+              Height = 15
+              Caption = 'Foreground= Main Label ; Background= Group Box'
+            end
+            object CGhomeTheme: TColorGrid
+              Left = 16
+              Top = 61
+              Width = 384
+              Height = 184
+              ParentShowHint = False
+              ShowHint = False
+              TabOrder = 0
+              OnChange = CGhomeThemeChange
+            end
+            object btnHomeThemeDefault: TButton
+              Left = 302
+              Top = 15
+              Width = 101
+              Height = 40
+              Caption = 'Default'
+              TabOrder = 1
+              OnClick = btnHomeThemeDefaultClick
+            end
+          end
+          object grbUpdateWelcomeLabel: TGroupBox
+            Left = 640
+            Top = 68
+            Width = 217
+            Height = 181
+            Caption = 'Update Welcome Label'
+            TabOrder = 2
+            object clbWelcomeLabelTheme: TColorListBox
+              Left = 16
+              Top = 24
+              Width = 185
+              Height = 97
+              TabOrder = 0
+            end
+            object btnUpdateWelcomeLabel: TButton
+              Left = 16
+              Top = 136
+              Width = 185
+              Height = 33
+              Caption = 'Update Label Theme'
+              TabOrder = 1
+              OnClick = btnUpdateWelcomeLabelClick
+            end
+          end
         end
       end
       object grbAdminQuick: TGroupBox
@@ -26933,6 +27046,9 @@ object frmVolitant_Express: TfrmVolitant_Express
         Width = 937
         Height = 473
         Caption = 'Select Page to go to'
+        Color = clBtnFace
+        ParentBackground = False
+        ParentColor = False
         TabOrder = 0
         object btnTOorder: TButton
           Left = 48
@@ -27243,7 +27359,11 @@ object frmVolitant_Express: TfrmVolitant_Express
   end
   object tFlightAnimation: TTimer
     OnTimer = tFlightAnimationTimer
-    Left = 368
+    Left = 56
+    Top = 632
+  end
+  object ColorDialogFORM: TColorDialog
+    Left = 96
     Top = 632
   end
 end

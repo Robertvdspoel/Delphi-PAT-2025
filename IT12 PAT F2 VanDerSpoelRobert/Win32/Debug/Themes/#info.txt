@@ -1,0 +1,1 @@
+each file will contain an integer that represents the color value that will be loaded by the system on startup

@@ -282,6 +282,19 @@ type
     btnToTheme: TButton;
     edtSearchForItem: TEdit;
     chkChangeItemDangerous: TCheckBox;
+    lblThemePage: TLabel;
+    grbUpdateFormTheme: TGroupBox;
+    ColorDialogFORM: TColorDialog;
+    btnChangeFORMtheme: TButton;
+    btnFormThemeDefault: TButton;
+    grpChangeHomeTheme: TGroupBox;
+    CGhomeTheme: TColorGrid;
+    lblColorGridInfo: TLabel;
+    lblHomeThemeInfo: TLabel;
+    btnHomeThemeDefault: TButton;
+    grbUpdateWelcomeLabel: TGroupBox;
+    clbWelcomeLabelTheme: TColorListBox;
+    btnUpdateWelcomeLabel: TButton;
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnRegisterGOClick(Sender: TObject);
@@ -333,7 +346,13 @@ type
     procedure btnToItemsClick(Sender: TObject);
     procedure btnToThemeClick(Sender: TObject);
     procedure edtSearchForItemChange(Sender: TObject);
-
+    procedure btnAddPlaneClick(Sender: TObject);
+    procedure btnChangeFORMthemeClick(Sender: TObject);
+    procedure btnFormThemeDefaultClick(Sender: TObject);
+    Procedure imgDynamicOnclick(Sender: TObject);
+    procedure CGhomeThemeChange(Sender: TObject);
+    procedure btnHomeThemeDefaultClick(Sender: TObject);
+    procedure btnUpdateWelcomeLabelClick(Sender: TObject);    // For the dynamic object
   private
     { Private declarations }
 
@@ -344,8 +363,9 @@ type
     Function ValidateEmail(pEmail: string): Boolean;
 
 
-    Procedure imgDynamicOnclick(Sender: TObject);    // For the dynamic object
-    
+
+    Procedure WriteToFormTheme(pFileName : string; pColorValue : integer); // For writing to the files for system themes
+
   public
     { Public declarations }
 
@@ -735,7 +755,7 @@ begin
   Writeln(tFile, sCategoryAdd) ;
 
   CloseFile(tFile);
-  ShowMessage('Item added to combobox') ;
+  ShowMessage('Category added to combobox') ;
 // Update the combobox in the end when the category has been added
 cmbItemCategoryAdd.Items.Add(sCategoryAdd) ;
 end;
@@ -824,6 +844,14 @@ begin
   redAddDescription.Clear ;
 end;
 
+procedure TfrmVolitant_Express.btnAddPlaneClick(Sender: TObject);
+begin
+// Add a plane to the database
+
+  // Validation
+
+end;
+
 procedure TfrmVolitant_Express.btnBackFromGalleryClick(Sender: TObject);
 var
   I : integer;
@@ -844,6 +872,19 @@ tsGallery.TabVisible := False;
 
 
 tsWelcome.TabVisible := True;
+end;
+
+procedure TfrmVolitant_Express.btnChangeFORMthemeClick(Sender: TObject);
+var
+  iColor : integer;
+begin
+// Update the theme of the Form
+  if ColorDialogForm.Execute then   // Whem a color is selected from the color dialogue
+  frmVolitant_Express.Color := ColorDialogFORM.Color ;  // Chnahe the forms dialogue
+  // Store the color to use when starting the program again
+  iColor :=ColorDialogFORM.Color ;
+  // Write to file for startup theme setting
+  WriteToFormTheme('Themes/formtheme.txt', iColor) ;
 end;
 
 procedure TfrmVolitant_Express.btnCInfoBackClick(Sender: TObject);
@@ -964,6 +1005,13 @@ qrySQL.SQL.Text := sSQL ;
 qrySQL.Open ;
 end;
 
+procedure TfrmVolitant_Express.btnFormThemeDefaultClick(Sender: TObject);
+begin
+// Set the form theme back to the default color
+frmVolitant_Express.color :=clBtnFace ;
+WriteToFormTheme('Themes/formtheme.txt', clBtnFace) ;
+end;
+
 procedure TfrmVolitant_Express.btnRetireItemClick(Sender: TObject);
 begin
 // retire an item or unretire it
@@ -1076,6 +1124,20 @@ begin
 tsWelcome.TabVisible := False;
 tsGallery.TabVisible := true;
 
+end;
+
+procedure TfrmVolitant_Express.btnHomeThemeDefaultClick(Sender: TObject);
+begin
+// Return the home theme to default
+  // Chnage the color grid back to its starting position
+  CGhomeTheme.BackgroundIndex := 0 ;
+  CGhomeTheme.ForegroundIndex := 0 ;
+  // of the label
+  lblWelcomeHome.font.Color := clMaroon    ;
+  WriteToFormTheme('Themes/home_label_theme.txt', clMaroon) ;
+  // of the group box
+  grbHome.Color := clBtnFace ;
+  WriteToFormTheme('Themes/home_grb_theme.txt', clBtnFace) ;
 end;
 
 procedure TfrmVolitant_Express.btnIntroVidClick(Sender: TObject);
@@ -1457,7 +1519,7 @@ begin
 
   if Length(redUpdateItem.Text) > 120  then
   begin
-    ShowMessage('Item Note may not be longer than 120 chracters')
+    ShowMessage('Item Note may not be longer than 120 chracters');
     exit;
   end;
 
@@ -1499,6 +1561,13 @@ begin
 // Validation
 
 // if the retire plane button was selected, display a confirmation dialogue to confirm that they want to retire the plane
+end;
+
+procedure TfrmVolitant_Express.btnUpdateWelcomeLabelClick(Sender: TObject);
+begin
+// Update the welcome lable color theme
+  lblWelcome.font.Color := clbWelcomeLabelTheme.Selected;
+  WriteToFormTheme('Themes/welcome_label_theme.txt', clbWelcomeLabelTheme.Selected) ;
 end;
 
 procedure TfrmVolitant_Express.Button1Click(Sender: TObject);
@@ -1544,6 +1613,18 @@ begin
   2: dbgDifferentTables.DataSource := dsrCompany ;
   3: dbgDifferentTables.DataSource := dsrItems ;
   end;
+end;
+
+procedure TfrmVolitant_Express.CGhomeThemeChange(Sender: TObject);
+begin
+// Change the theme of the home page
+
+  // Change the color of the label
+  lblWelcomeHome.font.Color := CGhomeTheme.ForegroundColor ;
+   WriteToFormTheme('Themes/home_label_theme.txt',CGhomeTheme.ForegroundColor) ;
+   // Change the theme of the group box
+   grbHome.Color := CGhomeTheme.BackgroundColor ;
+   WriteToFormTheme('Themes/home_grb_theme.txt', CGhomeTheme.BackgroundColor) ;
 end;
 
 procedure TfrmVolitant_Express.dbgDifferentTablesCellClick(Column: TColumn);
@@ -2008,6 +2089,23 @@ begin
 
     Result := True;
   
+end;
+
+procedure TfrmVolitant_Express.WriteToFormTheme(pFileName: string;
+  pColorValue: integer);
+  var
+    tFile : textfile;
+begin
+// Write to the Files containing the themes
+
+  // Always rewrite the file as a new value will always be stored
+  AssignFile(tFile, pFileName) ;
+  Rewrite(tFile) ;
+
+  Writeln(tFile, pColorValue) ;
+
+  CloseFile(tFile) ;
+
 end;
 
 end.
