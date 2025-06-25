@@ -8,5 +8,5 @@ Used Chat GPT for the bulk of the email sending
 
 https://www.youtube.com/watch?v=XwOdBaExs1E
 
-IS empty was gotten by chatGPT
+IS empty function was gotten by chatGPT
 

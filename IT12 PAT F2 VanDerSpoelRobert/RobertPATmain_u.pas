@@ -278,6 +278,10 @@ type
     lblSelectCountry: TLabel;
     lblGalleryInfo: TLabel;
     lblConfirmYears: TLabel;
+    tsThemeAdmin: TTabSheet;
+    btnToTheme: TButton;
+    edtSearchForItem: TEdit;
+    chkChangeItemDangerous: TCheckBox;
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnRegisterGOClick(Sender: TObject);
@@ -327,6 +331,8 @@ type
     procedure Button1Click(Sender: TObject);
     procedure btnToEmailsClick(Sender: TObject);
     procedure btnToItemsClick(Sender: TObject);
+    procedure btnToThemeClick(Sender: TObject);
+    procedure edtSearchForItemChange(Sender: TObject);
 
   private
     { Private declarations }
@@ -359,7 +365,9 @@ type
     // For the gallery
    iImageCount : integer;
   arrFileNames : array[1..1000] of string;
- 
+
+  // ItemUpdate ID
+  iItemUpdateID : integer ;
 
   end;
 
@@ -802,7 +810,18 @@ begin
    tblItems['Retired'] := False;
   tblItems.Post ;
 
+  //  Update the list box
+  lstSelectItemManage.Items.Add(sItemname +' -- ' + cmbItemCategoryAdd.Items[cmbItemCategoryAdd.ItemIndex] + ' -- ' +floattostrf(rPrice, ffCurrency, 10,2)) ;
+
+  // Add item to a list box
   ShowMessage('Item successfully added');
+  // Clear the inputs
+  edtItemAddName.Clear ;
+  cmbItemCategoryAdd.ItemIndex := -1;
+  sedAddItemRands.Value := 0 ;
+  sedItemAddCents.Value := 0 ;
+  chkDangerousItemAdd.Checked := False;
+  redAddDescription.Clear ;
 end;
 
 procedure TfrmVolitant_Express.btnBackFromGalleryClick(Sender: TObject);
@@ -947,8 +966,18 @@ end;
 
 procedure TfrmVolitant_Express.btnRetireItemClick(Sender: TObject);
 begin
-// retire an item
+// retire an item or unretire it
 
+      if  btnRetireItem.Caption = 'Retire Item' then
+      begin
+        btnRetireItem.Caption := 'UnRetire Item';
+        ShowMessage('Item Retired; Press Update Item to finalize') ;
+      end
+      else
+     begin
+        btnRetireItem.Caption := 'Retire Item';
+        ShowMessage('Item UnRetired; Press Update Item to finalize');
+     end;
 
 end;
 
@@ -1332,13 +1361,38 @@ begin
  pgcAdmin.ActivePage.TabVisible := False;
  tsItemsAdmin.TabVisible := True;
 
-   if not FileExists('Item_Categories.txt')  then
+   if not FileExists('Item_Categories.txt')  then  // Check that the categories file does exist
   begin
     ShowMessage('Item_Categories.txt not Found. Add categories to resolve this problem');
     Exit;
   end;
-
+  // Load the different categories into the combo box
  cmbItemCategoryAdd.Items.LoadFromFile('Item_Categories.txt') ;
+
+ // Load a list of all the items into the list box to update them
+ lstSelectItemManage.Clear;
+
+ tblItems.First ;
+ while not tblItems.eof do
+ begin
+  //if tblItems['Retired'] = false then
+  begin
+    lstSelectItemManage.Items.Add(tblItems['Item Name'] + ' -- '+ tblItems['Category']+ ' -- '+floattostrf(tblItems['T_Cost/kg'], ffCurrency,10,2));
+  end;
+  tblItems.Next ;
+ end;
+
+ iItemUpdateID := 0 ;
+
+
+   // clear update inputs
+  edtSearchForItem.Clear ;
+  sedUpdateItemRands.Value := 0;
+  sedUpdateItemCents.Value := 0;
+  chkChangeItemDangerous.Checked := False;
+  redUpdateItem.Clear ;
+  lstSelectItemManage.ItemIndex := -1;
+
 end;
 
 procedure TfrmVolitant_Express.btnTOLogClick(Sender: TObject);
@@ -1385,11 +1439,57 @@ begin
   btnReloadSum.Click  ;
 end;
 
+procedure TfrmVolitant_Express.btnToThemeClick(Sender: TObject);
+begin
+// go the the theme change admin page from any other of the admin pages
+end;
+
 procedure TfrmVolitant_Express.btnUpdateItemClick(Sender: TObject);
 begin
 // Update the item
 
 // Validation
+  if sedUpdateItemRands.Value = 0 then // Emsure that item transport price was entered
+  begin
+    ShowMessage('Enter an amount of money for the item') ;
+    exit;
+  end;
+
+  if Length(redUpdateItem.Text) > 120  then
+  begin
+    ShowMessage('Item Note may not be longer than 120 chracters')
+    exit;
+  end;
+
+    // Update the item
+    tblItems.RecNo := iItemUpdateID ;
+    tblItems.Edit ;
+
+    tblItems['T_Cost/kg'] := sedUpdateItemRands.Value + (sedUpdateItemCents.Value / 100);
+    tblItems['Dangerous'] := chkChangeItemDangerous.Checked ;
+    tblItems['Note'] := redUpdateItem.Text ;
+    // Update the retire item part
+    if  btnRetireItem.Caption = 'Retire Item' then
+    begin
+      tblItems['Retired'] := False;
+    end
+    else
+    begin
+       tblItems['Retired'] := True;
+    end;
+
+    tblItems.Post ;
+
+  // clear update inputs
+  edtSearchForItem.Clear ;
+  sedUpdateItemRands.Value := 0;
+  sedUpdateItemCents.Value := 0;
+  chkChangeItemDangerous.Checked := False;
+  redUpdateItem.Clear ;
+  lstSelectItemManage.ItemIndex := -1;
+
+
+  ShowMessage('Item updated successfully') ;
 end;
 
 procedure TfrmVolitant_Express.btnUpdatePlaneClick(Sender: TObject);
@@ -1449,6 +1549,23 @@ end;
 procedure TfrmVolitant_Express.dbgDifferentTablesCellClick(Column: TColumn);
 begin
 // If the active table is tblOrders: when a record is clicked on: Retrieve all the foreign data from the other tables and dispay info about that record in a showmessage
+end;
+
+procedure TfrmVolitant_Express.edtSearchForItemChange(Sender: TObject);
+var
+  I: Integer;
+begin
+// Search and select an item when you search for it
+  for I := 0 to (lstSelectItemManage.Count-1) do
+  begin
+    if Pos(Uppercase(edtSearchForItem.Text), Uppercase(lstSelectItemManage.Items[i])) > 0  then  // Check for an item matching what is entered in the edit
+    begin
+      lstSelectItemManage.ItemIndex := i ;  // Set the index
+       lstSelectItemManageClick(lstSelectItemManage);   // Call the lst box click
+      Break;
+    end;
+  end;
+
 end;
 
 procedure TfrmVolitant_Express.FormActivate(Sender: TObject);
@@ -1721,8 +1838,43 @@ begin
 end;
 
 procedure TfrmVolitant_Express.lstSelectItemManageClick(Sender: TObject);
+var
+  sItemName : string;
+  bFound : boolean;
 begin
 // Update the Update components
+
+  // Item Name extraction
+  sItemName := Copy(lstSelectItemManage.Items[lstSelectItemManage.ItemIndex], 1, POS(' -- ', lstSelectItemManage.Items[lstSelectItemManage.ItemIndex])-1)   ;
+  redUpdateItem.Clear ;
+  // Search the item to update
+  bFound := False;
+  tblItems.First ;
+  while not tblItems.eof and (bFound = False) do
+  begin
+    if sItemName = tblItems['Item Name'] then
+    begin
+      bFound := True;
+      iItemUpdateID :=tblItems.RecNo ; // Get the record of the item selected
+      // Update the components for the update of the ITEM
+
+      redUpdateItem.Lines.Add(tblItems['Note']);
+      // Item retirement
+      if tblItems['Retired'] = True then
+      btnRetireItem.Caption := 'UnRetire Item'
+      else
+       btnRetireItem.Caption := 'Retire Item';
+
+      chkChangeItemDangerous.Checked := tblItems['Dangerous'];    // Set the dangerous component
+
+        // Calculate the cost
+        sedUpdateItemRands.Value := Trunc(tblItems['T_Cost/kg']);
+        sedUpdateItemCents.Value := Round(Frac(tblItems['T_Cost/kg'])*100);
+    end;
+
+    tblItems.Next ;
+  end;
+
 end;
 
 procedure TfrmVolitant_Express.tFlightAnimationTimer(Sender: TObject);
