@@ -1566,8 +1566,8 @@ end;
 procedure TfrmVolitant_Express.btnUpdateWelcomeLabelClick(Sender: TObject);
 begin
 // Update the welcome lable color theme
-
-  lblWelcome.Font.Color := clbWelcomeLabelTheme.Color;
+  lblWelcome.font.Color := clbWelcomeLabelTheme.Selected;
+  WriteToFormTheme('Themes/welcome_label_theme.txt', clbWelcomeLabelTheme.Selected) ;
 end;
 
 procedure TfrmVolitant_Express.Button1Click(Sender: TObject);
@@ -1844,6 +1844,9 @@ sID := '';
 end;
 
 procedure TfrmVolitant_Express.FormCreate(Sender: TObject);
+var
+  tFile : textfile;
+  sColor : string ;
 begin
 // Set up the tab sheets
 {
@@ -1868,10 +1871,36 @@ tsGallery.TabVisible := False;
   // Set sonme starting variablles
   bTimer := False;
   iImageCount := 0;
+
+  // Set the programs color themes
+    // Set the forms color
+    if FileExists('Themes/formtheme.txt')  then  // Only load if the file exists else just leave as normal
+    begin
+      AssignFile(tFile, 'Themes/formtheme.txt');
+      Reset(tFile);
+      Readln(tFile, sColor);    // Read the color code from the txt file
+      frmVolitant_Express.Color := StrToInt(sColor);  // Set the color of the form
+      CloseFile(tFile);    // Close the file
+    end;
+    // Set the color of the welcome label
+    if FileExists('Themes/welcome_label_theme.txt')  then  // Only load if the file exists else just leave as normal
+    begin
+      AssignFile(tFile, 'Themes/welcome_label_theme.txt');
+      Reset(tFile);
+      Readln(tFile, sColor);    // Read the color code from the txt file
+      lblWelcome.font.Color := StrToInt(sColor);  // Set the color of the label
+      CloseFile(tFile);    // Close the file
+    end;
+    // Set the color of the home label
+    if FileExists('Themes/home_label_theme.txt')  then  // Only load if the file exists else just leave as normal
+    begin
+      AssignFile(tFile, 'Themes/home_label_theme.txt');
+      Reset(tFile);
+      Readln(tFile, sColor);    // Read the color code from the txt file
+      lblWelcomeHome.font.Color := StrToInt(sColor);  // Set the color of the label
+      CloseFile(tFile);    // Close the file
+    end;
 end;
-
-
-
 
 procedure TfrmVolitant_Express.imgDynamicOnclick;
 var

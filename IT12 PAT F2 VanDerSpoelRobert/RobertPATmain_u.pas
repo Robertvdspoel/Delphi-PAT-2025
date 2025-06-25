@@ -295,6 +295,7 @@ type
     grbUpdateWelcomeLabel: TGroupBox;
     clbWelcomeLabelTheme: TColorListBox;
     btnUpdateWelcomeLabel: TButton;
+    btnGroupBoxDefaultColor: TButton;
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnRegisterGOClick(Sender: TObject);
@@ -352,7 +353,8 @@ type
     Procedure imgDynamicOnclick(Sender: TObject);
     procedure CGhomeThemeChange(Sender: TObject);
     procedure btnHomeThemeDefaultClick(Sender: TObject);
-    procedure btnUpdateWelcomeLabelClick(Sender: TObject);    // For the dynamic object
+    procedure btnUpdateWelcomeLabelClick(Sender: TObject);
+    procedure btnGroupBoxDefaultColorClick(Sender: TObject);    // For the dynamic object
   private
     { Private declarations }
 
@@ -1126,6 +1128,13 @@ tsGallery.TabVisible := true;
 
 end;
 
+procedure TfrmVolitant_Express.btnGroupBoxDefaultColorClick(Sender: TObject);
+begin
+// Change the color of the group box to its defualt clBtnFace; as there is no clBtnFace in the color grid
+grbHome.Color := clBtnFace;
+  WriteToFormTheme('Themes/home_grb_theme.txt', clBtnFace) ;
+end;
+
 procedure TfrmVolitant_Express.btnHomeThemeDefaultClick(Sender: TObject);
 begin
 // Return the home theme to default
@@ -1844,6 +1853,9 @@ sID := '';
 end;
 
 procedure TfrmVolitant_Express.FormCreate(Sender: TObject);
+var
+  tFile : textfile;
+  sColor : string ;
 begin
 // Set up the tab sheets
 {
@@ -1868,10 +1880,47 @@ tsGallery.TabVisible := False;
   // Set sonme starting variablles
   bTimer := False;
   iImageCount := 0;
+
+  // Set the programs color themes
+    // Set the forms color
+    if FileExists('Themes/formtheme.txt')  then  // Only load if the file exists else just leave as normal
+    begin
+      AssignFile(tFile, 'Themes/formtheme.txt');
+      Reset(tFile);
+      Readln(tFile, sColor);    // Read the color code from the txt file
+      frmVolitant_Express.Color := StrToInt(sColor);  // Set the color of the form
+      CloseFile(tFile);    // Close the file
+    end;
+    // Set the color of the welcome label
+    if FileExists('Themes/welcome_label_theme.txt')  then  // Only load if the file exists else just leave as normal
+    begin
+      AssignFile(tFile, 'Themes/welcome_label_theme.txt');
+      Reset(tFile);
+      Readln(tFile, sColor);    // Read the color code from the txt file
+      lblWelcome.font.Color := StrToInt(sColor);  // Set the color of the label
+      CloseFile(tFile);    // Close the file
+    end;
+    // Set the color of the home label
+    if FileExists('Themes/home_label_theme.txt')  then  // Only load if the file exists else just leave as normal
+    begin
+      AssignFile(tFile, 'Themes/home_label_theme.txt');
+      Reset(tFile);
+      Readln(tFile, sColor);    // Read the color code from the txt file
+      lblWelcomeHome.font.Color := StrToInt(sColor);  // Set the color of the label
+      CloseFile(tFile);    // Close the file
+    end;
+    // Set the color of the home group box
+    if FileExists('Themes/home_grb_theme.txt')  then  // Only load if the file exists else just leave as normal
+    begin
+      AssignFile(tFile, 'Themes/home_grb_theme.txt');
+      Reset(tFile);
+      Readln(tFile, sColor);    // Read the color code from the txt file
+      grbHome.Color := StrToInt(sColor);  // Set the color of the group box
+      CloseFile(tFile);    // Close the file
+    end;
+
+
 end;
-
-
-
 
 procedure TfrmVolitant_Express.imgDynamicOnclick;
 var

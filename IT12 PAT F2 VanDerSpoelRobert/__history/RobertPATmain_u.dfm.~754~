@@ -6429,7 +6429,7 @@ object frmVolitant_Express: TfrmVolitant_Express
     Top = 16
     Width = 1234
     Height = 609
-    ActivePage = tsAdmin
+    ActivePage = tsHome
     TabOrder = 0
     object tsWelcome: TTabSheet
       Caption = 'Welcome'
@@ -26888,7 +26888,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             object CGhomeTheme: TColorGrid
               Left = 16
               Top = 61
-              Width = 376
+              Width = 384
               Height = 184
               ParentShowHint = False
               ShowHint = False
@@ -26903,6 +26903,33 @@ object frmVolitant_Express: TfrmVolitant_Express
               Caption = 'Default'
               TabOrder = 1
               OnClick = btnHomeThemeDefaultClick
+            end
+          end
+          object grbUpdateWelcomeLabel: TGroupBox
+            Left = 640
+            Top = 68
+            Width = 217
+            Height = 181
+            Caption = 'Update Welcome Label'
+            TabOrder = 2
+            object clbWelcomeLabelTheme: TColorListBox
+              Left = 16
+              Top = 24
+              Width = 185
+              Height = 97
+              TabOrder = 0
+            end
+            object btnUpdateWelcomeLabel: TButton
+              Left = 16
+              Top = 136
+              Width = 185
+              Height = 33
+              Hint = 'Defualt is Lime'
+              Caption = 'Update Label Theme'
+              ParentShowHint = False
+              ShowHint = True
+              TabOrder = 1
+              OnClick = btnUpdateWelcomeLabelClick
             end
           end
         end
@@ -27335,11 +27362,11 @@ object frmVolitant_Express: TfrmVolitant_Express
   end
   object tFlightAnimation: TTimer
     OnTimer = tFlightAnimationTimer
-    Left = 368
+    Left = 56
     Top = 632
   end
   object ColorDialogFORM: TColorDialog
-    Left = 432
+    Left = 96
     Top = 632
   end
 end
