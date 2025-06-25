@@ -186,7 +186,7 @@ type
     sedUpdateFuelCents: TSpinEdit;
     lblUpdateFuelRands: TLabel;
     lblUpdateFuelCents: TLabel;
-    ListBox2: TListBox;
+    lstManagePlane: TListBox;
     lblSelectPlaneUpdate: TLabel;
     btnUpdatePlane: TButton;
     cmbSelectTable: TComboBox;
@@ -296,6 +296,8 @@ type
     clbWelcomeLabelTheme: TColorListBox;
     btnUpdateWelcomeLabel: TButton;
     btnGroupBoxDefaultColor: TButton;
+    SpinEdit1: TSpinEdit;
+    Button1: TButton;
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnRegisterGOClick(Sender: TObject);
@@ -354,7 +356,8 @@ type
     procedure CGhomeThemeChange(Sender: TObject);
     procedure btnHomeThemeDefaultClick(Sender: TObject);
     procedure btnUpdateWelcomeLabelClick(Sender: TObject);
-    procedure btnGroupBoxDefaultColorClick(Sender: TObject);    // For the dynamic object
+    procedure btnGroupBoxDefaultColorClick(Sender: TObject);
+    procedure btnSearcCompAgeRangeClick(Sender: TObject);    // For the dynamic object
   private
     { Private declarations }
 
@@ -1003,8 +1006,14 @@ sSQL := edtCustomSQL.Text;
        exit;
   end;
 
-qrySQL.SQL.Text := sSQL ;
-qrySQL.Open ;
+  try   // Try, incase an invalid SQL statemnet is entered
+    qrySQL.SQL.Text := sSQL;
+    qrySQL.Open;
+    except
+    on E: Exception do // Handle the error by recieving the message
+      ShowMessage('SQL/Database error: ' + E.Message);
+  end;
+
 end;
 
 procedure TfrmVolitant_Express.btnFormThemeDefaultClick(Sender: TObject);
@@ -1391,6 +1400,60 @@ begin
 mpIntroVideo.Stop;     // Stop the video
 mpIntroVideo.Position := 0; // Sets the video's time to the begining
 mpIntroVideo.Play;     // Restart the video
+end;
+
+procedure TfrmVolitant_Express.btnSearcCompAgeRangeClick(Sender: TObject);
+var
+  iAge, iCount : integer ;
+  sGovernment : string;
+begin
+// Search for companies in an age range
+  // Validation
+  if sedAgeTopSearch.Value < sedAgeBottomSearch.Value then
+  begin
+    ShowMessage('Upper year may not be lower than lower year');
+    exit;
+  end;
+  iAge := 0;
+
+  redCompanyOut.Clear ;
+     // Set the tabstops
+     redCompanyOut.SelAttributes.Color := clRed;
+     redCompanyOut.Paragraph.TabCount := 5;
+     redCompanyOut.Paragraph.Tab[0] := 75;
+     redCompanyOut.Paragraph.Tab[1] := 225;
+     redCompanyOut.Paragraph.Tab[2] := 375;
+     redCompanyOut.Paragraph.Tab[3] := 445;
+     redCompanyOut.Paragraph.Tab[4] := 560;
+    redCompanyOut.Lines.Add('CompanyID'+ #9+ 'Company Name'+ #9+'LocationBased'+#9+ 'Government'+ #9+'Company Age(Years)'+ #9+ 'Total Orders'+ #13) ;
+  tblCompany.First ;
+  while not tblCompany.eof do
+  begin
+    iAge := YearsBetween(Date, tblCompany['Establishment Date']);
+
+    if (  iAge >= sedAgeBottomSearch.Value) and (  iAge <= sedAgeTopSearch.Value)  then // Companies in the age range
+    begin
+      iCount := 0;
+      tblOrders.First ;
+      while not tblOrders.Eof do    // Count the orders that the company has made
+      begin
+        if tblCompany['CompanyID'] = tblOrders['CompanyID'] then  // Where the company has an order
+        begin
+          Inc(iCount)  ;
+        end;
+
+        tblOrders.Next ;
+      end;
+      // Set the government variable
+      if tblCompany['Goverment Agency'] = true then
+      sGovernment := 'True'
+      else
+      sGovernment := 'False';
+      // Display the company info
+      redCompanyOut.Lines.Add(IntToStr(tblCompany['CompanyID']) + #9 + tblCompany['CompanyName']+ #9+ tblCompany['Location Based']+#9+sGovernment  +#9+ IntToStr(iAge)+#9+IntToStr(iCount)) ;
+    end;
+    tblCompany.Next ;
+  end;
 end;
 
 procedure TfrmVolitant_Express.btnSendNewsletterClick(Sender: TObject);
@@ -1910,14 +1973,16 @@ tsGallery.TabVisible := False;
       CloseFile(tFile);    // Close the file
     end;
     // Set the color of the home group box
-    if FileExists('Themes/home_label_theme.txt')  then  // Only load if the file exists else just leave as normal
+    if FileExists('Themes/home_grb_theme.txt')  then  // Only load if the file exists else just leave as normal
     begin
-      AssignFile(tFile, 'Themes/home_label_theme.txt');
+      AssignFile(tFile, 'Themes/home_grb_theme.txt');
       Reset(tFile);
       Readln(tFile, sColor);    // Read the color code from the txt file
-      lblWelcomeHome.font.Color := StrToInt(sColor);  // Set the color of the label
+      grbHome.Color := StrToInt(sColor);  // Set the color of the group box
       CloseFile(tFile);    // Close the file
     end;
+
+
 end;
 
 procedure TfrmVolitant_Express.imgDynamicOnclick;

@@ -26866,7 +26866,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             Left = 213
             Top = 68
             Width = 406
-            Height = 261
+            Height = 293
             Caption = 'Change Home Theme'
             ParentShowHint = False
             ShowHint = False
@@ -26904,20 +26904,41 @@ object frmVolitant_Express: TfrmVolitant_Express
               TabOrder = 1
               OnClick = btnHomeThemeDefaultClick
             end
+            object btnGroupBoxDefaultColor: TButton
+              Left = 16
+              Top = 251
+              Width = 387
+              Height = 39
+              Caption = 'Change Group Box color to default (clBtnFace)'
+              TabOrder = 2
+              OnClick = btnGroupBoxDefaultColorClick
+            end
           end
           object grbUpdateWelcomeLabel: TGroupBox
             Left = 640
             Top = 68
-            Width = 233
+            Width = 217
             Height = 181
             Caption = 'Update Welcome Label'
             TabOrder = 2
-            object clbWelcomeLabel: TColorListBox
+            object clbWelcomeLabelTheme: TColorListBox
               Left = 16
               Top = 24
               Width = 185
               Height = 97
               TabOrder = 0
+            end
+            object btnUpdateWelcomeLabel: TButton
+              Left = 16
+              Top = 136
+              Width = 185
+              Height = 33
+              Hint = 'Defualt is Lime'
+              Caption = 'Update Label Theme'
+              ParentShowHint = False
+              ShowHint = True
+              TabOrder = 1
+              OnClick = btnUpdateWelcomeLabelClick
             end
           end
         end

@@ -10,3 +10,4 @@ https://www.youtube.com/watch?v=XwOdBaExs1E
 
 IS empty function was gotten by chatGPT
 
+ColorDialogForm.Execute was figured out by chatgpt

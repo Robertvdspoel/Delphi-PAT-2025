@@ -25432,7 +25432,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 56
         Width = 905
         Height = 481
-        ActivePage = tsThemeAdmin
+        ActivePage = tsCompaniesAdmin
         TabOrder = 0
         object tsItemsAdmin: TTabSheet
           Caption = 'Items'
@@ -26331,11 +26331,11 @@ object frmVolitant_Express: TfrmVolitant_Express
             ParentFont = False
           end
           object lblSearchForComanyAge: TLabel
-            Left = 680
-            Top = 14
-            Width = 142
+            Left = 656
+            Top = 12
+            Width = 183
             Height = 15
-            Caption = 'Enter Age Range to Search:'
+            Caption = 'Enter Age Range to Search (Years) :'
           end
           object lblAgeBottom: TLabel
             Left = 640
@@ -26411,6 +26411,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             Font.Style = [fsBold]
             ParentFont = False
             TabOrder = 3
+            OnClick = btnSearcCompAgeRangeClick
           end
           object edtEnterSearchCompanyt: TEdit
             Left = 335
@@ -26866,7 +26867,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             Left = 213
             Top = 68
             Width = 406
-            Height = 261
+            Height = 293
             Caption = 'Change Home Theme'
             ParentShowHint = False
             ShowHint = False
@@ -26886,7 +26887,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Caption = 'Foreground= Main Label ; Background= Group Box'
             end
             object CGhomeTheme: TColorGrid
-              Left = 16
+              Left = 19
               Top = 61
               Width = 384
               Height = 184
@@ -26903,6 +26904,15 @@ object frmVolitant_Express: TfrmVolitant_Express
               Caption = 'Default'
               TabOrder = 1
               OnClick = btnHomeThemeDefaultClick
+            end
+            object btnGroupBoxDefaultColor: TButton
+              Left = 16
+              Top = 251
+              Width = 387
+              Height = 39
+              Caption = 'Change Group Box color to default (clBtnFace)'
+              TabOrder = 2
+              OnClick = btnGroupBoxDefaultColorClick
             end
           end
           object grbUpdateWelcomeLabel: TGroupBox
@@ -26924,7 +26934,10 @@ object frmVolitant_Express: TfrmVolitant_Express
               Top = 136
               Width = 185
               Height = 33
+              Hint = 'Defualt is Lime'
               Caption = 'Update Label Theme'
+              ParentShowHint = False
+              ShowHint = True
               TabOrder = 1
               OnClick = btnUpdateWelcomeLabelClick
             end

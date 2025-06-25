@@ -235,9 +235,6 @@ Coordinates=1031,212,91,58
 [lblUpdateItemInfo]
 Coordinates=1189,620,116,58
 
-[ListBox2]
-Coordinates=409,10,101,124
-
 [lblTopPickupC]
 Coordinates=1231,348,98,58
 
@@ -830,4 +827,7 @@ Coordinates=1978,848,144,58
 [clbWelcomeLabelTheme]
 Coordinates=2043,232,116,58
 Visible=True
+
+[lstManagePlane]
+Coordinates=409,10,101,124
 

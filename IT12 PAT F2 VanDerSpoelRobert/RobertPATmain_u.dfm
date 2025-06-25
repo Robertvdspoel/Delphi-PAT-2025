@@ -25432,7 +25432,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 56
         Width = 905
         Height = 481
-        ActivePage = tsThemeAdmin
+        ActivePage = tsOrdersAdmin
         TabOrder = 0
         object tsItemsAdmin: TTabSheet
           Caption = 'Items'
@@ -26032,7 +26032,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               TabOrder = 2
               Value = 0
             end
-            object ListBox2: TListBox
+            object lstManagePlane: TListBox
               Left = 3
               Top = 50
               Width = 350
@@ -26084,7 +26084,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             Top = 62
             Width = 849
             Height = 371
-            ActivePage = tsOrderOutput
+            ActivePage = tsOrderUpdate
             TabOrder = 0
             object tsOrderUpdate: TTabSheet
               Caption = 'Update an Order'
@@ -26103,7 +26103,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                   Caption = 'Enter a company name to search (Optional)'
                 end
                 object lblSelectOrderStatus: TLabel
-                  Left = 240
+                  Left = 232
                   Top = 81
                   Width = 119
                   Height = 15
@@ -26188,6 +26188,18 @@ object frmVolitant_Express: TfrmVolitant_Express
                   Font.Style = [fsBold]
                   ParentFont = False
                   TabOrder = 5
+                end
+                object SplitView1: TSplitView
+                  Left = 2
+                  Top = 17
+                  Width = 200
+                  Height = 287
+                  OpenedWidth = 200
+                  Placement = svpLeft
+                  TabOrder = 6
+                  ExplicitLeft = 512
+                  ExplicitTop = 24
+                  ExplicitHeight = 41
                 end
               end
               object btnToOrdersOutput: TButton
@@ -26331,11 +26343,11 @@ object frmVolitant_Express: TfrmVolitant_Express
             ParentFont = False
           end
           object lblSearchForComanyAge: TLabel
-            Left = 680
-            Top = 14
-            Width = 142
+            Left = 656
+            Top = 12
+            Width = 183
             Height = 15
-            Caption = 'Enter Age Range to Search:'
+            Caption = 'Enter Age Range to Search (Years) :'
           end
           object lblAgeBottom: TLabel
             Left = 640
@@ -26411,6 +26423,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             Font.Style = [fsBold]
             ParentFont = False
             TabOrder = 3
+            OnClick = btnSearcCompAgeRangeClick
           end
           object edtEnterSearchCompanyt: TEdit
             Left = 335
@@ -26439,6 +26452,24 @@ object frmVolitant_Express: TfrmVolitant_Express
             MinValue = 0
             TabOrder = 6
             Value = 0
+          end
+          object SpinEdit1: TSpinEdit
+            Left = 16
+            Top = 398
+            Width = 73
+            Height = 49
+            MaxValue = 0
+            MinValue = 0
+            TabOrder = 7
+            Value = 0
+          end
+          object Button1: TButton
+            Left = 95
+            Top = 398
+            Width = 90
+            Height = 50
+            Caption = 'Button1'
+            TabOrder = 8
           end
         end
         object tsEmailsAdmin: TTabSheet
@@ -26886,7 +26917,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Caption = 'Foreground= Main Label ; Background= Group Box'
             end
             object CGhomeTheme: TColorGrid
-              Left = 16
+              Left = 19
               Top = 61
               Width = 384
               Height = 184
