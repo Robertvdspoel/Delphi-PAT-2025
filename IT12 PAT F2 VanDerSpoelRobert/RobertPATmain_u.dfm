@@ -14484,7 +14484,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 96
         Width = 1017
         Height = 473
-        ActivePage = tsDetails
+        ActivePage = tsRegConfirm
         TabOrder = 0
         object tsDetails: TTabSheet
           Caption = 'Company Details'
@@ -25432,8 +25432,9 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 56
         Width = 905
         Height = 481
-        ActivePage = tsOrdersAdmin
+        ActivePage = tsCompaniesAdmin
         TabOrder = 0
+        OnChange = pgcAdminChange
         object tsItemsAdmin: TTabSheet
           Caption = 'Items'
           object lblItemsAdmin: TLabel
@@ -26148,8 +26149,8 @@ object frmVolitant_Express: TfrmVolitant_Express
                   TabOrder = 2
                 end
                 object BitBtnClearOrderSearch: TBitBtn
-                  Left = 304
-                  Top = 41
+                  Left = 438
+                  Top = 38
                   Width = 75
                   Height = 25
                   Caption = 'Clear'
@@ -26189,24 +26190,22 @@ object frmVolitant_Express: TfrmVolitant_Express
                   ParentFont = False
                   TabOrder = 5
                 end
-                object SplitView1: TSplitView
-                  Left = 2
-                  Top = 17
-                  Width = 200
-                  Height = 287
-                  OpenedWidth = 200
-                  Placement = svpLeft
+                object SpinEdit2: TSpinEdit
+                  Left = 311
+                  Top = 39
+                  Width = 121
+                  Height = 24
+                  MaxValue = 0
+                  MinValue = 0
                   TabOrder = 6
-                  ExplicitLeft = 512
-                  ExplicitTop = 24
-                  ExplicitHeight = 41
+                  Value = 0
                 end
               end
               object btnToOrdersOutput: TButton
                 Left = 632
-                Top = 315
+                Top = 312
                 Width = 155
-                Height = 25
+                Height = 28
                 Caption = 'Go to Orders Output Page'
                 Font.Charset = DEFAULT_CHARSET
                 Font.Color = clWindowText
@@ -26310,9 +26309,9 @@ object frmVolitant_Express: TfrmVolitant_Express
               end
               object btnTOorderUpdate: TButton
                 Left = 656
-                Top = 313
+                Top = 311
                 Width = 155
-                Height = 25
+                Height = 27
                 Caption = 'To Update Order Page'
                 Font.Charset = DEFAULT_CHARSET
                 Font.Color = clWindowText
@@ -26363,6 +26362,13 @@ object frmVolitant_Express: TfrmVolitant_Express
             Height = 15
             Caption = 'Top Range:'
           end
+          object lblEnterCompanyID: TLabel
+            Left = 32
+            Top = 392
+            Width = 41
+            Height = 15
+            Caption = 'Enter ID'
+          end
           object redCompanyOut: TRichEdit
             Left = 16
             Top = 133
@@ -26409,6 +26415,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             Font.Style = [fsBold]
             ParentFont = False
             TabOrder = 2
+            OnClick = btnSeatchForCompanyClick
           end
           object btnSearcCompAgeRange: TButton
             Left = 640
@@ -26425,7 +26432,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             TabOrder = 3
             OnClick = btnSearcCompAgeRangeClick
           end
-          object edtEnterSearchCompanyt: TEdit
+          object edtEnterSearchCompany: TEdit
             Left = 335
             Top = 49
             Width = 241
@@ -26453,23 +26460,87 @@ object frmVolitant_Express: TfrmVolitant_Express
             TabOrder = 6
             Value = 0
           end
-          object SpinEdit1: TSpinEdit
+          object sedEnterCompanyID: TSpinEdit
             Left = 16
-            Top = 398
-            Width = 73
-            Height = 49
-            MaxValue = 0
+            Top = 413
+            Width = 81
+            Height = 35
+            Hint = 'Press the Load the Company button'
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -19
+            Font.Name = 'Segoe UI Semibold'
+            Font.Style = [fsBold]
+            MaxValue = 100000000
             MinValue = 0
+            ParentFont = False
+            ParentShowHint = False
+            ShowHint = True
             TabOrder = 7
             Value = 0
+            OnChange = sedEnterCompanyIDChange
           end
-          object Button1: TButton
-            Left = 95
+          object btnLoadCompany: TButton
+            Left = 103
             Top = 398
-            Width = 90
+            Width = 154
             Height = 50
-            Caption = 'Button1'
+            Caption = 'Load Company'
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -16
+            Font.Name = 'Segoe UI Semibold'
+            Font.Style = [fsBold]
+            ParentFont = False
             TabOrder = 8
+            OnClick = btnLoadCompanyClick
+          end
+          object btnDeleteCompanyAdmin: TButton
+            Left = 727
+            Top = 398
+            Width = 154
+            Height = 49
+            Caption = 'Delete Company'
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -16
+            Font.Name = 'Segoe UI'
+            Font.Style = [fsBold]
+            ParentFont = False
+            TabOrder = 9
+            OnClick = btnDeleteCompanyAdminClick
+          end
+          object chkSuspendAccount: TCheckBox
+            Left = 263
+            Top = 408
+            Width = 210
+            Height = 25
+            Hint = 'Press update button to the right to take effect'
+            Caption = 'Suspend Account'
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -24
+            Font.Name = 'Segoe UI Semibold'
+            Font.Style = [fsBold]
+            ParentFont = False
+            ParentShowHint = False
+            ShowHint = True
+            TabOrder = 10
+          end
+          object btnUpdateSuspension: TButton
+            Left = 479
+            Top = 398
+            Width = 233
+            Height = 50
+            Caption = 'Update Suspension'
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clGreen
+            Font.Height = -21
+            Font.Name = 'Segoe UI'
+            Font.Style = [fsBold]
+            ParentFont = False
+            TabOrder = 11
+            OnClick = btnUpdateSuspensionClick
           end
         end
         object tsEmailsAdmin: TTabSheet
@@ -26497,9 +26568,9 @@ object frmVolitant_Express: TfrmVolitant_Express
             TabOrder = 0
             object memNewsLetterMessage: TMemo
               Left = 32
-              Top = 40
+              Top = 32
               Width = 745
-              Height = 177
+              Height = 185
               Font.Charset = ANSI_CHARSET
               Font.Color = clWindowText
               Font.Height = -19
@@ -27191,7 +27262,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Left = 48
         Top = 112
         Width = 1081
-        Height = 177
+        Height = 209
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
         Font.Height = -19
@@ -27207,9 +27278,9 @@ object frmVolitant_Express: TfrmVolitant_Express
       end
       object BitBtnPay: TBitBtn
         Left = 48
-        Top = 312
+        Top = 336
         Width = 1081
-        Height = 65
+        Height = 58
         Caption = 'Pay Selected Order'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -27262,14 +27333,15 @@ object frmVolitant_Express: TfrmVolitant_Express
         TabOrder = 4
       end
       object BitBtnretryPaySelect: TBitBtn
-        Left = 1136
-        Top = 264
+        Left = 1135
+        Top = 296
         Width = 87
         Height = 25
         Caption = 'Unselect'
         Kind = bkRetry
         NumGlyphs = 2
         TabOrder = 5
+        OnClick = BitBtnretryPaySelectClick
       end
     end
     object tsPOrder: TTabSheet
@@ -27298,8 +27370,8 @@ object frmVolitant_Express: TfrmVolitant_Express
         object tsPlaceOrder: TTabSheet
           Caption = 'Place  Oder'
           object ListBox1: TListBox
-            Left = 288
-            Top = 104
+            Left = 424
+            Top = 120
             Width = 121
             Height = 97
             ItemHeight = 15

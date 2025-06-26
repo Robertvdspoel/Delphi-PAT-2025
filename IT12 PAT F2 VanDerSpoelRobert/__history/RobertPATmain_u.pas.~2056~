@@ -15,7 +15,7 @@ uses
   Vcl.DBCtrls, Vcl.CheckLst, Soap.InvokeRegistry, Soap.WSDLIntf,
   Soap.SOAPPasInv, Soap.SOAPHTTPPasInv, VclTee.TeeGDIPlus, VCLTee.TeEngine,
   VCLTee.Series, VCLTee.TeeProcs, VCLTee.Chart, DateUtils, math, clsDistance_u, clsUsername_u,
-  Vcl.FileCtrl;
+  Vcl.FileCtrl, Xml.xmldom, Xml.XmlTransform;
 
 type
   TfrmVolitant_Express = class(TForm)
@@ -186,7 +186,7 @@ type
     sedUpdateFuelCents: TSpinEdit;
     lblUpdateFuelRands: TLabel;
     lblUpdateFuelCents: TLabel;
-    ListBox2: TListBox;
+    lstManagePlane: TListBox;
     lblSelectPlaneUpdate: TLabel;
     btnUpdatePlane: TButton;
     cmbSelectTable: TComboBox;
@@ -243,7 +243,7 @@ type
     btnCompanyOrderOut: TButton;
     btnSeatchForCompany: TButton;
     btnSearcCompAgeRange: TButton;
-    edtEnterSearchCompanyt: TEdit;
+    edtEnterSearchCompany: TEdit;
     sedAgeBottomSearch: TSpinEdit;
     sedAgeTopSearch: TSpinEdit;
     lblSearchForComanyAge: TLabel;
@@ -296,6 +296,13 @@ type
     clbWelcomeLabelTheme: TColorListBox;
     btnUpdateWelcomeLabel: TButton;
     btnGroupBoxDefaultColor: TButton;
+    sedEnterCompanyID: TSpinEdit;
+    btnLoadCompany: TButton;
+    SpinEdit2: TSpinEdit;
+    lblEnterCompanyID: TLabel;
+    btnDeleteCompanyAdmin: TButton;
+    chkSuspendAccount: TCheckBox;
+    btnUpdateSuspension: TButton;
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnRegisterGOClick(Sender: TObject);
@@ -342,7 +349,6 @@ type
     procedure btnLastInfoBackClick(Sender: TObject);
     procedure tFlightAnimationTimer(Sender: TObject);
     procedure btnToSummaryClick(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
     procedure btnToEmailsClick(Sender: TObject);
     procedure btnToItemsClick(Sender: TObject);
     procedure btnToThemeClick(Sender: TObject);
@@ -355,7 +361,14 @@ type
     procedure btnHomeThemeDefaultClick(Sender: TObject);
     procedure btnUpdateWelcomeLabelClick(Sender: TObject);
     procedure btnGroupBoxDefaultColorClick(Sender: TObject);
-    procedure btnSearcCompAgeRangeClick(Sender: TObject);    // For the dynamic object
+    procedure btnSearcCompAgeRangeClick(Sender: TObject);
+    procedure btnSeatchForCompanyClick(Sender: TObject);
+    procedure btnLoadCompanyClick(Sender: TObject);
+    procedure BitBtnretryPaySelectClick(Sender: TObject);
+    procedure sedEnterCompanyIDChange(Sender: TObject);
+    procedure pgcAdminChange(Sender: TObject);
+    procedure btnDeleteCompanyAdminClick(Sender: TObject);
+    procedure btnUpdateSuspensionClick(Sender: TObject);    // For the dynamic object
   private
     { Private declarations }
 
@@ -364,7 +377,7 @@ type
     objUsername : TUsername ;
 
     Function ValidateEmail(pEmail: string): Boolean;
-
+    Function DeleteAccount(pID : integer): boolean;
 
 
     Procedure WriteToFormTheme(pFileName : string; pColorValue : integer); // For writing to the files for system themes
@@ -568,6 +581,12 @@ begin
   tblCompany.Post ;
 
 // Go to the Home page
+end;
+
+procedure TfrmVolitant_Express.BitBtnretryPaySelectClick(Sender: TObject);
+begin
+// Reset the pay order list box
+lstPayment.ItemIndex := -1;
 end;
 
 procedure TfrmVolitant_Express.BitBtnTOcInfoClick(Sender: TObject);
@@ -1014,6 +1033,13 @@ sSQL := edtCustomSQL.Text;
 
 end;
 
+procedure TfrmVolitant_Express.btnDeleteCompanyAdminClick(Sender: TObject);
+begin
+// Delete the account of the company
+  // Ask for confirmation
+
+end;
+
 procedure TfrmVolitant_Express.btnFormThemeDefaultClick(Sender: TObject);
 begin
 // Set the form theme back to the default color
@@ -1038,7 +1064,7 @@ begin
 
 end;
 
-procedure TfrmVolitant_Express.btnGalleryClick(Sender: TObject);   // Dynamic Component
+procedure TfrmVolitant_Express.btnGalleryClick(Sender:  TObject);   // Dynamic Component
 const imgWidth = 480;
 const imgHeight = 250;
 var
@@ -1175,6 +1201,80 @@ begin
 // Go back to the contact info reg page from the last info page
 tsLastInfo.TabVisible := False;
 tsContact.TabVisible := True;
+end;
+
+procedure TfrmVolitant_Express.btnLoadCompanyClick(Sender: TObject);
+var
+  bFound : boolean;
+  sGovernment, sNewsletter, sSuspended : string ;
+begin
+// Load every detail of the company that was entered in the spinedit
+
+  // Validate that a company was entered
+  if sedEnterCompanyID.Value = 0 then
+  begin
+    ShowMessage('Enter CompanyID to find') ;
+    exit;
+  end;
+  redCompanyOut.Clear ;
+  bFound := False;
+  tblCompany.First ;
+  while not tblCompany.eof and (bFound = False) do   // Find the company
+  begin
+    if tblCompany['CompanyID'] = sedEnterCompanyID.Value then // If a matching company is found
+    begin
+      bFound := True;
+        // Set government agency string
+        if tblCompany['Goverment Agency'] =True then
+        sGovernment := 'Yes'
+        else
+        sGovernment := 'No';
+        // Set newsletter string
+        if tblCompany['Newsletter'] then
+        sNewsletter := 'Yes'
+        else
+        sNewsletter := 'No' ;
+        // Set the suspended string
+        if tblCompany['Suspended'] then
+        begin     // If the account is suspended
+          sSuspended := 'Yes';
+          chkSuspendAccount.Checked := True;  // Update the check box for suspension
+        end
+        else
+         begin
+            sSuspended := 'No';
+            chkSuspendAccount.Checked := False;
+         end;
+      // Display the company info
+      redCompanyOut.SelStart := 0 ;
+      redCompanyOut.SelLength := 10;
+      redCompanyOut.SelAttributes.Size := 14;
+      redCompanyOut.lines.Add('Company Name: '+tblCompany['CompanyName']) ; // company name
+      redCompanyOut.lines.Add('Username: '+tblCompany['Username']) ; // Username
+      redCompanyOut.lines.Add('Password: '+tblCompany['Password']) ; // Password
+      redCompanyOut.Lines.Add('Email: '+tblCompany['Email']) ;       // Email
+      redCompanyOut.lines.Add('Location Based: '+tblCompany['Location Based']) ; // Location Based
+      redCompanyOut.lines.Add('Government: ' + sGovernment) ; // Government agency
+      redCompanyOut.lines.Add('Newsletter: '+ sNewsletter) ; // Newsletter
+      redCompanyOut.lines.Add('Registration Date: ' + DateToStr(tblCompany['Regdate']) ) ;  // Reg date
+      redCompanyOut.lines.Add('Company Age: ' + IntToStr(YearsBetween(Date, tblCompany['Establishment Date']) ) ) ;// date of establishment
+      redCompanyOut.lines.Add('Default Hours: ' + IntToStr(tblCompany['Defualt Hours']) ) ;  // The companies defualt hours
+      redCompanyOut.Lines.Add('Suspended: '+ sSuspended ) ; // suspended
+
+    end;
+  tblCompany.Next ;
+  end;
+    // If no company was found
+  if bFound = False then
+  begin
+     redCompanyOut.Lines.Add('No Matching Company Found') ;
+     exit;
+  end;
+
+  // enable the company controll buttons if a comany is found
+   btnDeleteCompanyAdmin.Enabled := true;
+  chkSuspendAccount.Enabled := true;
+  btnUpdateSuspension.Enabled := True;
 end;
 
 procedure TfrmVolitant_Express.btnLoginBackClick(Sender: TObject);
@@ -1417,12 +1517,12 @@ begin
   redCompanyOut.Clear ;
      // Set the tabstops
      redCompanyOut.SelAttributes.Color := clRed;
-     redCompanyOut.Paragraph.TabCount := 4;
+     redCompanyOut.Paragraph.TabCount := 5;
      redCompanyOut.Paragraph.Tab[0] := 75;
      redCompanyOut.Paragraph.Tab[1] := 225;
      redCompanyOut.Paragraph.Tab[2] := 375;
      redCompanyOut.Paragraph.Tab[3] := 445;
-     redCompanyOut.Paragraph.Tab[4] := 500;
+     redCompanyOut.Paragraph.Tab[4] := 560;
     redCompanyOut.Lines.Add('CompanyID'+ #9+ 'Company Name'+ #9+'LocationBased'+#9+ 'Government'+ #9+'Company Age(Years)'+ #9+ 'Total Orders'+ #13) ;
   tblCompany.First ;
   while not tblCompany.eof do
@@ -1433,7 +1533,7 @@ begin
     begin
       iCount := 0;
       tblOrders.First ;
-      while not tblOrders.Eof do
+      while not tblOrders.Eof do    // Count the orders that the company has made
       begin
         if tblCompany['CompanyID'] = tblOrders['CompanyID'] then  // Where the company has an order
         begin
@@ -1442,10 +1542,63 @@ begin
 
         tblOrders.Next ;
       end;
-      redCompanyOut.Lines.Add(IntToStr(tblCompany['CompanyID']) + #9 + tblCompany['CompanyName']+ #9+ tblCompany['Location Based']+#9+BoolToStr(tblCompany['Goverment Agency']) +#9+ IntToStr(iAge)+#9+IntToStr(iCount)   )  ;
+      // Set the government variable
+      if tblCompany['Goverment Agency'] = true then
+      sGovernment := 'Yes'
+      else
+      sGovernment := 'No';
+      // Display the company info
+      redCompanyOut.Lines.Add(IntToStr(tblCompany['CompanyID']) + #9 + tblCompany['CompanyName']+ #9+ tblCompany['Location Based']+#9+sGovernment  +#9+ IntToStr(iAge)+#9+IntToStr(iCount)) ;
     end;
     tblCompany.Next ;
   end;
+end;
+
+procedure TfrmVolitant_Express.btnSeatchForCompanyClick(Sender: TObject);
+var
+  iOrderCount : integer;
+  sGovernment : string ;
+begin
+// Search for a company based on the company name
+  // Set the tab stops
+    redCompanyOut.Clear ;
+     redCompanyOut.SelAttributes.Color := clRed;
+     redCompanyOut.Paragraph.TabCount := 4;
+     redCompanyOut.Paragraph.Tab[0] := 75;
+     redCompanyOut.Paragraph.Tab[1] := 225;
+     redCompanyOut.Paragraph.Tab[2] := 375;
+     redCompanyOut.Paragraph.Tab[3] := 445;
+     redCompanyOut.Lines.Add('CompanyID'+ #9+ 'Company Name'+ #9+'LocationBased'+#9+ 'Government'+ #9+ 'Total Orders'+ #13) ;
+
+     redCompanyOut.SelAttributes.Color := clBlack ;
+  tblCompany.First ;
+  while not tblCompany.eof do
+  begin
+     if Pos(UpperCase(edtEnterSearchCompany.Text), UpperCase(tblCompany['CompanyName'])  )> 0  then   // Find names that matches what was entered in the edit
+     begin
+        iOrderCount := 0 ;
+        // Count orders that the company has placed
+        tblOrders.First ;
+        while not tblOrders.eof do
+        begin
+            // Finder orders under the company
+            if tblCompany['CompanyID'] = tblOrders['CompanyID'] then
+            Inc(iOrderCount);
+
+          tblOrders.Next ;
+        end;
+           // Get government agency string
+        if tblCompany['Goverment Agency'] =True then
+        sGovernment := 'Yes'
+        else
+        sGovernment := 'No';
+
+        redCompanyOut.Lines.Add(IntToStr(tblCompany['CompanyID']) +#9+ tblCompany['CompanyName']+#9+ tblCompany['Location Based']+#9+sGovernment+#9+IntToStr(iOrderCount) ) ;
+     end;
+
+    tblCompany.Next ;
+  end;
+
 end;
 
 procedure TfrmVolitant_Express.btnSendNewsletterClick(Sender: TObject);
@@ -1518,6 +1671,10 @@ begin
   chkChangeItemDangerous.Checked := False;
   redUpdateItem.Clear ;
   lstSelectItemManage.ItemIndex := -1;
+
+  // Disable the company management buttons
+  btnDeleteCompanyAdmin.Enabled := False;
+  chkSuspendAccount.Enabled := False;
 
 end;
 
@@ -1624,7 +1781,24 @@ begin
 
 // Validation
 
-// if the retire plane button was selected, display a confirmation dialogue to confirm that they want to retire the plane
+end;
+
+procedure TfrmVolitant_Express.btnUpdateSuspensionClick(Sender: TObject);
+var
+  bSuspended : boolean;
+begin
+// Read the suspension update to the database
+  // Set boolean var for db updation
+  if chkSuspendAccount.Checked then
+  bSuspended := True
+  else
+  bSuspended := False;
+
+  // Update the suspension
+  qrySQL.SQL.Text := 'Update tblCompany Set Suspended = ' + booltostr(bSuspended) + ' where CompanyID = ' + IntToStr(sedEnterCompanyID.Value)   ;
+  qrySQL.ExecSQL ;
+
+  ShowMessage('Updated suspension successfully');
 end;
 
 procedure TfrmVolitant_Express.btnUpdateWelcomeLabelClick(Sender: TObject);
@@ -1632,19 +1806,6 @@ begin
 // Update the welcome lable color theme
   lblWelcome.font.Color := clbWelcomeLabelTheme.Selected;
   WriteToFormTheme('Themes/welcome_label_theme.txt', clbWelcomeLabelTheme.Selected) ;
-end;
-
-procedure TfrmVolitant_Express.Button1Click(Sender: TObject);
-var
-  tFlightHours : integer;
-  rHours : real;
-begin
- tFlightHours := HoursBetween(tblOrders['Pickup Date'], tblOrders['E/D Date']) ;
-              //rRevenue := rRevenue + tblPlanes['FuelCost']  * tFlightHours ; // times by the hours of the flight
-      // rHours := (tblOrders['E/D Date'] - tblOrders['Pickup Date']) * 24;  // TDateTime difference * 24
-          rHours  := HoursBetween(tblOrders['Pickup Date'], tblOrders['E/D Date']) ;
-    ShowMessage(FloatToStr(rHours) ) ;
- ShowMessage(intToStr(tFlightHours) ) ;
 end;
 
 procedure TfrmVolitant_Express.cmbCountryBasedChange(Sender: TObject);
@@ -1725,7 +1886,10 @@ begin
 // Form Acticvate
 iCountryCount := 0 ;
 sID := '';
-
+// Set the admin company controll buttons
+btnDeleteCompanyAdmin.Enabled := False;
+chkSuspendAccount.Enabled := False;
+ btnUpdateSuspension.Enabled := False;
 
 // array population
 
@@ -2060,6 +2224,21 @@ begin
     tblItems.Next ;
   end;
 
+end;
+
+procedure TfrmVolitant_Express.pgcAdminChange(Sender: TObject);
+begin
+// Change things on the tabpages when a change is made
+redCompanyOut.Clear ;
+end;
+
+procedure TfrmVolitant_Express.sedEnterCompanyIDChange(Sender: TObject);
+begin
+// Set things right when a change is made ragarding the companies management
+  btnDeleteCompanyAdmin.Enabled := False;
+  chkSuspendAccount.Enabled := False;
+  btnUpdateSuspension.Enabled := False;
+  btnLoadCompany.Enabled := True;
 end;
 
 procedure TfrmVolitant_Express.tFlightAnimationTimer(Sender: TObject);

@@ -668,9 +668,6 @@ Visible=True
 [lblAgeBottom]
 Coordinates=436,144,91,58
 
-[edtEnterSearchCompanyt]
-Coordinates=120,144,162,58
-
 []
 Coordinates=1749,570,91,36
 
@@ -830,4 +827,7 @@ Visible=True
 
 [lstManagePlane]
 Coordinates=409,10,101,124
+
+[edtEnterSearchCompany]
+Coordinates=120,144,162,58
 
