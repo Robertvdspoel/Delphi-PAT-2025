@@ -25432,7 +25432,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 56
         Width = 905
         Height = 481
-        ActivePage = tsCompaniesAdmin
+        ActivePage = tsOrdersAdmin
         TabOrder = 0
         OnChange = pgcAdminChange
         object tsItemsAdmin: TTabSheet
@@ -26160,9 +26160,9 @@ object frmVolitant_Express: TfrmVolitant_Express
                 end
                 object rgpOrderStatus: TRadioGroup
                   Left = 551
-                  Top = 96
+                  Top = 24
                   Width = 217
-                  Height = 161
+                  Height = 233
                   Caption = 'Select Order status'
                   Font.Charset = DEFAULT_CHARSET
                   Font.Color = clWindowText
@@ -26172,7 +26172,9 @@ object frmVolitant_Express: TfrmVolitant_Express
                   Items.Strings = (
                     'Waiting for delivery'
                     'In Transit'
-                    'Delivered')
+                    'Delivered'
+                    'Delayed'
+                    'Canceled')
                   ParentFont = False
                   TabOrder = 4
                 end
@@ -26190,10 +26192,10 @@ object frmVolitant_Express: TfrmVolitant_Express
                   ParentFont = False
                   TabOrder = 5
                 end
-                object SpinEdit2: TSpinEdit
-                  Left = 311
-                  Top = 39
-                  Width = 121
+                object sedEnterCNameSearchOrderUpdate: TSpinEdit
+                  Left = 320
+                  Top = 43
+                  Width = 89
                   Height = 24
                   MaxValue = 0
                   MinValue = 0

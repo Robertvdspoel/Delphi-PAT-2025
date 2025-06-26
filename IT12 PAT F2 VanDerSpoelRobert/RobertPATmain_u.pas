@@ -298,7 +298,7 @@ type
     btnGroupBoxDefaultColor: TButton;
     sedEnterCompanyID: TSpinEdit;
     btnLoadCompany: TButton;
-    SpinEdit2: TSpinEdit;
+    sedEnterCNameSearchOrderUpdate: TSpinEdit;
     lblEnterCompanyID: TLabel;
     btnDeleteCompanyAdmin: TButton;
     chkSuspendAccount: TCheckBox;
@@ -1034,10 +1034,24 @@ sSQL := edtCustomSQL.Text;
 end;
 
 procedure TfrmVolitant_Express.btnDeleteCompanyAdminClick(Sender: TObject);
+var
+  iRandom : integer ;
 begin
 // Delete the account of the company
   // Ask for confirmation
-
+  iRandom := RandomRange(100, 1000);
+  if Inputbox('Enter code to confirm deletion', 'Code: '+ IntToStr(iRandom), '' ) = IntToStr(iRandom)  then // Confirm that you want to delete the account by typing over the given code
+  begin
+    if DeleteAccount(sedEnterCompanyID.Value) then  // If the Deletion was a success
+    begin
+      // Clear the components
+      redCompanyOut.Clear ;
+      sedEnterCompanyID.Value := 0;
+       ShowMessage('Account of Company deleted successfully') ;
+    end;
+  end
+  else
+  ShowMessage('Deletion of account was cancelled')  ;
 end;
 
 procedure TfrmVolitant_Express.btnFormThemeDefaultClick(Sender: TObject);
@@ -1877,15 +1891,34 @@ begin   // Return if the deletetion was successfull
   begin
     if tblOrders['CompanyID'] = pID  then  // If the Order falls under the company that want to be deleted
     begin
+      if (tblOrders['Paid'] = false) and not (tblOrders['Status'] = 'Canceled') then // Checks that there are no outstanding payments for orders which were not cancelled
+      begin
+         ShowMessage('Unpaid order(s) found.'+#13+ 'Pay order or Cancel order to delete account') ;
+         Result := false;   // Return a false if the deletio failed
+         exit;
+      end;
 
-
+      if not (tblOrders['Status'] = 'Delivered') and not (tblOrders['Status'] = 'Canceled') then // Check for orders that prevents deletion
+      begin
+        ShowMessage('Account Deletion not Eligible'+#13+'Active/Unresolved order(s) found.'+#13+'Resolve/ Complete orders to delete account.')  ;
+        Result := False ;
+        exit;
+      end;
 
     end;
-
 
     tblOrders.next;
   end;
 
+  // Move orders to deletion account, this is done to still keep the order data, and still allow for an account deletetion
+  qrySQL.SQL.Text := 'Update tblOrders SET CompanyID = 54 where CompanyID = '+ inttostr(pID);
+  qrySQL.ExecSQL ;
+
+  // Delete the company account
+  qrySQL.SQL.Text := 'Delete from tblCompany where CompanyID = '+ inttostr(pID);
+  qrySQL.ExecSQL ;
+
+  Result := True; // Return a True if the deletion was successfull
 end;
 
 procedure TfrmVolitant_Express.edtSearchForItemChange(Sender: TObject);
