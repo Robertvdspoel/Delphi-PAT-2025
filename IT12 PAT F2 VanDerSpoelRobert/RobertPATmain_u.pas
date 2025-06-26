@@ -1786,17 +1786,27 @@ end;
 procedure TfrmVolitant_Express.btnUpdateSuspensionClick(Sender: TObject);
 var
   bSuspended : boolean;
+  sSuspended : string;
 begin
 // Read the suspension update to the database
   // Set boolean var for db updation
   if chkSuspendAccount.Checked then
-  bSuspended := True
+  begin
+    bSuspended := True;
+    sSuspended := 'Yes' ;
+  end
   else
-  bSuspended := False;
+  begin
+    bSuspended := False;
+    sSuspended := 'No';
+  end;
 
   // Update the suspension
   qrySQL.SQL.Text := 'Update tblCompany Set Suspended = ' + booltostr(bSuspended) + ' where CompanyID = ' + IntToStr(sedEnterCompanyID.Value)   ;
   qrySQL.ExecSQL ;
+  // Update the last line in the richedit containign info about the companies suspension
+
+  redCompanyOut.Lines[redCompanyOut.Lines.Count - 1] := 'Suspended: '+ sSuspended;    // Update the last line; last line will always be the suspended line
 
   ShowMessage('Updated suspension successfully');
 end;
