@@ -15,7 +15,7 @@ uses
   Vcl.DBCtrls, Vcl.CheckLst, Soap.InvokeRegistry, Soap.WSDLIntf,
   Soap.SOAPPasInv, Soap.SOAPHTTPPasInv, VclTee.TeeGDIPlus, VCLTee.TeEngine,
   VCLTee.Series, VCLTee.TeeProcs, VCLTee.Chart, DateUtils, math, clsDistance_u, clsUsername_u,
-  Vcl.FileCtrl;
+  Vcl.FileCtrl, Xml.xmldom, Xml.XmlTransform;
 
 type
   TfrmVolitant_Express = class(TForm)
@@ -186,7 +186,7 @@ type
     sedUpdateFuelCents: TSpinEdit;
     lblUpdateFuelRands: TLabel;
     lblUpdateFuelCents: TLabel;
-    ListBox2: TListBox;
+    lstManagePlane: TListBox;
     lblSelectPlaneUpdate: TLabel;
     btnUpdatePlane: TButton;
     cmbSelectTable: TComboBox;
@@ -243,7 +243,7 @@ type
     btnCompanyOrderOut: TButton;
     btnSeatchForCompany: TButton;
     btnSearcCompAgeRange: TButton;
-    edtEnterSearchCompanyt: TEdit;
+    edtEnterSearchCompany: TEdit;
     sedAgeBottomSearch: TSpinEdit;
     sedAgeTopSearch: TSpinEdit;
     lblSearchForComanyAge: TLabel;
@@ -278,6 +278,31 @@ type
     lblSelectCountry: TLabel;
     lblGalleryInfo: TLabel;
     lblConfirmYears: TLabel;
+    tsThemeAdmin: TTabSheet;
+    btnToTheme: TButton;
+    edtSearchForItem: TEdit;
+    chkChangeItemDangerous: TCheckBox;
+    lblThemePage: TLabel;
+    grbUpdateFormTheme: TGroupBox;
+    ColorDialogFORM: TColorDialog;
+    btnChangeFORMtheme: TButton;
+    btnFormThemeDefault: TButton;
+    grpChangeHomeTheme: TGroupBox;
+    CGhomeTheme: TColorGrid;
+    lblColorGridInfo: TLabel;
+    lblHomeThemeInfo: TLabel;
+    btnHomeThemeDefault: TButton;
+    grbUpdateWelcomeLabel: TGroupBox;
+    clbWelcomeLabelTheme: TColorListBox;
+    btnUpdateWelcomeLabel: TButton;
+    btnGroupBoxDefaultColor: TButton;
+    sedEnterCompanyID: TSpinEdit;
+    btnLoadCompany: TButton;
+    SpinEdit2: TSpinEdit;
+    lblEnterCompanyID: TLabel;
+    btnDeleteCompanyAdmin: TButton;
+    chkSuspendAccount: TCheckBox;
+    btnUpdateSuspension: TButton;
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnRegisterGOClick(Sender: TObject);
@@ -324,10 +349,26 @@ type
     procedure btnLastInfoBackClick(Sender: TObject);
     procedure tFlightAnimationTimer(Sender: TObject);
     procedure btnToSummaryClick(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
     procedure btnToEmailsClick(Sender: TObject);
     procedure btnToItemsClick(Sender: TObject);
-
+    procedure btnToThemeClick(Sender: TObject);
+    procedure edtSearchForItemChange(Sender: TObject);
+    procedure btnAddPlaneClick(Sender: TObject);
+    procedure btnChangeFORMthemeClick(Sender: TObject);
+    procedure btnFormThemeDefaultClick(Sender: TObject);
+    Procedure imgDynamicOnclick(Sender: TObject);
+    procedure CGhomeThemeChange(Sender: TObject);
+    procedure btnHomeThemeDefaultClick(Sender: TObject);
+    procedure btnUpdateWelcomeLabelClick(Sender: TObject);
+    procedure btnGroupBoxDefaultColorClick(Sender: TObject);
+    procedure btnSearcCompAgeRangeClick(Sender: TObject);
+    procedure btnSeatchForCompanyClick(Sender: TObject);
+    procedure btnLoadCompanyClick(Sender: TObject);
+    procedure BitBtnretryPaySelectClick(Sender: TObject);
+    procedure sedEnterCompanyIDChange(Sender: TObject);
+    procedure pgcAdminChange(Sender: TObject);
+    procedure btnDeleteCompanyAdminClick(Sender: TObject);
+    procedure btnUpdateSuspensionClick(Sender: TObject);    // For the dynamic object
   private
     { Private declarations }
 
@@ -336,10 +377,11 @@ type
     objUsername : TUsername ;
 
     Function ValidateEmail(pEmail: string): Boolean;
+    Function DeleteAccount(pID : integer): boolean;
 
 
-    Procedure imgDynamicOnclick(Sender: TObject);    // For the dynamic object
-    
+    Procedure WriteToFormTheme(pFileName : string; pColorValue : integer); // For writing to the files for system themes
+
   public
     { Public declarations }
 
@@ -359,7 +401,9 @@ type
     // For the gallery
    iImageCount : integer;
   arrFileNames : array[1..1000] of string;
- 
+
+  // ItemUpdate ID
+  iItemUpdateID : integer ;
 
   end;
 
@@ -537,6 +581,12 @@ begin
   tblCompany.Post ;
 
 // Go to the Home page
+end;
+
+procedure TfrmVolitant_Express.BitBtnretryPaySelectClick(Sender: TObject);
+begin
+// Reset the pay order list box
+lstPayment.ItemIndex := -1;
 end;
 
 procedure TfrmVolitant_Express.BitBtnTOcInfoClick(Sender: TObject);
@@ -727,7 +777,7 @@ begin
   Writeln(tFile, sCategoryAdd) ;
 
   CloseFile(tFile);
-  ShowMessage('Item added to combobox') ;
+  ShowMessage('Category added to combobox') ;
 // Update the combobox in the end when the category has been added
 cmbItemCategoryAdd.Items.Add(sCategoryAdd) ;
 end;
@@ -802,7 +852,26 @@ begin
    tblItems['Retired'] := False;
   tblItems.Post ;
 
+  //  Update the list box
+  lstSelectItemManage.Items.Add(sItemname +' -- ' + cmbItemCategoryAdd.Items[cmbItemCategoryAdd.ItemIndex] + ' -- ' +floattostrf(rPrice, ffCurrency, 10,2)) ;
+
+  // Add item to a list box
   ShowMessage('Item successfully added');
+  // Clear the inputs
+  edtItemAddName.Clear ;
+  cmbItemCategoryAdd.ItemIndex := -1;
+  sedAddItemRands.Value := 0 ;
+  sedItemAddCents.Value := 0 ;
+  chkDangerousItemAdd.Checked := False;
+  redAddDescription.Clear ;
+end;
+
+procedure TfrmVolitant_Express.btnAddPlaneClick(Sender: TObject);
+begin
+// Add a plane to the database
+
+  // Validation
+
 end;
 
 procedure TfrmVolitant_Express.btnBackFromGalleryClick(Sender: TObject);
@@ -825,6 +894,19 @@ tsGallery.TabVisible := False;
 
 
 tsWelcome.TabVisible := True;
+end;
+
+procedure TfrmVolitant_Express.btnChangeFORMthemeClick(Sender: TObject);
+var
+  iColor : integer;
+begin
+// Update the theme of the Form
+  if ColorDialogForm.Execute then   // Whem a color is selected from the color dialogue
+  frmVolitant_Express.Color := ColorDialogFORM.Color ;  // Chnahe the forms dialogue
+  // Store the color to use when starting the program again
+  iColor :=ColorDialogFORM.Color ;
+  // Write to file for startup theme setting
+  WriteToFormTheme('Themes/formtheme.txt', iColor) ;
 end;
 
 procedure TfrmVolitant_Express.btnCInfoBackClick(Sender: TObject);
@@ -941,18 +1023,48 @@ sSQL := edtCustomSQL.Text;
        exit;
   end;
 
-qrySQL.SQL.Text := sSQL ;
-qrySQL.Open ;
+  try   // Try, incase an invalid SQL statemnet is entered
+    qrySQL.SQL.Text := sSQL;
+    qrySQL.Open;
+    except
+    on E: Exception do // Handle the error by recieving the message
+      ShowMessage('SQL/Database error: ' + E.Message);
+  end;
+
+end;
+
+procedure TfrmVolitant_Express.btnDeleteCompanyAdminClick(Sender: TObject);
+begin
+// Delete the account of the company
+  // Ask for confirmation
+
+end;
+
+procedure TfrmVolitant_Express.btnFormThemeDefaultClick(Sender: TObject);
+begin
+// Set the form theme back to the default color
+frmVolitant_Express.color :=clBtnFace ;
+WriteToFormTheme('Themes/formtheme.txt', clBtnFace) ;
 end;
 
 procedure TfrmVolitant_Express.btnRetireItemClick(Sender: TObject);
 begin
-// retire an item
+// retire an item or unretire it
 
+      if  btnRetireItem.Caption = 'Retire Item' then
+      begin
+        btnRetireItem.Caption := 'UnRetire Item';
+        ShowMessage('Item Retired; Press Update Item to finalize') ;
+      end
+      else
+     begin
+        btnRetireItem.Caption := 'Retire Item';
+        ShowMessage('Item UnRetired; Press Update Item to finalize');
+     end;
 
 end;
 
-procedure TfrmVolitant_Express.btnGalleryClick(Sender: TObject);   // Dynamic Component
+procedure TfrmVolitant_Express.btnGalleryClick(Sender:  TObject);   // Dynamic Component
 const imgWidth = 480;
 const imgHeight = 250;
 var
@@ -1049,6 +1161,27 @@ tsGallery.TabVisible := true;
 
 end;
 
+procedure TfrmVolitant_Express.btnGroupBoxDefaultColorClick(Sender: TObject);
+begin
+// Change the color of the group box to its defualt clBtnFace; as there is no clBtnFace in the color grid
+grbHome.Color := clBtnFace;
+  WriteToFormTheme('Themes/home_grb_theme.txt', clBtnFace) ;
+end;
+
+procedure TfrmVolitant_Express.btnHomeThemeDefaultClick(Sender: TObject);
+begin
+// Return the home theme to default
+  // Chnage the color grid back to its starting position
+  CGhomeTheme.BackgroundIndex := 0 ;
+  CGhomeTheme.ForegroundIndex := 0 ;
+  // of the label
+  lblWelcomeHome.font.Color := clMaroon    ;
+  WriteToFormTheme('Themes/home_label_theme.txt', clMaroon) ;
+  // of the group box
+  grbHome.Color := clBtnFace ;
+  WriteToFormTheme('Themes/home_grb_theme.txt', clBtnFace) ;
+end;
+
 procedure TfrmVolitant_Express.btnIntroVidClick(Sender: TObject);
 begin
 // Plays the recorded intro video about the company
@@ -1068,6 +1201,80 @@ begin
 // Go back to the contact info reg page from the last info page
 tsLastInfo.TabVisible := False;
 tsContact.TabVisible := True;
+end;
+
+procedure TfrmVolitant_Express.btnLoadCompanyClick(Sender: TObject);
+var
+  bFound : boolean;
+  sGovernment, sNewsletter, sSuspended : string ;
+begin
+// Load every detail of the company that was entered in the spinedit
+
+  // Validate that a company was entered
+  if sedEnterCompanyID.Value = 0 then
+  begin
+    ShowMessage('Enter CompanyID to find') ;
+    exit;
+  end;
+  redCompanyOut.Clear ;
+  bFound := False;
+  tblCompany.First ;
+  while not tblCompany.eof and (bFound = False) do   // Find the company
+  begin
+    if tblCompany['CompanyID'] = sedEnterCompanyID.Value then // If a matching company is found
+    begin
+      bFound := True;
+        // Set government agency string
+        if tblCompany['Goverment Agency'] =True then
+        sGovernment := 'Yes'
+        else
+        sGovernment := 'No';
+        // Set newsletter string
+        if tblCompany['Newsletter'] then
+        sNewsletter := 'Yes'
+        else
+        sNewsletter := 'No' ;
+        // Set the suspended string
+        if tblCompany['Suspended'] then
+        begin     // If the account is suspended
+          sSuspended := 'Yes';
+          chkSuspendAccount.Checked := True;  // Update the check box for suspension
+        end
+        else
+         begin
+            sSuspended := 'No';
+            chkSuspendAccount.Checked := False;
+         end;
+      // Display the company info
+      redCompanyOut.SelStart := 0 ;
+      redCompanyOut.SelLength := 10;
+      redCompanyOut.SelAttributes.Size := 14;
+      redCompanyOut.lines.Add('Company Name: '+tblCompany['CompanyName']) ; // company name
+      redCompanyOut.lines.Add('Username: '+tblCompany['Username']) ; // Username
+      redCompanyOut.lines.Add('Password: '+tblCompany['Password']) ; // Password
+      redCompanyOut.Lines.Add('Email: '+tblCompany['Email']) ;       // Email
+      redCompanyOut.lines.Add('Location Based: '+tblCompany['Location Based']) ; // Location Based
+      redCompanyOut.lines.Add('Government: ' + sGovernment) ; // Government agency
+      redCompanyOut.lines.Add('Newsletter: '+ sNewsletter) ; // Newsletter
+      redCompanyOut.lines.Add('Registration Date: ' + DateToStr(tblCompany['Regdate']) ) ;  // Reg date
+      redCompanyOut.lines.Add('Company Age: ' + IntToStr(YearsBetween(Date, tblCompany['Establishment Date']) ) ) ;// date of establishment
+      redCompanyOut.lines.Add('Default Hours: ' + IntToStr(tblCompany['Defualt Hours']) ) ;  // The companies defualt hours
+      redCompanyOut.Lines.Add('Suspended: '+ sSuspended ) ; // suspended
+
+    end;
+  tblCompany.Next ;
+  end;
+    // If no company was found
+  if bFound = False then
+  begin
+     redCompanyOut.Lines.Add('No Matching Company Found') ;
+     exit;
+  end;
+
+  // enable the company controll buttons if a comany is found
+   btnDeleteCompanyAdmin.Enabled := true;
+  chkSuspendAccount.Enabled := true;
+  btnUpdateSuspension.Enabled := True;
 end;
 
 procedure TfrmVolitant_Express.btnLoginBackClick(Sender: TObject);
@@ -1293,6 +1500,107 @@ mpIntroVideo.Position := 0; // Sets the video's time to the begining
 mpIntroVideo.Play;     // Restart the video
 end;
 
+procedure TfrmVolitant_Express.btnSearcCompAgeRangeClick(Sender: TObject);
+var
+  iAge, iCount : integer ;
+  sGovernment : string;
+begin
+// Search for companies in an age range
+  // Validation
+  if sedAgeTopSearch.Value < sedAgeBottomSearch.Value then
+  begin
+    ShowMessage('Upper year may not be lower than lower year');
+    exit;
+  end;
+  iAge := 0;
+
+  redCompanyOut.Clear ;
+     // Set the tabstops
+     redCompanyOut.SelAttributes.Color := clRed;
+     redCompanyOut.Paragraph.TabCount := 5;
+     redCompanyOut.Paragraph.Tab[0] := 75;
+     redCompanyOut.Paragraph.Tab[1] := 225;
+     redCompanyOut.Paragraph.Tab[2] := 375;
+     redCompanyOut.Paragraph.Tab[3] := 445;
+     redCompanyOut.Paragraph.Tab[4] := 560;
+    redCompanyOut.Lines.Add('CompanyID'+ #9+ 'Company Name'+ #9+'LocationBased'+#9+ 'Government'+ #9+'Company Age(Years)'+ #9+ 'Total Orders'+ #13) ;
+  tblCompany.First ;
+  while not tblCompany.eof do
+  begin
+    iAge := YearsBetween(Date, tblCompany['Establishment Date']);
+
+    if (  iAge >= sedAgeBottomSearch.Value) and (  iAge <= sedAgeTopSearch.Value)  then // Companies in the age range
+    begin
+      iCount := 0;
+      tblOrders.First ;
+      while not tblOrders.Eof do    // Count the orders that the company has made
+      begin
+        if tblCompany['CompanyID'] = tblOrders['CompanyID'] then  // Where the company has an order
+        begin
+          Inc(iCount)  ;
+        end;
+
+        tblOrders.Next ;
+      end;
+      // Set the government variable
+      if tblCompany['Goverment Agency'] = true then
+      sGovernment := 'Yes'
+      else
+      sGovernment := 'No';
+      // Display the company info
+      redCompanyOut.Lines.Add(IntToStr(tblCompany['CompanyID']) + #9 + tblCompany['CompanyName']+ #9+ tblCompany['Location Based']+#9+sGovernment  +#9+ IntToStr(iAge)+#9+IntToStr(iCount)) ;
+    end;
+    tblCompany.Next ;
+  end;
+end;
+
+procedure TfrmVolitant_Express.btnSeatchForCompanyClick(Sender: TObject);
+var
+  iOrderCount : integer;
+  sGovernment : string ;
+begin
+// Search for a company based on the company name
+  // Set the tab stops
+    redCompanyOut.Clear ;
+     redCompanyOut.SelAttributes.Color := clRed;
+     redCompanyOut.Paragraph.TabCount := 4;
+     redCompanyOut.Paragraph.Tab[0] := 75;
+     redCompanyOut.Paragraph.Tab[1] := 225;
+     redCompanyOut.Paragraph.Tab[2] := 375;
+     redCompanyOut.Paragraph.Tab[3] := 445;
+     redCompanyOut.Lines.Add('CompanyID'+ #9+ 'Company Name'+ #9+'LocationBased'+#9+ 'Government'+ #9+ 'Total Orders'+ #13) ;
+
+     redCompanyOut.SelAttributes.Color := clBlack ;
+  tblCompany.First ;
+  while not tblCompany.eof do
+  begin
+     if Pos(UpperCase(edtEnterSearchCompany.Text), UpperCase(tblCompany['CompanyName'])  )> 0  then   // Find names that matches what was entered in the edit
+     begin
+        iOrderCount := 0 ;
+        // Count orders that the company has placed
+        tblOrders.First ;
+        while not tblOrders.eof do
+        begin
+            // Finder orders under the company
+            if tblCompany['CompanyID'] = tblOrders['CompanyID'] then
+            Inc(iOrderCount);
+
+          tblOrders.Next ;
+        end;
+           // Get government agency string
+        if tblCompany['Goverment Agency'] =True then
+        sGovernment := 'Yes'
+        else
+        sGovernment := 'No';
+
+        redCompanyOut.Lines.Add(IntToStr(tblCompany['CompanyID']) +#9+ tblCompany['CompanyName']+#9+ tblCompany['Location Based']+#9+sGovernment+#9+IntToStr(iOrderCount) ) ;
+     end;
+
+    tblCompany.Next ;
+  end;
+
+end;
+
 procedure TfrmVolitant_Express.btnSendNewsletterClick(Sender: TObject);
 begin
 // Send the newsletter
@@ -1332,13 +1640,42 @@ begin
  pgcAdmin.ActivePage.TabVisible := False;
  tsItemsAdmin.TabVisible := True;
 
-   if not FileExists('Item_Categories.txt')  then
+   if not FileExists('Item_Categories.txt')  then  // Check that the categories file does exist
   begin
     ShowMessage('Item_Categories.txt not Found. Add categories to resolve this problem');
     Exit;
   end;
-
+  // Load the different categories into the combo box
  cmbItemCategoryAdd.Items.LoadFromFile('Item_Categories.txt') ;
+
+ // Load a list of all the items into the list box to update them
+ lstSelectItemManage.Clear;
+
+ tblItems.First ;
+ while not tblItems.eof do
+ begin
+  //if tblItems['Retired'] = false then
+  begin
+    lstSelectItemManage.Items.Add(tblItems['Item Name'] + ' -- '+ tblItems['Category']+ ' -- '+floattostrf(tblItems['T_Cost/kg'], ffCurrency,10,2));
+  end;
+  tblItems.Next ;
+ end;
+
+ iItemUpdateID := 0 ;
+
+
+   // clear update inputs
+  edtSearchForItem.Clear ;
+  sedUpdateItemRands.Value := 0;
+  sedUpdateItemCents.Value := 0;
+  chkChangeItemDangerous.Checked := False;
+  redUpdateItem.Clear ;
+  lstSelectItemManage.ItemIndex := -1;
+
+  // Disable the company management buttons
+  btnDeleteCompanyAdmin.Enabled := False;
+  chkSuspendAccount.Enabled := False;
+
 end;
 
 procedure TfrmVolitant_Express.btnTOLogClick(Sender: TObject);
@@ -1385,11 +1722,57 @@ begin
   btnReloadSum.Click  ;
 end;
 
+procedure TfrmVolitant_Express.btnToThemeClick(Sender: TObject);
+begin
+// go the the theme change admin page from any other of the admin pages
+end;
+
 procedure TfrmVolitant_Express.btnUpdateItemClick(Sender: TObject);
 begin
 // Update the item
 
 // Validation
+  if sedUpdateItemRands.Value = 0 then // Emsure that item transport price was entered
+  begin
+    ShowMessage('Enter an amount of money for the item') ;
+    exit;
+  end;
+
+  if Length(redUpdateItem.Text) > 120  then
+  begin
+    ShowMessage('Item Note may not be longer than 120 chracters');
+    exit;
+  end;
+
+    // Update the item
+    tblItems.RecNo := iItemUpdateID ;
+    tblItems.Edit ;
+
+    tblItems['T_Cost/kg'] := sedUpdateItemRands.Value + (sedUpdateItemCents.Value / 100);
+    tblItems['Dangerous'] := chkChangeItemDangerous.Checked ;
+    tblItems['Note'] := redUpdateItem.Text ;
+    // Update the retire item part
+    if  btnRetireItem.Caption = 'Retire Item' then
+    begin
+      tblItems['Retired'] := False;
+    end
+    else
+    begin
+       tblItems['Retired'] := True;
+    end;
+
+    tblItems.Post ;
+
+  // clear update inputs
+  edtSearchForItem.Clear ;
+  sedUpdateItemRands.Value := 0;
+  sedUpdateItemCents.Value := 0;
+  chkChangeItemDangerous.Checked := False;
+  redUpdateItem.Clear ;
+  lstSelectItemManage.ItemIndex := -1;
+
+
+  ShowMessage('Item updated successfully') ;
 end;
 
 procedure TfrmVolitant_Express.btnUpdatePlaneClick(Sender: TObject);
@@ -1398,20 +1781,41 @@ begin
 
 // Validation
 
-// if the retire plane button was selected, display a confirmation dialogue to confirm that they want to retire the plane
 end;
 
-procedure TfrmVolitant_Express.Button1Click(Sender: TObject);
+procedure TfrmVolitant_Express.btnUpdateSuspensionClick(Sender: TObject);
 var
-  tFlightHours : integer;
-  rHours : real;
+  bSuspended : boolean;
+  sSuspended : string;
 begin
- tFlightHours := HoursBetween(tblOrders['Pickup Date'], tblOrders['E/D Date']) ;
-              //rRevenue := rRevenue + tblPlanes['FuelCost']  * tFlightHours ; // times by the hours of the flight
-      // rHours := (tblOrders['E/D Date'] - tblOrders['Pickup Date']) * 24;  // TDateTime difference * 24
-          rHours  := HoursBetween(tblOrders['Pickup Date'], tblOrders['E/D Date']) ;
-    ShowMessage(FloatToStr(rHours) ) ;
- ShowMessage(intToStr(tFlightHours) ) ;
+// Read the suspension update to the database
+  // Set boolean var for db updation
+  if chkSuspendAccount.Checked then
+  begin
+    bSuspended := True;
+    sSuspended := 'Yes' ;
+  end
+  else
+  begin
+    bSuspended := False;
+    sSuspended := 'No';
+  end;
+
+  // Update the suspension
+  qrySQL.SQL.Text := 'Update tblCompany Set Suspended = ' + booltostr(bSuspended) + ' where CompanyID = ' + IntToStr(sedEnterCompanyID.Value)   ;
+  qrySQL.ExecSQL ;
+  // Update the last line in the richedit containign info about the companies suspension
+
+  redCompanyOut.Lines[redCompanyOut.Lines.Count - 1] := 'Suspended: '+ sSuspended;    // Update the last line; last line will always be the suspended line
+
+  ShowMessage('Updated suspension successfully');
+end;
+
+procedure TfrmVolitant_Express.btnUpdateWelcomeLabelClick(Sender: TObject);
+begin
+// Update the welcome lable color theme
+  lblWelcome.font.Color := clbWelcomeLabelTheme.Selected;
+  WriteToFormTheme('Themes/welcome_label_theme.txt', clbWelcomeLabelTheme.Selected) ;
 end;
 
 procedure TfrmVolitant_Express.cmbCountryBasedChange(Sender: TObject);
@@ -1446,9 +1850,59 @@ begin
   end;
 end;
 
+procedure TfrmVolitant_Express.CGhomeThemeChange(Sender: TObject);
+begin
+// Change the theme of the home page
+
+  // Change the color of the label
+  lblWelcomeHome.font.Color := CGhomeTheme.ForegroundColor ;
+   WriteToFormTheme('Themes/home_label_theme.txt',CGhomeTheme.ForegroundColor) ;
+   // Change the theme of the group box
+   grbHome.Color := CGhomeTheme.BackgroundColor ;
+   WriteToFormTheme('Themes/home_grb_theme.txt', CGhomeTheme.BackgroundColor) ;
+end;
+
 procedure TfrmVolitant_Express.dbgDifferentTablesCellClick(Column: TColumn);
 begin
 // If the active table is tblOrders: when a record is clicked on: Retrieve all the foreign data from the other tables and dispay info about that record in a showmessage
+end;
+
+function TfrmVolitant_Express.DeleteAccount(pID: integer): boolean;
+begin   // Return if the deletetion was successfull
+// Delete a company account
+
+  //Check that a company is deletable, by checking if there are any active/ unpaid orders
+  tblOrders.First ;
+  while not tblOrders.eof do
+  begin
+    if tblOrders['CompanyID'] = pID  then  // If the Order falls under the company that want to be deleted
+    begin
+
+
+
+    end;
+
+
+    tblOrders.next;
+  end;
+
+end;
+
+procedure TfrmVolitant_Express.edtSearchForItemChange(Sender: TObject);
+var
+  I: Integer;
+begin
+// Search and select an item when you search for it
+  for I := 0 to (lstSelectItemManage.Count-1) do
+  begin
+    if Pos(Uppercase(edtSearchForItem.Text), Uppercase(lstSelectItemManage.Items[i])) > 0  then  // Check for an item matching what is entered in the edit
+    begin
+      lstSelectItemManage.ItemIndex := i ;  // Set the index
+       lstSelectItemManageClick(lstSelectItemManage);   // Call the lst box click
+      Break;
+    end;
+  end;
+
 end;
 
 procedure TfrmVolitant_Express.FormActivate(Sender: TObject);
@@ -1463,7 +1917,10 @@ begin
 // Form Acticvate
 iCountryCount := 0 ;
 sID := '';
-
+// Set the admin company controll buttons
+btnDeleteCompanyAdmin.Enabled := False;
+chkSuspendAccount.Enabled := False;
+ btnUpdateSuspension.Enabled := False;
 
 // array population
 
@@ -1646,6 +2103,9 @@ sID := '';
 end;
 
 procedure TfrmVolitant_Express.FormCreate(Sender: TObject);
+var
+  tFile : textfile;
+  sColor : string ;
 begin
 // Set up the tab sheets
 {
@@ -1670,10 +2130,47 @@ tsGallery.TabVisible := False;
   // Set sonme starting variablles
   bTimer := False;
   iImageCount := 0;
+
+  // Set the programs color themes
+    // Set the forms color
+    if FileExists('Themes/formtheme.txt')  then  // Only load if the file exists else just leave as normal
+    begin
+      AssignFile(tFile, 'Themes/formtheme.txt');
+      Reset(tFile);
+      Readln(tFile, sColor);    // Read the color code from the txt file
+      frmVolitant_Express.Color := StrToInt(sColor);  // Set the color of the form
+      CloseFile(tFile);    // Close the file
+    end;
+    // Set the color of the welcome label
+    if FileExists('Themes/welcome_label_theme.txt')  then  // Only load if the file exists else just leave as normal
+    begin
+      AssignFile(tFile, 'Themes/welcome_label_theme.txt');
+      Reset(tFile);
+      Readln(tFile, sColor);    // Read the color code from the txt file
+      lblWelcome.font.Color := StrToInt(sColor);  // Set the color of the label
+      CloseFile(tFile);    // Close the file
+    end;
+    // Set the color of the home label
+    if FileExists('Themes/home_label_theme.txt')  then  // Only load if the file exists else just leave as normal
+    begin
+      AssignFile(tFile, 'Themes/home_label_theme.txt');
+      Reset(tFile);
+      Readln(tFile, sColor);    // Read the color code from the txt file
+      lblWelcomeHome.font.Color := StrToInt(sColor);  // Set the color of the label
+      CloseFile(tFile);    // Close the file
+    end;
+    // Set the color of the home group box
+    if FileExists('Themes/home_grb_theme.txt')  then  // Only load if the file exists else just leave as normal
+    begin
+      AssignFile(tFile, 'Themes/home_grb_theme.txt');
+      Reset(tFile);
+      Readln(tFile, sColor);    // Read the color code from the txt file
+      grbHome.Color := StrToInt(sColor);  // Set the color of the group box
+      CloseFile(tFile);    // Close the file
+    end;
+
+
 end;
-
-
-
 
 procedure TfrmVolitant_Express.imgDynamicOnclick;
 var
@@ -1721,8 +2218,58 @@ begin
 end;
 
 procedure TfrmVolitant_Express.lstSelectItemManageClick(Sender: TObject);
+var
+  sItemName : string;
+  bFound : boolean;
 begin
 // Update the Update components
+
+  // Item Name extraction
+  sItemName := Copy(lstSelectItemManage.Items[lstSelectItemManage.ItemIndex], 1, POS(' -- ', lstSelectItemManage.Items[lstSelectItemManage.ItemIndex])-1)   ;
+  redUpdateItem.Clear ;
+  // Search the item to update
+  bFound := False;
+  tblItems.First ;
+  while not tblItems.eof and (bFound = False) do
+  begin
+    if sItemName = tblItems['Item Name'] then
+    begin
+      bFound := True;
+      iItemUpdateID :=tblItems.RecNo ; // Get the record of the item selected
+      // Update the components for the update of the ITEM
+
+      redUpdateItem.Lines.Add(tblItems['Note']);
+      // Item retirement
+      if tblItems['Retired'] = True then
+      btnRetireItem.Caption := 'UnRetire Item'
+      else
+       btnRetireItem.Caption := 'Retire Item';
+
+      chkChangeItemDangerous.Checked := tblItems['Dangerous'];    // Set the dangerous component
+
+        // Calculate the cost
+        sedUpdateItemRands.Value := Trunc(tblItems['T_Cost/kg']);
+        sedUpdateItemCents.Value := Round(Frac(tblItems['T_Cost/kg'])*100);
+    end;
+
+    tblItems.Next ;
+  end;
+
+end;
+
+procedure TfrmVolitant_Express.pgcAdminChange(Sender: TObject);
+begin
+// Change things on the tabpages when a change is made
+redCompanyOut.Clear ;
+end;
+
+procedure TfrmVolitant_Express.sedEnterCompanyIDChange(Sender: TObject);
+begin
+// Set things right when a change is made ragarding the companies management
+  btnDeleteCompanyAdmin.Enabled := False;
+  chkSuspendAccount.Enabled := False;
+  btnUpdateSuspension.Enabled := False;
+  btnLoadCompany.Enabled := True;
 end;
 
 procedure TfrmVolitant_Express.tFlightAnimationTimer(Sender: TObject);
@@ -1856,6 +2403,23 @@ begin
 
     Result := True;
   
+end;
+
+procedure TfrmVolitant_Express.WriteToFormTheme(pFileName: string;
+  pColorValue: integer);
+  var
+    tFile : textfile;
+begin
+// Write to the Files containing the themes
+
+  // Always rewrite the file as a new value will always be stored
+  AssignFile(tFile, pFileName) ;
+  Rewrite(tFile) ;
+
+  Writeln(tFile, pColorValue) ;
+
+  CloseFile(tFile) ;
+
 end;
 
 end.

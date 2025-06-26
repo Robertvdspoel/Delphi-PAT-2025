@@ -1,4 +1,7 @@
 Minerals
 Flowers
 Food
-Biological samplesVehicles
+Biological samples
+Vehicles
+Weapons
+Toys

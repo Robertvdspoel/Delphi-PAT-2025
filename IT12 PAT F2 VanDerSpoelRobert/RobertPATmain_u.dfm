@@ -14484,7 +14484,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 96
         Width = 1017
         Height = 473
-        ActivePage = tsDetails
+        ActivePage = tsRegConfirm
         TabOrder = 0
         object tsDetails: TTabSheet
           Caption = 'Company Details'
@@ -25432,8 +25432,9 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 56
         Width = 905
         Height = 481
-        ActivePage = tsItemsAdmin
+        ActivePage = tsCompaniesAdmin
         TabOrder = 0
+        OnChange = pgcAdminChange
         object tsItemsAdmin: TTabSheet
           Caption = 'Items'
           object lblItemsAdmin: TLabel
@@ -25585,7 +25586,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
             object sedItemAddCents: TSpinEdit
               Left = 192
-              Top = 189
+              Top = 188
               Width = 121
               Height = 30
               Font.Charset = DEFAULT_CHARSET
@@ -25620,8 +25621,8 @@ object frmVolitant_Express: TfrmVolitant_Express
           end
           object grbManageItems: TGroupBox
             Left = 424
-            Top = 54
-            Width = 441
+            Top = 49
+            Width = 470
             Height = 379
             Caption = 'Manage Items'
             TabOrder = 2
@@ -25634,21 +25635,21 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
             object lblUpdateItemInfo: TLabel
               Left = 24
-              Top = 195
-              Width = 128
+              Top = 203
+              Width = 91
               Height = 15
-              Caption = 'Update item Description'
+              Caption = 'Update itemNote'
             end
             object lblUpdateItemPrice: TLabel
-              Left = 24
+              Left = 96
               Top = 127
               Width = 210
               Height = 15
               Caption = 'Update the price of transporting in R/kg'
             end
             object lblUpdateItemRands: TLabel
-              Left = 64
-              Top = 148
+              Left = 72
+              Top = 144
               Width = 32
               Height = 15
               Caption = 'Rands'
@@ -25661,9 +25662,9 @@ object frmVolitant_Express: TfrmVolitant_Express
               Caption = 'Cents'
             end
             object lstSelectItemManage: TListBox
-              Left = 24
+              Left = 3
               Top = 42
-              Width = 385
+              Width = 464
               Height = 79
               Font.Charset = DEFAULT_CHARSET
               Font.Color = clWindowText
@@ -25678,9 +25679,9 @@ object frmVolitant_Express: TfrmVolitant_Express
             object btnRetireItem: TButton
               Left = 24
               Top = 280
-              Width = 385
+              Width = 443
               Height = 38
-              Caption = 'Ritire Item'
+              Caption = 'Retire Item'
               Font.Charset = ANSI_CHARSET
               Font.Color = clWindowText
               Font.Height = -21
@@ -25692,9 +25693,9 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
             object redUpdateItem: TRichEdit
               Left = 24
-              Top = 216
-              Width = 385
-              Height = 58
+              Top = 224
+              Width = 443
+              Height = 50
               Font.Charset = ANSI_CHARSET
               Font.Color = clWindowText
               Font.Height = -16
@@ -25707,7 +25708,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             object btnUpdateItem: TButton
               Left = 24
               Top = 324
-              Width = 385
+              Width = 443
               Height = 40
               Caption = 'Update Item'
               Font.Charset = DEFAULT_CHARSET
@@ -25729,7 +25730,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Height = -15
               Font.Name = 'Segoe UI'
               Font.Style = []
-              MaxValue = 0
+              MaxValue = 50000
               MinValue = 0
               ParentFont = False
               TabOrder = 4
@@ -25737,7 +25738,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
             object sedUpdateItemCents: TSpinEdit
               Left = 240
-              Top = 165
+              Top = 167
               Width = 121
               Height = 30
               Font.Charset = DEFAULT_CHARSET
@@ -25745,11 +25746,28 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Height = -15
               Font.Name = 'Segoe UI'
               Font.Style = []
-              MaxValue = 0
+              MaxValue = 99
               MinValue = 0
               ParentFont = False
               TabOrder = 5
               Value = 0
+            end
+            object edtSearchForItem: TEdit
+              Left = 160
+              Top = 13
+              Width = 281
+              Height = 23
+              TabOrder = 6
+              TextHint = 'Enter item Name to Search'
+              OnChange = edtSearchForItemChange
+            end
+            object chkChangeItemDangerous: TCheckBox
+              Left = 160
+              Top = 203
+              Width = 105
+              Height = 17
+              Caption = 'Item Dangerous?'
+              TabOrder = 7
             end
           end
         end
@@ -25931,12 +25949,13 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Style = [fsBold]
               ParentFont = False
               TabOrder = 6
+              OnClick = btnAddPlaneClick
             end
           end
           object grbManagePlanes: TGroupBox
-            Left = 528
+            Left = 488
             Top = 65
-            Width = 329
+            Width = 369
             Height = 352
             Caption = 'Manage Planes'
             TabOrder = 1
@@ -25962,21 +25981,21 @@ object frmVolitant_Express: TfrmVolitant_Express
               Caption = 'Cents'
             end
             object lblSelectPlaneUpdate: TLabel
-              Left = 24
+              Left = 3
               Top = 29
               Width = 127
               Height = 15
               Caption = 'Select a plane to Update'
             end
             object chkRetirePlane: TCheckBox
-              Left = 40
-              Top = 240
+              Left = 32
+              Top = 248
               Width = 137
               Height = 17
               Caption = 'Retire Plane'
               Font.Charset = DEFAULT_CHARSET
               Font.Color = clWindowText
-              Font.Height = -16
+              Font.Height = -19
               Font.Name = 'Segoe UI'
               Font.Style = []
               ParentFont = False
@@ -26014,10 +26033,10 @@ object frmVolitant_Express: TfrmVolitant_Express
               TabOrder = 2
               Value = 0
             end
-            object ListBox2: TListBox
-              Left = 24
+            object lstManagePlane: TListBox
+              Left = 3
               Top = 50
-              Width = 281
+              Width = 350
               Height = 79
               Font.Charset = DEFAULT_CHARSET
               Font.Color = clWindowText
@@ -26031,7 +26050,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             object btnUpdatePlane: TButton
               Left = 24
               Top = 296
-              Width = 281
+              Width = 321
               Height = 41
               Caption = 'Update Plane'
               Font.Charset = DEFAULT_CHARSET
@@ -26066,7 +26085,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             Top = 62
             Width = 849
             Height = 371
-            ActivePage = tsOrderOutput
+            ActivePage = tsOrderUpdate
             TabOrder = 0
             object tsOrderUpdate: TTabSheet
               Caption = 'Update an Order'
@@ -26085,7 +26104,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                   Caption = 'Enter a company name to search (Optional)'
                 end
                 object lblSelectOrderStatus: TLabel
-                  Left = 240
+                  Left = 232
                   Top = 81
                   Width = 119
                   Height = 15
@@ -26130,8 +26149,8 @@ object frmVolitant_Express: TfrmVolitant_Express
                   TabOrder = 2
                 end
                 object BitBtnClearOrderSearch: TBitBtn
-                  Left = 304
-                  Top = 41
+                  Left = 438
+                  Top = 38
                   Width = 75
                   Height = 25
                   Caption = 'Clear'
@@ -26171,12 +26190,22 @@ object frmVolitant_Express: TfrmVolitant_Express
                   ParentFont = False
                   TabOrder = 5
                 end
+                object SpinEdit2: TSpinEdit
+                  Left = 311
+                  Top = 39
+                  Width = 121
+                  Height = 24
+                  MaxValue = 0
+                  MinValue = 0
+                  TabOrder = 6
+                  Value = 0
+                end
               end
               object btnToOrdersOutput: TButton
                 Left = 632
-                Top = 315
+                Top = 312
                 Width = 155
-                Height = 25
+                Height = 28
                 Caption = 'Go to Orders Output Page'
                 Font.Charset = DEFAULT_CHARSET
                 Font.Color = clWindowText
@@ -26280,9 +26309,9 @@ object frmVolitant_Express: TfrmVolitant_Express
               end
               object btnTOorderUpdate: TButton
                 Left = 656
-                Top = 313
+                Top = 311
                 Width = 155
-                Height = 25
+                Height = 27
                 Caption = 'To Update Order Page'
                 Font.Charset = DEFAULT_CHARSET
                 Font.Color = clWindowText
@@ -26313,11 +26342,11 @@ object frmVolitant_Express: TfrmVolitant_Express
             ParentFont = False
           end
           object lblSearchForComanyAge: TLabel
-            Left = 680
-            Top = 14
-            Width = 142
+            Left = 656
+            Top = 12
+            Width = 183
             Height = 15
-            Caption = 'Enter Age Range to Search:'
+            Caption = 'Enter Age Range to Search (Years) :'
           end
           object lblAgeBottom: TLabel
             Left = 640
@@ -26332,6 +26361,13 @@ object frmVolitant_Express: TfrmVolitant_Express
             Width = 59
             Height = 15
             Caption = 'Top Range:'
+          end
+          object lblEnterCompanyID: TLabel
+            Left = 32
+            Top = 392
+            Width = 41
+            Height = 15
+            Caption = 'Enter ID'
           end
           object redCompanyOut: TRichEdit
             Left = 16
@@ -26379,6 +26415,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             Font.Style = [fsBold]
             ParentFont = False
             TabOrder = 2
+            OnClick = btnSeatchForCompanyClick
           end
           object btnSearcCompAgeRange: TButton
             Left = 640
@@ -26393,8 +26430,9 @@ object frmVolitant_Express: TfrmVolitant_Express
             Font.Style = [fsBold]
             ParentFont = False
             TabOrder = 3
+            OnClick = btnSearcCompAgeRangeClick
           end
-          object edtEnterSearchCompanyt: TEdit
+          object edtEnterSearchCompany: TEdit
             Left = 335
             Top = 49
             Width = 241
@@ -26422,6 +26460,88 @@ object frmVolitant_Express: TfrmVolitant_Express
             TabOrder = 6
             Value = 0
           end
+          object sedEnterCompanyID: TSpinEdit
+            Left = 16
+            Top = 413
+            Width = 81
+            Height = 35
+            Hint = 'Press the Load the Company button'
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -19
+            Font.Name = 'Segoe UI Semibold'
+            Font.Style = [fsBold]
+            MaxValue = 100000000
+            MinValue = 0
+            ParentFont = False
+            ParentShowHint = False
+            ShowHint = True
+            TabOrder = 7
+            Value = 0
+            OnChange = sedEnterCompanyIDChange
+          end
+          object btnLoadCompany: TButton
+            Left = 103
+            Top = 398
+            Width = 154
+            Height = 50
+            Caption = 'Load Company'
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -16
+            Font.Name = 'Segoe UI Semibold'
+            Font.Style = [fsBold]
+            ParentFont = False
+            TabOrder = 8
+            OnClick = btnLoadCompanyClick
+          end
+          object btnDeleteCompanyAdmin: TButton
+            Left = 727
+            Top = 398
+            Width = 154
+            Height = 49
+            Caption = 'Delete Company'
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -16
+            Font.Name = 'Segoe UI'
+            Font.Style = [fsBold]
+            ParentFont = False
+            TabOrder = 9
+            OnClick = btnDeleteCompanyAdminClick
+          end
+          object chkSuspendAccount: TCheckBox
+            Left = 263
+            Top = 408
+            Width = 210
+            Height = 25
+            Hint = 'Press update button to the right to take effect'
+            Caption = 'Suspend Account'
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -24
+            Font.Name = 'Segoe UI Semibold'
+            Font.Style = [fsBold]
+            ParentFont = False
+            ParentShowHint = False
+            ShowHint = True
+            TabOrder = 10
+          end
+          object btnUpdateSuspension: TButton
+            Left = 479
+            Top = 398
+            Width = 233
+            Height = 50
+            Caption = 'Update Suspension'
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clGreen
+            Font.Height = -21
+            Font.Name = 'Segoe UI'
+            Font.Style = [fsBold]
+            ParentFont = False
+            TabOrder = 11
+            OnClick = btnUpdateSuspensionClick
+          end
         end
         object tsEmailsAdmin: TTabSheet
           Caption = 'Emails'
@@ -26448,9 +26568,9 @@ object frmVolitant_Express: TfrmVolitant_Express
             TabOrder = 0
             object memNewsLetterMessage: TMemo
               Left = 32
-              Top = 40
+              Top = 32
               Width = 745
-              Height = 177
+              Height = 185
               Font.Charset = ANSI_CHARSET
               Font.Color = clWindowText
               Font.Height = -19
@@ -26796,6 +26916,134 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
           end
         end
+        object tsThemeAdmin: TTabSheet
+          Caption = 'Change Theme'
+          ImageIndex = 7
+          object lblThemePage: TLabel
+            Left = 200
+            Top = 15
+            Width = 362
+            Height = 47
+            Caption = 'Change System Theme'
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clTeal
+            Font.Height = -35
+            Font.Name = 'Segoe UI Semibold'
+            Font.Style = [fsBold]
+            ParentFont = False
+          end
+          object grbUpdateFormTheme: TGroupBox
+            Left = 3
+            Top = 68
+            Width = 185
+            Height = 125
+            Caption = 'Change Form Theme'
+            TabOrder = 0
+            object btnChangeFORMtheme: TButton
+              Left = 3
+              Top = 24
+              Width = 179
+              Height = 50
+              Caption = 'Change Form Theme'
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -16
+              Font.Name = 'Segoe UI'
+              Font.Style = [fsBold]
+              ParentFont = False
+              TabOrder = 0
+              OnClick = btnChangeFORMthemeClick
+            end
+            object btnFormThemeDefault: TButton
+              Left = 56
+              Top = 80
+              Width = 75
+              Height = 25
+              Caption = 'Default'
+              TabOrder = 1
+              OnClick = btnFormThemeDefaultClick
+            end
+          end
+          object grpChangeHomeTheme: TGroupBox
+            Left = 213
+            Top = 68
+            Width = 406
+            Height = 293
+            Caption = 'Change Home Theme'
+            ParentShowHint = False
+            ShowHint = False
+            TabOrder = 1
+            object lblColorGridInfo: TLabel
+              Left = 16
+              Top = 19
+              Width = 280
+              Height = 15
+              Caption = 'Left Click for Foreground. Right Click for Background'
+            end
+            object lblHomeThemeInfo: TLabel
+              Left = 16
+              Top = 40
+              Width = 270
+              Height = 15
+              Caption = 'Foreground= Main Label ; Background= Group Box'
+            end
+            object CGhomeTheme: TColorGrid
+              Left = 19
+              Top = 61
+              Width = 384
+              Height = 184
+              ParentShowHint = False
+              ShowHint = False
+              TabOrder = 0
+              OnChange = CGhomeThemeChange
+            end
+            object btnHomeThemeDefault: TButton
+              Left = 302
+              Top = 15
+              Width = 101
+              Height = 40
+              Caption = 'Default'
+              TabOrder = 1
+              OnClick = btnHomeThemeDefaultClick
+            end
+            object btnGroupBoxDefaultColor: TButton
+              Left = 16
+              Top = 251
+              Width = 387
+              Height = 39
+              Caption = 'Change Group Box color to default (clBtnFace)'
+              TabOrder = 2
+              OnClick = btnGroupBoxDefaultColorClick
+            end
+          end
+          object grbUpdateWelcomeLabel: TGroupBox
+            Left = 640
+            Top = 68
+            Width = 217
+            Height = 181
+            Caption = 'Update Welcome Label'
+            TabOrder = 2
+            object clbWelcomeLabelTheme: TColorListBox
+              Left = 16
+              Top = 24
+              Width = 185
+              Height = 97
+              TabOrder = 0
+            end
+            object btnUpdateWelcomeLabel: TButton
+              Left = 16
+              Top = 136
+              Width = 185
+              Height = 33
+              Hint = 'Defualt is Lime'
+              Caption = 'Update Label Theme'
+              ParentShowHint = False
+              ShowHint = True
+              TabOrder = 1
+              OnClick = btnUpdateWelcomeLabelClick
+            end
+          end
+        end
       end
       object grbAdminQuick: TGroupBox
         Left = 16
@@ -26821,7 +27069,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         end
         object btnToPlanes: TButton
           Left = 16
-          Top = 104
+          Top = 86
           Width = 153
           Height = 49
           Caption = 'Planes'
@@ -26829,7 +27077,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         end
         object btnToOrders: TButton
           Left = 16
-          Top = 168
+          Top = 141
           Width = 153
           Height = 49
           Caption = 'Orders'
@@ -26837,7 +27085,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         end
         object btnToCompanies: TButton
           Left = 16
-          Top = 240
+          Top = 196
           Width = 153
           Height = 49
           Caption = 'Companies'
@@ -26845,7 +27093,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         end
         object btnToEmails: TButton
           Left = 16
-          Top = 295
+          Top = 251
           Width = 153
           Height = 49
           Caption = 'Emails'
@@ -26854,7 +27102,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         end
         object btnToSummary: TButton
           Left = 16
-          Top = 360
+          Top = 306
           Width = 153
           Height = 49
           Caption = 'Summary'
@@ -26863,12 +27111,21 @@ object frmVolitant_Express: TfrmVolitant_Express
         end
         object btnToCustom: TButton
           Left = 16
-          Top = 425
+          Top = 361
           Width = 153
           Height = 49
           Caption = 'Custom SQL'
           TabOrder = 6
           OnClick = btnToCustomClick
+        end
+        object btnToTheme: TButton
+          Left = 16
+          Top = 416
+          Width = 153
+          Height = 48
+          Caption = 'Theme'
+          TabOrder = 7
+          OnClick = btnToThemeClick
         end
       end
       object bitbtnAdminHelp: TBitBtn
@@ -26903,6 +27160,9 @@ object frmVolitant_Express: TfrmVolitant_Express
         Width = 937
         Height = 473
         Caption = 'Select Page to go to'
+        Color = clBtnFace
+        ParentBackground = False
+        ParentColor = False
         TabOrder = 0
         object btnTOorder: TButton
           Left = 48
@@ -27002,7 +27262,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Left = 48
         Top = 112
         Width = 1081
-        Height = 177
+        Height = 209
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
         Font.Height = -19
@@ -27018,9 +27278,9 @@ object frmVolitant_Express: TfrmVolitant_Express
       end
       object BitBtnPay: TBitBtn
         Left = 48
-        Top = 312
+        Top = 336
         Width = 1081
-        Height = 65
+        Height = 58
         Caption = 'Pay Selected Order'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -27073,14 +27333,15 @@ object frmVolitant_Express: TfrmVolitant_Express
         TabOrder = 4
       end
       object BitBtnretryPaySelect: TBitBtn
-        Left = 1136
-        Top = 264
+        Left = 1135
+        Top = 296
         Width = 87
         Height = 25
         Caption = 'Unselect'
         Kind = bkRetry
         NumGlyphs = 2
         TabOrder = 5
+        OnClick = BitBtnretryPaySelectClick
       end
     end
     object tsPOrder: TTabSheet
@@ -27109,8 +27370,8 @@ object frmVolitant_Express: TfrmVolitant_Express
         object tsPlaceOrder: TTabSheet
           Caption = 'Place  Oder'
           object ListBox1: TListBox
-            Left = 288
-            Top = 104
+            Left = 424
+            Top = 120
             Width = 121
             Height = 97
             ItemHeight = 15
@@ -27213,7 +27474,11 @@ object frmVolitant_Express: TfrmVolitant_Express
   end
   object tFlightAnimation: TTimer
     OnTimer = tFlightAnimationTimer
-    Left = 368
+    Left = 56
+    Top = 632
+  end
+  object ColorDialogFORM: TColorDialog
+    Left = 96
     Top = 632
   end
 end
