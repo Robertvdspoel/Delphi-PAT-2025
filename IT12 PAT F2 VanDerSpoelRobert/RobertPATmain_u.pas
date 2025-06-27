@@ -15,7 +15,7 @@ uses
   Vcl.DBCtrls, Vcl.CheckLst, Soap.InvokeRegistry, Soap.WSDLIntf,
   Soap.SOAPPasInv, Soap.SOAPHTTPPasInv, VclTee.TeeGDIPlus, VCLTee.TeEngine,
   VCLTee.Series, VCLTee.TeeProcs, VCLTee.Chart, DateUtils, math, clsDistance_u, clsUsername_u,
-  Vcl.FileCtrl, Xml.xmldom, Xml.XmlTransform;
+  Vcl.FileCtrl, Xml.xmldom, Xml.XmlTransform, Vcl.TabNotBk;
 
 type
   TfrmVolitant_Express = class(TForm)
@@ -368,7 +368,9 @@ type
     procedure sedEnterCompanyIDChange(Sender: TObject);
     procedure pgcAdminChange(Sender: TObject);
     procedure btnDeleteCompanyAdminClick(Sender: TObject);
-    procedure btnUpdateSuspensionClick(Sender: TObject);    // For the dynamic object
+    procedure btnUpdateSuspensionClick(Sender: TObject);
+    procedure btnToPlanesClick(Sender: TObject);
+    procedure lstManagePlaneClick(Sender: TObject);    // For the dynamic object
   private
     { Private declarations }
 
@@ -1065,13 +1067,18 @@ procedure TfrmVolitant_Express.btnRetireItemClick(Sender: TObject);
 begin
 // retire an item or unretire it
 
-      if  btnRetireItem.Caption = 'Retire Item' then
+  if lstSelectItemManage.ItemIndex = -1 then  // Select item to manage
+  begin
+    ShowMessage('Select item that exists') ;
+    exit ;
+  end;
+      if  btnRetireItem.Caption = 'Retire Item' then  // If an item is retired
       begin
         btnRetireItem.Caption := 'UnRetire Item';
         ShowMessage('Item Retired; Press Update Item to finalize') ;
       end
       else
-     begin
+     begin // If item is unretired
         btnRetireItem.Caption := 'Retire Item';
         ShowMessage('Item UnRetired; Press Update Item to finalize');
      end;
@@ -1668,13 +1675,10 @@ begin
  tblItems.First ;
  while not tblItems.eof do
  begin
-  //if tblItems['Retired'] = false then
-  begin
+      // Load item into the list box
     lstSelectItemManage.Items.Add(tblItems['Item Name'] + ' -- '+ tblItems['Category']+ ' -- '+floattostrf(tblItems['T_Cost/kg'], ffCurrency,10,2));
-  end;
   tblItems.Next ;
  end;
-
  iItemUpdateID := 0 ;
 
 
@@ -1728,6 +1732,22 @@ tsPayment.TabVisible := True ;
 
 end;
 
+procedure TfrmVolitant_Express.btnToPlanesClick(Sender: TObject);
+begin
+// Change the active admin page to Plane management
+pgcAdmin.ActivePage.TabVisible := False;
+tsPlanesAdmin.TabVisible := True ;
+  // Load the manage plane list box
+  tblPlanes.First ;
+  while not tblPlanes.eof do
+  begin         // Load into a list box
+    lstManagePlane.Items.Add(IntToStr(tblPlanes['PlaneID']) +'-'+tblPlanes['Plane Name']+' -- '+ FloatToStrF(tblPlanes['FuelCost'], ffCurrency ,10,2)  );
+    tblPlanes.Next ;
+  end;
+  lstManagePlane.ItemIndex := -1 ;
+
+end;
+
 procedure TfrmVolitant_Express.btnToSummaryClick(Sender: TObject);
 begin
 // Go to the summary page and load the info on the page
@@ -1742,40 +1762,60 @@ begin
 end;
 
 procedure TfrmVolitant_Express.btnUpdateItemClick(Sender: TObject);
+var
+  bFound : boolean ;
 begin
 // Update the item
 
 // Validation
+    // Ensure that item was selected to update
+  if lstSelectItemManage.ItemIndex = -1 then
+  begin
+    ShowMessage('Select item to manage') ;
+    exit ;
+  end;
   if sedUpdateItemRands.Value = 0 then // Emsure that item transport price was entered
   begin
     ShowMessage('Enter an amount of money for the item') ;
     exit;
   end;
-
-  if Length(redUpdateItem.Text) > 120  then
+    // Ensure that the note of the item is in range
+  if Length(redUpdateItem.Text) > 120 then
   begin
     ShowMessage('Item Note may not be longer than 120 chracters');
     exit;
   end;
 
     // Update the item
-    tblItems.RecNo := iItemUpdateID ;
-    tblItems.Edit ;
+    tblItems.First ;
+    bFound := false;
+    while not tblItems.eof and (bFound = False) do
+    begin
+      if iItemUpdateID = tblItems['ItemID'] then  // if a matching item is found
+      begin
+        bFound := True ;
+          tblItems.Edit ;
+        tblItems['T_Cost/kg'] := sedUpdateItemRands.Value + (sedUpdateItemCents.Value / 100);
+        tblItems['Dangerous'] := chkChangeItemDangerous.Checked ;
+        tblItems['Note'] := redUpdateItem.Text ;
+        // Update the retire item part
+        if  btnRetireItem.Caption = 'Retire Item' then
+        begin
+          tblItems['Retired'] := False;
+        end
+        else
+        begin
+           tblItems['Retired'] := True;
+        end;
 
-    tblItems['T_Cost/kg'] := sedUpdateItemRands.Value + (sedUpdateItemCents.Value / 100);
-    tblItems['Dangerous'] := chkChangeItemDangerous.Checked ;
-    tblItems['Note'] := redUpdateItem.Text ;
-    // Update the retire item part
-    if  btnRetireItem.Caption = 'Retire Item' then
-    begin
-      tblItems['Retired'] := False;
-    end
-    else
-    begin
-       tblItems['Retired'] := True;
+        tblItems.Post ;
+        // Update the listbox
+        lstSelectItemManage.Items[lstSelectItemManage.ItemIndex] := tblItems['Item Name'] + ' -- '+ tblItems['Category']+ ' -- '+floattostrf(tblItems['T_Cost/kg'], ffCurrency,10,2) ;
+
+      end
+      else
+    tblItems.Next ;
     end;
-
-    tblItems.Post ;
 
   // clear update inputs
   edtSearchForItem.Clear ;
@@ -1785,16 +1825,58 @@ begin
   redUpdateItem.Clear ;
   lstSelectItemManage.ItemIndex := -1;
 
-
   ShowMessage('Item updated successfully') ;
 end;
 
 procedure TfrmVolitant_Express.btnUpdatePlaneClick(Sender: TObject);
+var
+  iPlaneID : integer;
+  bFound : boolean ;
 begin
 // Update the plane info
 
-// Validation
+  // Validation
+    // Validate that plane is selected
+    if lstManagePlane.ItemIndex = -1 then
+    begin
+      ShowMessage('Select a plane to update');
+      exit;
+    end;
+    // Validate that a fuel price was entered
+    if sedUpdateFuelRands.Value = 0  then
+    begin
+      ShowMessage('Enter a fuel price for the Plane') ;
+      exit;
+    end;
+    // update the plane
+      // Get the planeID
+    iPlaneID  := StrToInt(Copy(lstManagePlane.Items[lstManagePlane.ItemIndex], 1, Pos('-',lstManagePlane.Items[lstManagePlane.ItemIndex])-1 ) ) ;
+      bFound := false;
+      tblPlanes.First ;
+      while not tblPlanes.Eof and (bFound = False) do
+      begin
+        if tblPlanes['PlaneID'] = iPlaneID then // If a matching record was found
+        begin
+          bFound := True;
+          // Update the plane
+          tblPlanes.Edit ;
+          tblPlanes['Retired'] := chkRetirePlane.Checked ;
+          tblPlanes['FuelCost'] := sedUpdateFuelRands.Value + sedUpdateFuelCents.Value / 100;
+          tblPlanes.Post ;
+           // Update the listbox
+          lstManagePlane.Items[lstManagePlane.ItemIndex] := IntToStr(tblPlanes['PlaneID']) +'-'+tblPlanes['Plane Name']+' -- '+ FloatToStrF(tblPlanes['FuelCost'], ffCurrency ,10,2)  ;
+        end
+        else
+        tblPlanes.Next ;
+      end;
 
+    // Clear inputs
+    chkRetirePlane.Checked := False;
+    sedUpdateFuelRands.Value := 0;
+    sedUpdateFuelCents.Value := 0;
+    lstManagePlane.ItemIndex := -1;
+    // Confirmation if successfull
+    ShowMessage('Plane updated successfully') ;
 end;
 
 procedure TfrmVolitant_Express.btnUpdateSuspensionClick(Sender: TObject);
@@ -1945,7 +2027,6 @@ var
   iPos : integer ;
   I, k: Integer;
   rKeep : real;
-
 begin
 // Form Acticvate
 iCountryCount := 0 ;
@@ -1991,8 +2072,6 @@ chkSuspendAccount.Enabled := False;
       end;
 
       CloseFile(tFile) ;
-
-
     end;
 
     // Sort the country arrays alpabetically from A to Z
@@ -2025,7 +2104,6 @@ chkSuspendAccount.Enabled := False;
     cmbCountryBased.Clear ; // Clears any txt that may have been in the comboBox
     for I := 1 to iCountryCount do
     cmbCountryBased.Items.Add(arrCountryName[i]) ;
-
 
     // Special character array
       iSpecialCharacterCount := 0;
@@ -2250,13 +2328,49 @@ begin
 
 end;
 
+procedure TfrmVolitant_Express.lstManagePlaneClick(Sender: TObject);
+var
+  iPlaneID : integer ;
+  bFound : boolean ;
+begin
+// Load file info into the components
+  // Validate that an item is selected
+    if lstManagePlane.ItemIndex = -1 then
+    begin
+      ShowMessage('Select a valid plane');
+      exit;
+    end;
+    // Get the ID
+  iPlaneID  := StrToInt(Copy(lstManagePlane.Items[lstManagePlane.ItemIndex], 1, Pos('-',lstManagePlane.Items[lstManagePlane.ItemIndex])-1 ) ) ;
+   // Get the matching record
+   tblPlanes.First ;
+   bFound := False;
+   while not tblPlanes.Eof and (bFound = False) do
+   begin
+      if tblPlanes['PlaneID'] = iPlaneID then // If a matching record was found
+      begin
+        bFound := True;
+        sedUpdateFuelRands.Value := Trunc(tblPlanes['FuelCost']) ; // Set the Rands
+        sedUpdateFuelCents.Value := Round(Frac(tblPlanes['FuelCost'])* 100 ) ; // Set the cents
+        chkRetirePlane.Checked := tblPlanes['Retired'] ; // If the plane is retired or not
+      end;
+   tblPlanes.Next ;
+   end;
+
+end;
+
 procedure TfrmVolitant_Express.lstSelectItemManageClick(Sender: TObject);
 var
   sItemName : string;
   bFound : boolean;
 begin
 // Update the Update components
-
+       // Ensure that item was selected to update
+  if lstSelectItemManage.ItemIndex = -1 then
+  begin
+    ShowMessage('Select item that exists') ;
+    exit ;
+  end;
   // Item Name extraction
   sItemName := Copy(lstSelectItemManage.Items[lstSelectItemManage.ItemIndex], 1, POS(' -- ', lstSelectItemManage.Items[lstSelectItemManage.ItemIndex])-1)   ;
   redUpdateItem.Clear ;

@@ -25430,9 +25430,9 @@ object frmVolitant_Express: TfrmVolitant_Express
       object pgcAdmin: TPageControl
         Left = 248
         Top = 56
-        Width = 905
+        Width = 945
         Height = 481
-        ActivePage = tsOrdersAdmin
+        ActivePage = tsPlanesAdmin
         TabOrder = 0
         OnChange = pgcAdminChange
         object tsItemsAdmin: TTabSheet
@@ -25858,7 +25858,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
             object sedAddPlaneMLoad: TSpinEdit
               Left = 32
-              Top = 111
+              Top = 109
               Width = 137
               Height = 31
               Font.Charset = DEFAULT_CHARSET
@@ -25874,7 +25874,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
             object sedAddPlaneCSpeed: TSpinEdit
               Left = 232
-              Top = 111
+              Top = 109
               Width = 137
               Height = 31
               Font.Charset = DEFAULT_CHARSET
@@ -25953,29 +25953,29 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
           end
           object grbManagePlanes: TGroupBox
-            Left = 488
+            Left = 480
             Top = 65
-            Width = 369
+            Width = 441
             Height = 352
             Caption = 'Manage Planes'
             TabOrder = 1
             object lblUpdateFuelPrice: TLabel
-              Left = 32
-              Top = 145
+              Left = 104
+              Top = 185
               Width = 172
               Height = 15
               Caption = 'Update Plane Fuel Cost per Hour'
             end
             object lblUpdateFuelRands: TLabel
               Left = 32
-              Top = 166
+              Top = 206
               Width = 32
               Height = 15
               Caption = 'Rands'
             end
             object lblUpdateFuelCents: TLabel
               Left = 218
-              Top = 166
+              Top = 206
               Width = 30
               Height = 15
               Caption = 'Cents'
@@ -25989,7 +25989,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
             object chkRetirePlane: TCheckBox
               Left = 32
-              Top = 248
+              Top = 264
               Width = 137
               Height = 17
               Caption = 'Retire Plane'
@@ -26003,7 +26003,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
             object sedUpdateFuelRands: TSpinEdit
               Left = 33
-              Top = 187
+              Top = 227
               Width = 129
               Height = 31
               Font.Charset = DEFAULT_CHARSET
@@ -26011,15 +26011,15 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Height = -16
               Font.Name = 'Segoe UI'
               Font.Style = []
-              MaxValue = 0
+              MaxValue = 90000000
               MinValue = 0
               ParentFont = False
               TabOrder = 1
               Value = 0
             end
             object sedUpdateFuelCents: TSpinEdit
-              Left = 192
-              Top = 187
+              Left = 214
+              Top = 227
               Width = 113
               Height = 31
               Font.Charset = DEFAULT_CHARSET
@@ -26027,7 +26027,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Height = -16
               Font.Name = 'Segoe UI'
               Font.Style = []
-              MaxValue = 0
+              MaxValue = 99
               MinValue = 0
               ParentFont = False
               TabOrder = 2
@@ -26036,8 +26036,8 @@ object frmVolitant_Express: TfrmVolitant_Express
             object lstManagePlane: TListBox
               Left = 3
               Top = 50
-              Width = 350
-              Height = 79
+              Width = 435
+              Height = 129
               Font.Charset = DEFAULT_CHARSET
               Font.Color = clWindowText
               Font.Height = -16
@@ -26046,11 +26046,12 @@ object frmVolitant_Express: TfrmVolitant_Express
               ItemHeight = 21
               ParentFont = False
               TabOrder = 3
+              OnClick = lstManagePlaneClick
             end
             object btnUpdatePlane: TButton
-              Left = 24
-              Top = 296
-              Width = 321
+              Left = 3
+              Top = 287
+              Width = 435
               Height = 41
               Caption = 'Update Plane'
               Font.Charset = DEFAULT_CHARSET
@@ -26181,7 +26182,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                 object btnUpdateOrderStatus: TButton
                   Left = 24
                   Top = 263
-                  Width = 753
+                  Width = 745
                   Height = 40
                   Caption = 'Update Status'
                   Font.Charset = ANSI_CHARSET
@@ -26226,7 +26227,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                 Left = 24
                 Top = 96
                 Width = 785
-                Height = 209
+                Height = 193
                 Font.Charset = ANSI_CHARSET
                 Font.Color = clWindowText
                 Font.Height = -12
@@ -26305,9 +26306,11 @@ object frmVolitant_Express: TfrmVolitant_Express
                 TabOrder = 5
                 TextHint = 'Select Phase'
                 Items.Strings = (
-                  'Waiting for Pickup'
+                  'Waiting for delivery'
                   'In Transit'
-                  'Delivered')
+                  'Delivered'
+                  'Delayed'
+                  'Canceled')
               end
               object btnTOorderUpdate: TButton
                 Left = 656
@@ -27076,6 +27079,7 @@ object frmVolitant_Express: TfrmVolitant_Express
           Height = 49
           Caption = 'Planes'
           TabOrder = 1
+          OnClick = btnToPlanesClick
         end
         object btnToOrders: TButton
           Left = 16
@@ -27372,7 +27376,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         object tsPlaceOrder: TTabSheet
           Caption = 'Place  Oder'
           object ListBox1: TListBox
-            Left = 424
+            Left = 400
             Top = 120
             Width = 121
             Height = 97
