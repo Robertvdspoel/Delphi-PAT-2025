@@ -25432,7 +25432,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 56
         Width = 945
         Height = 481
-        ActivePage = tsPlanesAdmin
+        ActivePage = tsOrdersAdmin
         TabOrder = 0
         OnChange = pgcAdminChange
         object tsItemsAdmin: TTabSheet
@@ -26050,7 +26050,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
             object btnUpdatePlane: TButton
               Left = 3
-              Top = 296
+              Top = 287
               Width = 435
               Height = 41
               Caption = 'Update Plane'
@@ -26178,6 +26178,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                     'Canceled')
                   ParentFont = False
                   TabOrder = 4
+                  OnClick = rgpOrderStatusClick
                 end
                 object btnUpdateOrderStatus: TButton
                   Left = 24

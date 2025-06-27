@@ -370,7 +370,8 @@ type
     procedure btnDeleteCompanyAdminClick(Sender: TObject);
     procedure btnUpdateSuspensionClick(Sender: TObject);
     procedure btnToPlanesClick(Sender: TObject);
-    procedure lstManagePlaneClick(Sender: TObject);    // For the dynamic object
+    procedure lstManagePlaneClick(Sender: TObject);
+    procedure btnUpdateOrderStatusClick(Sender: TObject);    // For the dynamic object
   private
     { Private declarations }
 
@@ -1311,19 +1312,27 @@ begin
 
   // Perhaps add SQL Injection protection
 
-  qrySQL.SQL.Text := 'Select CompanyID from tblCompany where (Username = ' + QuotedStr(edtUsernameLogin.Text) + ') and Password = '+ QuotedStr(edtPasswordLogin.Text) ;  // SQL Query
+  qrySQL.SQL.Text := 'Select CompanyID, Suspended from tblCompany where (Username = ' + QuotedStr(edtUsernameLogin.Text) + ') and Password = '+ QuotedStr(edtPasswordLogin.Text) ;  // SQL Query
 
    qrySQL.Open ;
 
   if not qrySQL.IsEmpty then  // Checks that the field (Query) does not come up empty
   begin
    //  qrySQL.First ;
+    if qrySQL['Suspended'] = False then  // if the account is not suspended
+    begin
+
      sID := inttostr(qrySQL['CompanyID'])  ;
 
      ShowMessage('Logged in succesfully!');
       // Change the tabsheets
      tsLogin.TabVisible := False;
      tsHome.TabVisible := True ;
+    end
+    else
+    begin // If the account is suspended
+
+    end;
   end
   else
   begin  // If it was an invalid login
@@ -1762,6 +1771,8 @@ begin
 end;
 
 procedure TfrmVolitant_Express.btnUpdateItemClick(Sender: TObject);
+var
+  bFound : boolean ;
 begin
 // Update the item
 
@@ -1786,32 +1797,34 @@ begin
 
     // Update the item
     tblItems.First ;
-    while not tblItems.eof do
+    bFound := false;
+    while not tblItems.eof and (bFound = False) do
     begin
+      if iItemUpdateID = tblItems['ItemID'] then  // if a matching item is found
+      begin
+        bFound := True ;
+          tblItems.Edit ;
+        tblItems['T_Cost/kg'] := sedUpdateItemRands.Value + (sedUpdateItemCents.Value / 100);
+        tblItems['Dangerous'] := chkChangeItemDangerous.Checked ;
+        tblItems['Note'] := redUpdateItem.Text ;
+        // Update the retire item part
+        if  btnRetireItem.Caption = 'Retire Item' then
+        begin
+          tblItems['Retired'] := False;
+        end
+        else
+        begin
+           tblItems['Retired'] := True;
+        end;
 
+        tblItems.Post ;
+        // Update the listbox
+        lstSelectItemManage.Items[lstSelectItemManage.ItemIndex] := tblItems['Item Name'] + ' -- '+ tblItems['Category']+ ' -- '+floattostrf(tblItems['T_Cost/kg'], ffCurrency,10,2) ;
+
+      end
+      else
     tblItems.Next ;
     end;
-
-
-    tblItems.RecNo := iItemUpdateID ;
-    tblItems.Edit ;
-
-    tblItems['T_Cost/kg'] := sedUpdateItemRands.Value + (sedUpdateItemCents.Value / 100);
-    tblItems['Dangerous'] := chkChangeItemDangerous.Checked ;
-    tblItems['Note'] := redUpdateItem.Text ;
-    // Update the retire item part
-    if  btnRetireItem.Caption = 'Retire Item' then
-    begin
-      tblItems['Retired'] := False;
-    end
-    else
-    begin
-       tblItems['Retired'] := True;
-    end;
-
-    tblItems.Post ;
-    // Update the listbox
-  lstSelectItemManage.Items[lstSelectItemManage.ItemIndex] := tblItems['Item Name'] + ' -- '+ tblItems['Category']+ ' -- '+floattostrf(tblItems['T_Cost/kg'], ffCurrency,10,2) ;
 
   // clear update inputs
   edtSearchForItem.Clear ;
@@ -1822,6 +1835,14 @@ begin
   lstSelectItemManage.ItemIndex := -1;
 
   ShowMessage('Item updated successfully') ;
+end;
+
+procedure TfrmVolitant_Express.btnUpdateOrderStatusClick(Sender: TObject);
+begin
+
+  // Only allow certain functions if a company, say has paid
+
+  // Remember to update date that the trip took
 end;
 
 procedure TfrmVolitant_Express.btnUpdatePlaneClick(Sender: TObject);

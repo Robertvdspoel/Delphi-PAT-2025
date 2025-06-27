@@ -370,7 +370,9 @@ type
     procedure btnDeleteCompanyAdminClick(Sender: TObject);
     procedure btnUpdateSuspensionClick(Sender: TObject);
     procedure btnToPlanesClick(Sender: TObject);
-    procedure lstManagePlaneClick(Sender: TObject);    // For the dynamic object
+    procedure lstManagePlaneClick(Sender: TObject);
+    procedure btnUpdateOrderStatusClick(Sender: TObject);
+    procedure btnSearchForOrdersClick(Sender: TObject);    // For the dynamic object
   private
     { Private declarations }
 
@@ -1311,19 +1313,27 @@ begin
 
   // Perhaps add SQL Injection protection
 
-  qrySQL.SQL.Text := 'Select CompanyID from tblCompany where (Username = ' + QuotedStr(edtUsernameLogin.Text) + ') and Password = '+ QuotedStr(edtPasswordLogin.Text) ;  // SQL Query
+  qrySQL.SQL.Text := 'Select CompanyID, Suspended from tblCompany where (Username = ' + QuotedStr(edtUsernameLogin.Text) + ') and Password = '+ QuotedStr(edtPasswordLogin.Text) ;  // SQL Query
 
    qrySQL.Open ;
 
   if not qrySQL.IsEmpty then  // Checks that the field (Query) does not come up empty
   begin
    //  qrySQL.First ;
+    if qrySQL['Suspended'] = False then  // if the account is not suspended
+    begin
+
      sID := inttostr(qrySQL['CompanyID'])  ;
 
      ShowMessage('Logged in succesfully!');
       // Change the tabsheets
      tsLogin.TabVisible := False;
      tsHome.TabVisible := True ;
+    end
+    else
+    begin // If the account is suspended
+      ShowMessage('Account is suspended'+ #13+'Contact admins to resolve your issue')  ;
+    end;
   end
   else
   begin  // If it was an invalid login
@@ -1573,6 +1583,14 @@ begin
     end;
     tblCompany.Next ;
   end;
+end;
+
+procedure TfrmVolitant_Express.btnSearchForOrdersClick(Sender: TObject);
+begin
+// Show all orders
+
+
+// Add button for displaying orders that will be due in short time
 end;
 
 procedure TfrmVolitant_Express.btnSeatchForCompanyClick(Sender: TObject);
@@ -1826,6 +1844,16 @@ begin
   lstSelectItemManage.ItemIndex := -1;
 
   ShowMessage('Item updated successfully') ;
+end;
+
+procedure TfrmVolitant_Express.btnUpdateOrderStatusClick(Sender: TObject);
+begin
+
+  // Only allow certain functions if a company, say has paid
+
+  // Remember to update date that the trip took
+
+  // Suspounded account order not to be processed
 end;
 
 procedure TfrmVolitant_Express.btnUpdatePlaneClick(Sender: TObject);

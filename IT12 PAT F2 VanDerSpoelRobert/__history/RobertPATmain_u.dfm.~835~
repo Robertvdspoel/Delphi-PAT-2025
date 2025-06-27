@@ -26011,7 +26011,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Height = -16
               Font.Name = 'Segoe UI'
               Font.Style = []
-              MaxValue = 10000000
+              MaxValue = 90000000
               MinValue = 0
               ParentFont = False
               TabOrder = 1
@@ -26050,7 +26050,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
             object btnUpdatePlane: TButton
               Left = 3
-              Top = 296
+              Top = 287
               Width = 435
               Height = 41
               Caption = 'Update Plane'

@@ -6429,7 +6429,7 @@ object frmVolitant_Express: TfrmVolitant_Express
     Top = 16
     Width = 1234
     Height = 609
-    ActivePage = tsAdmin
+    ActivePage = tsLogin
     TabOrder = 0
     object tsWelcome: TTabSheet
       Caption = 'Welcome'
@@ -26011,7 +26011,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Height = -16
               Font.Name = 'Segoe UI'
               Font.Style = []
-              MaxValue = 100000000
+              MaxValue = 90000000
               MinValue = 0
               ParentFont = False
               TabOrder = 1
@@ -26050,7 +26050,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
             object btnUpdatePlane: TButton
               Left = 3
-              Top = 296
+              Top = 287
               Width = 435
               Height = 41
               Caption = 'Update Plane'
@@ -26192,6 +26192,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                   Font.Style = [fsBold]
                   ParentFont = False
                   TabOrder = 5
+                  OnClick = btnUpdateOrderStatusClick
                 end
                 object sedEnterCNameSearchOrderUpdate: TSpinEdit
                   Left = 320

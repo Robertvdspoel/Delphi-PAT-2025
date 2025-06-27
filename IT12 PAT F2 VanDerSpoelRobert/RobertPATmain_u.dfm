@@ -25432,7 +25432,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 56
         Width = 945
         Height = 481
-        ActivePage = tsPlanesAdmin
+        ActivePage = tsOrdersAdmin
         TabOrder = 0
         OnChange = pgcAdminChange
         object tsItemsAdmin: TTabSheet
@@ -26148,6 +26148,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                   Font.Style = [fsBold]
                   ParentFont = False
                   TabOrder = 2
+                  OnClick = btnSearchForOrdersClick
                 end
                 object BitBtnClearOrderSearch: TBitBtn
                   Left = 438
@@ -26192,6 +26193,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                   Font.Style = [fsBold]
                   ParentFont = False
                   TabOrder = 5
+                  OnClick = btnUpdateOrderStatusClick
                 end
                 object sedEnterCNameSearchOrderUpdate: TSpinEdit
                   Left = 320
