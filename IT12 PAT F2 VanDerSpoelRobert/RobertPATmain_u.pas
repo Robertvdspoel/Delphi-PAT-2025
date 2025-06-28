@@ -295,7 +295,6 @@ type
     grbUpdateWelcomeLabel: TGroupBox;
     clbWelcomeLabelTheme: TColorListBox;
     btnUpdateWelcomeLabel: TButton;
-    btnGroupBoxDefaultColor: TButton;
     sedEnterCompanyID: TSpinEdit;
     btnLoadCompany: TButton;
     sedEnterCNameSearchOrderUpdate: TSpinEdit;
@@ -313,6 +312,11 @@ type
     btnItemOrderPrice: TButton;
     btnToAdminManage: TButton;
     tsAdminManage: TTabSheet;
+    lblManageAdmin: TLabel;
+    lblEnterPlaneAmounts: TLabel;
+    sedAddPlaneAmount: TSpinEdit;
+    sedUpdatePlaneCount: TSpinEdit;
+    lblUpdateAmountOfPlane: TLabel;
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnRegisterGOClick(Sender: TObject);
@@ -367,10 +371,7 @@ type
     procedure btnChangeFORMthemeClick(Sender: TObject);
     procedure btnFormThemeDefaultClick(Sender: TObject);
     Procedure imgDynamicOnclick(Sender: TObject);
-    procedure CGhomeThemeChange(Sender: TObject);
-    procedure btnHomeThemeDefaultClick(Sender: TObject);
     procedure btnUpdateWelcomeLabelClick(Sender: TObject);
-    procedure btnGroupBoxDefaultColorClick(Sender: TObject);
     procedure btnSearcCompAgeRangeClick(Sender: TObject);
     procedure btnSeatchForCompanyClick(Sender: TObject);
     procedure btnLoadCompanyClick(Sender: TObject);
@@ -384,7 +385,9 @@ type
     procedure btnUpdateOrderStatusClick(Sender: TObject);
     procedure btnSearchForOrdersClick(Sender: TObject);
     procedure btnItemOrderPriceClick(Sender: TObject);
-    procedure btnOrderSumAdminClick(Sender: TObject);    // For the dynamic object
+    procedure btnOrderSumAdminClick(Sender: TObject);
+    procedure btnHomeThemeDefaultClick(Sender: TObject);
+    procedure CGhomeThemeClick(Sender: TObject);    // For the dynamic object
   private
     { Private declarations }
 
@@ -940,6 +943,7 @@ begin
    tblPlanes['FuelCost'] := sedAddFuelRands.Value + sedAddFuelCents.Value / 100;
    tblPlanes['Max Distance'] := sedAddPlaneMDistance.Value ;
    tblPlanes['Retired'] := False ;
+   tblPlanes['Count'] := sedAddPlaneAmount.value;
   tblPlanes.Post ;
 // Update the list box
    lstManagePlane.Items.Add(IntToStr(tblPlanes['PlaneID']) +'-'+tblPlanes['Plane Name']+' -- '+ FloatToStrF(tblPlanes['FuelCost'], ffCurrency ,10,2)  );
@@ -986,6 +990,7 @@ begin
   iColor :=ColorDialogFORM.Color ;
   // Write to file for startup theme setting
   WriteToFormTheme('Themes/formtheme.txt', iColor) ;
+  ShowMessage('Form theme updated successfully') ;
 end;
 
 procedure TfrmVolitant_Express.btnCInfoBackClick(Sender: TObject);
@@ -1138,6 +1143,7 @@ begin
 // Set the form theme back to the default color
 frmVolitant_Express.color :=clBtnFace ;
 WriteToFormTheme('Themes/formtheme.txt', clBtnFace) ;
+ShowMessage('Default Form theme restored') ;
 end;
 
 procedure TfrmVolitant_Express.btnRetireItemClick(Sender: TObject);
@@ -1259,13 +1265,6 @@ tsGallery.TabVisible := true;
 
 end;
 
-procedure TfrmVolitant_Express.btnGroupBoxDefaultColorClick(Sender: TObject);
-begin
-// Change the color of the group box to its defualt clBtnFace; as there is no clBtnFace in the color grid
-grbHome.Color := clBtnFace;
-  WriteToFormTheme('Themes/home_grb_theme.txt', clBtnFace) ;
-end;
-
 procedure TfrmVolitant_Express.btnHomeThemeDefaultClick(Sender: TObject);
 begin
 // Return the home theme to default
@@ -1278,6 +1277,7 @@ begin
   // of the group box
   grbHome.Color := clBtnFace ;
   WriteToFormTheme('Themes/home_grb_theme.txt', clBtnFace) ;
+  ShowMessage('Themes of Home group box and home label restored to default') ;
 end;
 
 procedure TfrmVolitant_Express.btnIntroVidClick(Sender: TObject);
@@ -1449,6 +1449,7 @@ end;
 procedure TfrmVolitant_Express.btnOrderSumAdminClick(Sender: TObject);
 begin
 // Give a summary about stats everything order related
+
 end;
 
 procedure TfrmVolitant_Express.btnPauseVidClick(Sender: TObject);
@@ -1505,8 +1506,10 @@ begin
  pnlTotalOrders.Caption :='Total Orders: '+ IntToStr(tblOrders.RecordCount );
  // Total Items
  pnlTotalItems.Caption := 'Total Items: ' + IntToStr(tblItems.RecordCount) ;
- // Total Planes 
- pnlTotalPlanes.Caption := 'Total Planes: ' + IntToStr(tblPlanes.RecordCount) ;
+ // Total Planes
+ qrySQL.SQL.Text := 'Select SUM(Count) as Result from tblPlanes' ;
+ qrySQL.Open ;
+ pnlTotalPlanes.Caption := 'Total Planes: ' + IntToStr(qrySQL['Result']) ;
 
  // Top plain
  qrySQL.SQL.Text := 'SELECT TOP 1 PlaneID AS Result FROM tblOrders Group By PlaneID ORDER BY Count(*) DESC';
@@ -1835,6 +1838,7 @@ begin
 tsHome.TabVisible := False;
 tsPayment.TabVisible := True ;
 
+  // Load all payable orders into the list box
 
 end;
 
@@ -1946,7 +1950,7 @@ end;
 
 procedure TfrmVolitant_Express.btnUpdatePlaneClick(Sender: TObject);
 var
-  iPlaneID : integer;
+  iPlaneID, iPlainUseCount : integer;
   bFound : boolean ;
 begin
 // Update the plane info
@@ -1964,9 +1968,29 @@ begin
       ShowMessage('Enter a fuel price for the Plane') ;
       exit;
     end;
-    // update the plane
       // Get the planeID
     iPlaneID  := StrToInt(Copy(lstManagePlane.Items[lstManagePlane.ItemIndex], 1, Pos('-',lstManagePlane.Items[lstManagePlane.ItemIndex])-1 ) ) ;
+    // Ensure that the amount of plains after the plain count update, is not less than the amount of plains being used in orders currently
+    iPlainUseCount := 0 ;
+    tblOrders.First ;
+    while not tblOrders.Eof do
+    begin
+         if tblOrders['PlaneID'] = iPlaneID then // If a matching order was found
+         begin
+          if not (tblOrders['Status'] = 'Delivered') and not (tblOrders['Status']= 'Canceled') then  // If the plain is still being used, inc the amount of plains beign used counter
+          begin
+            Inc(iPlainUseCount) ;
+          end;
+         end;
+      tblOrders.Next ;
+    end;
+      // Check that enough planes will be left overs
+      if iPlainUseCount > sedUpdatePlaneCount.Value then
+      begin
+        ShowMessage('Not enough planes left for amount used in active orders'+#13+'Wait untill all orders are handeled before lowering the coount'+#13+ 'Retire plain temporarly to prevent more orders from beign added to plain. Update plain count after all orders using it was handeled and then unretire plain');
+        exit; 
+      end;
+    // update the plane
       bFound := false;
       tblPlanes.First ;
       while not tblPlanes.Eof and (bFound = False) do
@@ -1978,6 +2002,7 @@ begin
           tblPlanes.Edit ;
           tblPlanes['Retired'] := chkRetirePlane.Checked ;
           tblPlanes['FuelCost'] := sedUpdateFuelRands.Value + sedUpdateFuelCents.Value / 100;
+          tblPlanes['Count']:= sedUpdatePlaneCount.Value ;
           tblPlanes.Post ;
            // Update the listbox
           lstManagePlane.Items[lstManagePlane.ItemIndex] := IntToStr(tblPlanes['PlaneID']) +'-'+tblPlanes['Plane Name']+' -- '+ FloatToStrF(tblPlanes['FuelCost'], ffCurrency ,10,2)  ;
@@ -1990,6 +2015,7 @@ begin
     chkRetirePlane.Checked := False;
     sedUpdateFuelRands.Value := 0;
     sedUpdateFuelCents.Value := 0;
+    sedUpdatePlaneCount.Value := 1 ;
     lstManagePlane.ItemIndex := -1;
     // Confirmation if successfull
     ShowMessage('Plane updated successfully') ;
@@ -2028,6 +2054,7 @@ begin
 // Update the welcome lable color theme
   lblWelcome.font.Color := clbWelcomeLabelTheme.Selected;
   WriteToFormTheme('Themes/welcome_label_theme.txt', clbWelcomeLabelTheme.Selected) ;
+  ShowMessage('Welcome label theme updated');
 end;
 
 procedure TfrmVolitant_Express.cmbCountryBasedChange(Sender: TObject);
@@ -2062,16 +2089,17 @@ begin
   end;
 end;
 
-procedure TfrmVolitant_Express.CGhomeThemeChange(Sender: TObject);
+procedure TfrmVolitant_Express.CGhomeThemeClick(Sender: TObject);
 begin
 // Change the theme of the home page
-
   // Change the color of the label
   lblWelcomeHome.font.Color := CGhomeTheme.ForegroundColor ;
    WriteToFormTheme('Themes/home_label_theme.txt',CGhomeTheme.ForegroundColor) ;
    // Change the theme of the group box
    grbHome.Color := CGhomeTheme.BackgroundColor ;
    WriteToFormTheme('Themes/home_grb_theme.txt', CGhomeTheme.BackgroundColor) ;
+
+   ShowMessage('Theme of Home group box and label Updated')
 end;
 
 procedure TfrmVolitant_Express.dbgDifferentTablesCellClick(Column: TColumn);
@@ -2474,6 +2502,7 @@ begin
         sedUpdateFuelRands.Value := Trunc(tblPlanes['FuelCost']) ; // Set the Rands
         sedUpdateFuelCents.Value := Round(Frac(tblPlanes['FuelCost'])* 100 ) ; // Set the cents
         chkRetirePlane.Checked := tblPlanes['Retired'] ; // If the plane is retired or not
+        sedUpdatePlaneCount.Value := tblPlanes['Count'] ;
       end;
    tblPlanes.Next ;
    end;

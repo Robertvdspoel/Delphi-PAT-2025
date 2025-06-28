@@ -2,8 +2,8 @@ object frmVolitant_Express: TfrmVolitant_Express
   Left = 368
   Top = 166
   Caption = 'Volitant Express'
-  ClientHeight = 662
-  ClientWidth = 1250
+  ClientHeight = 648
+  ClientWidth = 1234
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -6425,8 +6425,8 @@ object frmVolitant_Express: TfrmVolitant_Express
   OnCreate = FormCreate
   TextHeight = 15
   object pgcMain: TPageControl
-    Left = 8
-    Top = 16
+    Left = 0
+    Top = 0
     Width = 1234
     Height = 609
     ActivePage = tsAdmin
@@ -25843,6 +25843,13 @@ object frmVolitant_Express: TfrmVolitant_Express
               Height = 15
               Caption = 'Cents'
             end
+            object lblEnterPlaneAmounts: TLabel
+              Left = 248
+              Top = 160
+              Width = 164
+              Height = 15
+              Caption = 'Amount of plains being added:'
+            end
             object edtAddPlaneName: TEdit
               Left = 32
               Top = 49
@@ -25951,6 +25958,22 @@ object frmVolitant_Express: TfrmVolitant_Express
               TabOrder = 6
               OnClick = btnAddPlaneClick
             end
+            object sedAddPlaneAmount: TSpinEdit
+              Left = 248
+              Top = 181
+              Width = 129
+              Height = 31
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -16
+              Font.Name = 'Segoe UI'
+              Font.Style = []
+              MaxValue = 20
+              MinValue = 1
+              ParentFont = False
+              TabOrder = 7
+              Value = 1
+            end
           end
           object grbManagePlanes: TGroupBox
             Left = 480
@@ -25960,36 +25983,43 @@ object frmVolitant_Express: TfrmVolitant_Express
             Caption = 'Manage Planes'
             TabOrder = 1
             object lblUpdateFuelPrice: TLabel
-              Left = 104
-              Top = 185
+              Left = 120
+              Top = 177
               Width = 172
               Height = 15
               Caption = 'Update Plane Fuel Cost per Hour'
             end
             object lblUpdateFuelRands: TLabel
               Left = 32
-              Top = 206
+              Top = 190
               Width = 32
               Height = 15
               Caption = 'Rands'
             end
             object lblUpdateFuelCents: TLabel
               Left = 218
-              Top = 206
+              Top = 190
               Width = 30
               Height = 15
               Caption = 'Cents'
             end
             object lblSelectPlaneUpdate: TLabel
               Left = 3
-              Top = 29
+              Top = 21
               Width = 127
               Height = 15
               Caption = 'Select a plane to Update'
             end
+            object lblUpdateAmountOfPlane: TLabel
+              Left = 24
+              Top = 258
+              Width = 95
+              Height = 15
+              Caption = 'Amount Of Plane:'
+            end
             object chkRetirePlane: TCheckBox
               Left = 32
-              Top = 264
+              Top = 284
               Width = 137
               Height = 17
               Caption = 'Retire Plane'
@@ -26003,7 +26033,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
             object sedUpdateFuelRands: TSpinEdit
               Left = 33
-              Top = 227
+              Top = 211
               Width = 129
               Height = 31
               Font.Charset = DEFAULT_CHARSET
@@ -26019,7 +26049,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
             object sedUpdateFuelCents: TSpinEdit
               Left = 214
-              Top = 227
+              Top = 211
               Width = 113
               Height = 31
               Font.Charset = DEFAULT_CHARSET
@@ -26035,7 +26065,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
             object lstManagePlane: TListBox
               Left = 3
-              Top = 50
+              Top = 42
               Width = 435
               Height = 129
               Font.Charset = DEFAULT_CHARSET
@@ -26050,7 +26080,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
             object btnUpdatePlane: TButton
               Left = 3
-              Top = 295
+              Top = 307
               Width = 435
               Height = 42
               Caption = 'Update Plane'
@@ -26062,6 +26092,22 @@ object frmVolitant_Express: TfrmVolitant_Express
               ParentFont = False
               TabOrder = 4
               OnClick = btnUpdatePlaneClick
+            end
+            object sedUpdatePlaneCount: TSpinEdit
+              Left = 136
+              Top = 247
+              Width = 121
+              Height = 31
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -16
+              Font.Name = 'Segoe UI'
+              Font.Style = []
+              MaxValue = 40
+              MinValue = 1
+              ParentFont = False
+              TabOrder = 5
+              Value = 0
             end
           end
         end
@@ -26085,14 +26131,14 @@ object frmVolitant_Express: TfrmVolitant_Express
             Left = 16
             Top = 62
             Width = 849
-            Height = 371
+            Height = 379
             ActivePage = tsOrderUpdate
             TabOrder = 0
             object tsOrderUpdate: TTabSheet
               Caption = 'Update an Order'
               object grpUpdateOrder: TGroupBox
                 Left = -4
-                Top = 3
+                Top = 0
                 Width = 790
                 Height = 306
                 Caption = 'Update Order'
@@ -26105,7 +26151,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                   Caption = 'Enter a company name to search (Optional)'
                 end
                 object lblSelectOrderStatus: TLabel
-                  Left = 232
+                  Left = 239
                   Top = 81
                   Width = 119
                   Height = 15
@@ -26114,7 +26160,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                 object lstSelectOrderAdmin: TListBox
                   Left = 24
                   Top = 102
-                  Width = 521
+                  Width = 540
                   Height = 155
                   Font.Charset = DEFAULT_CHARSET
                   Font.Color = clWindowText
@@ -26161,7 +26207,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                   TabOrder = 3
                 end
                 object rgpOrderStatus: TRadioGroup
-                  Left = 551
+                  Left = 570
                   Top = 24
                   Width = 217
                   Height = 233
@@ -26210,7 +26256,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                 Left = 632
                 Top = 312
                 Width = 155
-                Height = 28
+                Height = 34
                 Caption = 'Go to Orders Output Page'
                 Font.Charset = DEFAULT_CHARSET
                 Font.Color = clWindowText
@@ -26229,7 +26275,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                 Left = 24
                 Top = 96
                 Width = 785
-                Height = 193
+                Height = 201
                 Font.Charset = ANSI_CHARSET
                 Font.Color = clWindowText
                 Font.Height = -12
@@ -26316,10 +26362,10 @@ object frmVolitant_Express: TfrmVolitant_Express
                   'Canceled')
               end
               object btnTOorderUpdate: TButton
-                Left = 656
-                Top = 311
-                Width = 155
-                Height = 27
+                Left = 624
+                Top = 303
+                Width = 187
+                Height = 35
                 Caption = 'To Update Order Page'
                 Font.Charset = DEFAULT_CHARSET
                 Font.Color = clWindowText
@@ -27001,11 +27047,11 @@ object frmVolitant_Express: TfrmVolitant_Express
               Left = 19
               Top = 61
               Width = 384
-              Height = 184
+              Height = 220
               ParentShowHint = False
               ShowHint = False
               TabOrder = 0
-              OnChange = CGhomeThemeChange
+              OnClick = CGhomeThemeClick
             end
             object btnHomeThemeDefault: TButton
               Left = 302
@@ -27015,15 +27061,6 @@ object frmVolitant_Express: TfrmVolitant_Express
               Caption = 'Default'
               TabOrder = 1
               OnClick = btnHomeThemeDefaultClick
-            end
-            object btnGroupBoxDefaultColor: TButton
-              Left = 16
-              Top = 251
-              Width = 387
-              Height = 39
-              Caption = 'Change Group Box color to default (clBtnFace)'
-              TabOrder = 2
-              OnClick = btnGroupBoxDefaultColorClick
             end
           end
           object grbUpdateWelcomeLabel: TGroupBox
@@ -27104,6 +27141,19 @@ object frmVolitant_Express: TfrmVolitant_Express
         object tsAdminManage: TTabSheet
           Caption = 'Manage Admin'
           ImageIndex = 9
+          object lblManageAdmin: TLabel
+            Left = 288
+            Top = 24
+            Width = 308
+            Height = 37
+            Caption = 'Manage Admin Accounts'
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clNavy
+            Font.Height = -27
+            Font.Name = 'Segoe UI Semibold'
+            Font.Style = [fsBold]
+            ParentFont = False
+          end
         end
       end
       object grbAdminQuick: TGroupBox
@@ -27448,8 +27498,8 @@ object frmVolitant_Express: TfrmVolitant_Express
         object tsPlaceOrder: TTabSheet
           Caption = 'Place  Oder'
           object ListBox1: TListBox
-            Left = 400
-            Top = 120
+            Left = 264
+            Top = 72
             Width = 121
             Height = 97
             ItemHeight = 15
@@ -27483,8 +27533,8 @@ object frmVolitant_Express: TfrmVolitant_Express
     end
   end
   object bitbtnCloseProgram: TBitBtn
-    Left = 1036
-    Top = 627
+    Left = 1028
+    Top = 615
     Width = 206
     Height = 33
     Font.Charset = ANSI_CHARSET
