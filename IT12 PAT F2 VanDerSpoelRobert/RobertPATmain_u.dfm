@@ -2,7 +2,7 @@ object frmVolitant_Express: TfrmVolitant_Express
   Left = 368
   Top = 166
   Caption = 'Volitant Express'
-  ClientHeight = 663
+  ClientHeight = 662
   ClientWidth = 1250
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -25432,7 +25432,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 56
         Width = 945
         Height = 481
-        ActivePage = tsOrdersAdmin
+        ActivePage = tsPlanesAdmin
         TabOrder = 0
         OnChange = pgcAdminChange
         object tsItemsAdmin: TTabSheet
@@ -25866,7 +25866,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Height = -16
               Font.Name = 'Segoe UI'
               Font.Style = []
-              MaxValue = 0
+              MaxValue = 2000000
               MinValue = 0
               ParentFont = False
               TabOrder = 1
@@ -25882,7 +25882,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Height = -16
               Font.Name = 'Segoe UI'
               Font.Style = []
-              MaxValue = 0
+              MaxValue = 10000
               MinValue = 0
               ParentFont = False
               TabOrder = 2
@@ -25898,7 +25898,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Height = -16
               Font.Name = 'Segoe UI'
               Font.Style = []
-              MaxValue = 0
+              MaxValue = 2000000
               MinValue = 0
               ParentFont = False
               TabOrder = 3
@@ -25914,7 +25914,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Height = -16
               Font.Name = 'Segoe UI'
               Font.Style = []
-              MaxValue = 0
+              MaxValue = 99
               MinValue = 0
               ParentFont = False
               TabOrder = 4
@@ -25930,7 +25930,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Height = -16
               Font.Name = 'Segoe UI'
               Font.Style = []
-              MaxValue = 0
+              MaxValue = 21000
               MinValue = 0
               ParentFont = False
               TabOrder = 5
@@ -26050,9 +26050,9 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
             object btnUpdatePlane: TButton
               Left = 3
-              Top = 287
+              Top = 295
               Width = 435
-              Height = 41
+              Height = 42
               Caption = 'Update Plane'
               Font.Charset = DEFAULT_CHARSET
               Font.Color = clWindowText
@@ -26253,6 +26253,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                 Font.Style = [fsBold]
                 ParentFont = False
                 TabOrder = 1
+                OnClick = btnOrderSumAdminClick
               end
               object btnOrderInfoAdmin: TButton
                 Left = 224
@@ -26628,6 +26629,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             Top = 22
             Width = 857
             Height = 210
+            ReadOnly = True
             TabOrder = 0
             TitleFont.Charset = DEFAULT_CHARSET
             TitleFont.Color = clWindowText
@@ -26692,6 +26694,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Top = 49
               Width = 574
               Height = 112
+              ReadOnly = True
               TabOrder = 0
               TitleFont.Charset = DEFAULT_CHARSET
               TitleFont.Color = clWindowText
@@ -27051,6 +27054,57 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
           end
         end
+        object tsGrid: TTabSheet
+          Caption = 'Grid'
+          ImageIndex = 8
+          object lblSortDatabase: TLabel
+            Left = 168
+            Top = 3
+            Width = 498
+            Height = 45
+            Caption = 'Sort And Control Database in Grid'
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clAqua
+            Font.Height = -32
+            Font.Name = 'Segoe UI Semibold'
+            Font.Style = [fsBold]
+            ParentFont = False
+          end
+          object dbgGridDisplay: TDBGrid
+            Left = 3
+            Top = 54
+            Width = 918
+            Height = 187
+            ReadOnly = True
+            TabOrder = 0
+            TitleFont.Charset = DEFAULT_CHARSET
+            TitleFont.Color = clWindowText
+            TitleFont.Height = -12
+            TitleFont.Name = 'Segoe UI'
+            TitleFont.Style = []
+          end
+          object grbGrid: TGroupBox
+            Left = 3
+            Top = 256
+            Width = 918
+            Height = 177
+            Caption = 'Press a button to Run statement'
+            TabOrder = 1
+            object btnItemOrderPrice: TButton
+              Left = 3
+              Top = 24
+              Width = 174
+              Height = 25
+              Caption = 'Order Items Based On Price'
+              TabOrder = 0
+              OnClick = btnItemOrderPriceClick
+            end
+          end
+        end
+        object tsAdminManage: TTabSheet
+          Caption = 'Manage Admin'
+          ImageIndex = 9
+        end
       end
       object grbAdminQuick: TGroupBox
         Left = 16
@@ -27067,35 +27121,35 @@ object frmVolitant_Express: TfrmVolitant_Express
         TabOrder = 1
         object btnToItems: TButton
           Left = 16
-          Top = 31
+          Top = 26
           Width = 153
-          Height = 49
+          Height = 39
           Caption = 'Items'
           TabOrder = 0
           OnClick = btnToItemsClick
         end
         object btnToPlanes: TButton
           Left = 16
-          Top = 86
+          Top = 71
           Width = 153
-          Height = 49
+          Height = 42
           Caption = 'Planes'
           TabOrder = 1
           OnClick = btnToPlanesClick
         end
         object btnToOrders: TButton
           Left = 16
-          Top = 141
+          Top = 119
           Width = 153
-          Height = 49
+          Height = 37
           Caption = 'Orders'
           TabOrder = 2
         end
         object btnToCompanies: TButton
           Left = 16
-          Top = 196
+          Top = 162
           Width = 153
-          Height = 49
+          Height = 40
           Caption = 'Companies'
           TabOrder = 3
         end
@@ -27103,37 +27157,53 @@ object frmVolitant_Express: TfrmVolitant_Express
           Left = 16
           Top = 251
           Width = 153
-          Height = 49
+          Height = 39
           Caption = 'Emails'
           TabOrder = 4
           OnClick = btnToEmailsClick
         end
         object btnToSummary: TButton
           Left = 16
-          Top = 306
+          Top = 208
           Width = 153
-          Height = 49
+          Height = 37
           Caption = 'Summary'
           TabOrder = 5
           OnClick = btnToSummaryClick
         end
         object btnToCustom: TButton
           Left = 16
-          Top = 361
+          Top = 296
           Width = 153
-          Height = 49
+          Height = 37
           Caption = 'Custom SQL'
           TabOrder = 6
           OnClick = btnToCustomClick
         end
         object btnToTheme: TButton
           Left = 16
-          Top = 416
+          Top = 339
           Width = 153
-          Height = 48
+          Height = 37
           Caption = 'Theme'
           TabOrder = 7
           OnClick = btnToThemeClick
+        end
+        object btnToGrid: TButton
+          Left = 16
+          Top = 382
+          Width = 153
+          Height = 37
+          Caption = 'Grid'
+          TabOrder = 8
+        end
+        object btnToAdminManage: TButton
+          Left = 16
+          Top = 425
+          Width = 153
+          Height = 37
+          Caption = 'Manage Admins'
+          TabOrder = 9
         end
       end
       object bitbtnAdminHelp: TBitBtn
@@ -27488,5 +27558,14 @@ object frmVolitant_Express: TfrmVolitant_Express
   object ColorDialogFORM: TColorDialog
     Left = 96
     Top = 632
+  end
+  object qryGrid: TADOQuery
+    Parameters = <>
+    Left = 240
+    Top = 672
+  end
+  object dsrGrid: TDataSource
+    Left = 272
+    Top = 680
   end
 end

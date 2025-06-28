@@ -15,7 +15,7 @@ uses
   Vcl.DBCtrls, Vcl.CheckLst, Soap.InvokeRegistry, Soap.WSDLIntf,
   Soap.SOAPPasInv, Soap.SOAPHTTPPasInv, VclTee.TeeGDIPlus, VCLTee.TeEngine,
   VCLTee.Series, VCLTee.TeeProcs, VCLTee.Chart, DateUtils, math, clsDistance_u, clsUsername_u,
-  Vcl.FileCtrl, Xml.xmldom, Xml.XmlTransform, Vcl.TabNotBk;
+  Vcl.FileCtrl, Xml.xmldom, Xml.XmlTransform, Vcl.TabNotBk, VCLTee.TeeDraw3D;
 
 type
   TfrmVolitant_Express = class(TForm)
@@ -303,6 +303,16 @@ type
     btnDeleteCompanyAdmin: TButton;
     chkSuspendAccount: TCheckBox;
     btnUpdateSuspension: TButton;
+    tsGrid: TTabSheet;
+    btnToGrid: TButton;
+    lblSortDatabase: TLabel;
+    dbgGridDisplay: TDBGrid;
+    qryGrid: TADOQuery;
+    dsrGrid: TDataSource;
+    grbGrid: TGroupBox;
+    btnItemOrderPrice: TButton;
+    btnToAdminManage: TButton;
+    tsAdminManage: TTabSheet;
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnRegisterGOClick(Sender: TObject);
@@ -372,7 +382,9 @@ type
     procedure btnToPlanesClick(Sender: TObject);
     procedure lstManagePlaneClick(Sender: TObject);
     procedure btnUpdateOrderStatusClick(Sender: TObject);
-    procedure btnSearchForOrdersClick(Sender: TObject);    // For the dynamic object
+    procedure btnSearchForOrdersClick(Sender: TObject);
+    procedure btnItemOrderPriceClick(Sender: TObject);
+    procedure btnOrderSumAdminClick(Sender: TObject);    // For the dynamic object
   private
     { Private declarations }
 
@@ -871,11 +883,74 @@ begin
 end;
 
 procedure TfrmVolitant_Express.btnAddPlaneClick(Sender: TObject);
+var
+  sPlaneName : string ;
 begin
 // Add a plane to the database
 
   // Validation
+     // Check that a new item name was entered and that it is in range
+   sPlaneName := edtAddPlaneName.Text ;
+   if ( sPlaneName = '') or ( sPlaneName = ' ') or (Length( sPlaneName) > 40 ) then
+   begin
+      ShowMessage('No plane name entered or length longer than 40 character') ;
+      exit;
+   end;
+  // Check that the item name does not already exist
+  tblPlanes.First ;
+  while not tblPlanes.Eof do
+  begin
+    if Uppercase( sPlaneName) = Uppercase(tblPlanes['Plane Name']) then
+    begin
+      ShowMessage('Plane already exists. Update plane to change anything') ;
+      exit;
+    end;
+    tblPlanes.Next ;
+  end;
+  // Check that a max load was entered
+  if sedAddPlaneMLoad.Value = 0 then
+  begin
+    ShowMessage('Enter price max load in Kg');
+    exit;
+  end;
+  // Check that the cruising speed was entered
+  if sedAddPlaneCSpeed.Value = 0 then
+  begin
+    ShowMessage('Enter plane cruising speed in km/h') ;
+    exit ;
+  end;
+  // Check that a max distance was entered
+  if sedAddPlaneMDistance.Value = 0 then
+  begin
+    ShowMessage('Enter plane max flight distance in km') ;
+    exit;
+  end;
+  // Validate that a fuel price was entered
+  if sedAddFuelRands.Value = 0 then
+  begin
+    ShowMessage('Enter a fuel price in Fuel Cost per hour in ZAR');
+    exit;
+  end;
+  // Add item to the database
 
+  tblPlanes.Insert;
+   tblPlanes['Plane Name'] := sPlaneName ;
+   tblPlanes['Max Load'] := sedAddPlaneMLoad.Value ;
+   tblPlanes['Cruising Speed']:= sedAddPlaneCSpeed.Value ;
+   tblPlanes['FuelCost'] := sedAddFuelRands.Value + sedAddFuelCents.Value / 100;
+   tblPlanes['Max Distance'] := sedAddPlaneMDistance.Value ;
+   tblPlanes['Retired'] := False ;
+  tblPlanes.Post ;
+// Update the list box
+   lstManagePlane.Items.Add(IntToStr(tblPlanes['PlaneID']) +'-'+tblPlanes['Plane Name']+' -- '+ FloatToStrF(tblPlanes['FuelCost'], ffCurrency ,10,2)  );
+     ShowMessage('Item successfully added'); // Confirmation
+   // Clear the inputs
+   edtAddPlaneName.Clear;
+   sedAddPlaneMLoad.Value := 0 ;
+   sedAddPlaneCSpeed.Value := 0 ;
+   sedAddPlaneMDistance.Value := 0 ;
+   sedAddFuelRands.Value := 0;
+   sedAddFuelCents.Value := 0 ;
 end;
 
 procedure TfrmVolitant_Express.btnBackFromGalleryClick(Sender: TObject);
@@ -1219,6 +1294,13 @@ tsIntroVideo.TabVisible := true ;
   mpIntroVideo.Play;  // Play the video
 end;
 
+procedure TfrmVolitant_Express.btnItemOrderPriceClick(Sender: TObject);
+begin
+  // Order the items from the items table according to their price
+  qryGrid.SQL.Text := 'Select * from tblItems Order By [T_Cost/kg] DESC';
+  qryGrid.Open ;
+end;
+
 procedure TfrmVolitant_Express.btnLastInfoBackClick(Sender: TObject);
 begin
 // Go back to the contact info reg page from the last info page
@@ -1362,6 +1444,11 @@ begin
 // Search and list orders that are in a spesific phase
 
 // Validation
+end;
+
+procedure TfrmVolitant_Express.btnOrderSumAdminClick(Sender: TObject);
+begin
+// Give a summary about stats everything order related
 end;
 
 procedure TfrmVolitant_Express.btnPauseVidClick(Sender: TObject);
@@ -1733,12 +1820,13 @@ end;
 procedure TfrmVolitant_Express.btnToOrdersOutputClick(Sender: TObject);
 begin
 // Go to the orders output page from the orders update page
+pgcAdminOrders.ActivePage := tsOrderOutput;
 end;
 
 procedure TfrmVolitant_Express.btnTOorderUpdateClick(Sender: TObject);
 begin
 // Go to the update orders page from the order output page
-
+pgcAdminOrders.ActivePage := tsOrderUpdate ;
 end;
 
 procedure TfrmVolitant_Express.btnTOpaymentClick(Sender: TObject);
@@ -2198,6 +2286,11 @@ chkSuspendAccount.Enabled := False;
 
   dbgSQL_admin.DataSource := dsrSQL ;
 
+  // Grid Query Connection
+
+  qryGrid.Connection := conDB ;
+  dsrGrid.DataSet := qryGrid;
+  dbgGridDisplay.DataSource := dsrGrid ; // Link to the dbg grid
 
   // tblCompany    DO this for every table
 
@@ -2575,9 +2668,7 @@ begin
           
         end;
    end;
-
     Result := True;
-  
 end;
 
 procedure TfrmVolitant_Express.WriteToFormTheme(pFileName: string;
@@ -2586,7 +2677,6 @@ procedure TfrmVolitant_Express.WriteToFormTheme(pFileName: string;
     tFile : textfile;
 begin
 // Write to the Files containing the themes
-
   // Always rewrite the file as a new value will always be stored
   AssignFile(tFile, pFileName) ;
   Rewrite(tFile) ;
@@ -2594,7 +2684,6 @@ begin
   Writeln(tFile, pColorValue) ;
 
   CloseFile(tFile) ;
-
 end;
 
 end.
