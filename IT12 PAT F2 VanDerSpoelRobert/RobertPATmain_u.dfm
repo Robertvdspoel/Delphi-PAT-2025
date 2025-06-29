@@ -26328,6 +26328,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                 Font.Style = [fsBold]
                 ParentFont = False
                 TabOrder = 3
+                OnClick = btnOrdersOutstandingPaymentClick
               end
               object btnOrderPhaseAdmin: TButton
                 Left = 656

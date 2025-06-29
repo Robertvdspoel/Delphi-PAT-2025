@@ -387,7 +387,8 @@ type
     procedure btnItemOrderPriceClick(Sender: TObject);
     procedure btnOrderSumAdminClick(Sender: TObject);
     procedure btnHomeThemeDefaultClick(Sender: TObject);
-    procedure CGhomeThemeClick(Sender: TObject);    // For the dynamic object
+    procedure CGhomeThemeClick(Sender: TObject);
+    procedure btnOrdersOutstandingPaymentClick(Sender: TObject);    // For the dynamic object
   private
     { Private declarations }
 
@@ -1462,15 +1463,6 @@ begin
      // Setup tabstops for display of orders in that phase
     redOrderout.SelAttributes.Color := clGreen;
     redOrderout.Paragraph.TabCount := 8;
-    {
-     redOrderout.Paragraph.Tab[0] := 65;
-      redOrderout.Paragraph.Tab[1] := 75;
-    redOrderout.Paragraph.Tab[2] := 185;
-    redOrderout.Paragraph.Tab[3] := 310;
-    redOrderout.Paragraph.Tab[4] := 460;
-    redOrderout.Paragraph.Tab[5] := 560;
-    redOrderout.Paragraph.Tab[6] := 610;
-    redOrderout.Paragraph.Tab[7] := 700;      }
       redOrderout.Paragraph.Tab[0] := 60;   // OrderID
   redOrderout.Paragraph.Tab[1] := 130;  // CompanyID
   redOrderout.Paragraph.Tab[2] := 210;  // Weight(kg)
@@ -1512,6 +1504,65 @@ begin
         end;
         tblOrders.Next ;
     end;
+end;
+
+procedure TfrmVolitant_Express.btnOrdersOutstandingPaymentClick(Sender: TObject);
+var
+  bItemFound : boolean ;
+  sPaid : string;
+  iUnpaidCount : integer;
+begin
+// Display all orders with outstandigng payments. Exlude canecelled orders
+  redOrderOut.Clear ;
+     // Setup tabstops for display of orders in that phase
+    redOrderout.SelAttributes.Color := clPurple ;
+    redOrderout.Paragraph.TabCount := 8;
+      redOrderout.Paragraph.Tab[0] := 60;   // OrderID
+  redOrderout.Paragraph.Tab[1] := 130;  // CompanyID
+  redOrderout.Paragraph.Tab[2] := 210;  // Weight(kg)
+  redOrderout.Paragraph.Tab[3] := 300;  // Pickup Country
+  redOrderout.Paragraph.Tab[4] := 440;  // Drop-Off Country
+  redOrderout.Paragraph.Tab[5] := 580;  // Status
+  redOrderout.Paragraph.Tab[6] := 650;  // Paid
+  redOrderout.Paragraph.Tab[7] := 720;  // Date of Placement
+    redOrderout.Lines.Add('OrderID'+#9+'CompanyID'+ #9+ 'Weight(kg)'+ #9 + 'Pickup Country'+ #9+'Drop-Off Country'+#9+'Status'+ #9+'Paid'+#9+'Date of Placement'+#9+'Item Name'+ #13) ;
+
+    // find the orders
+    iUnpaidCount := 0 ;
+    tblOrders.First;
+    while not tblOrders.Eof do
+    begin
+        if (tblOrders['Paid'] = False) and not (tblOrders['Status'] = 'Canceled')  then // If a order was found that's not paid and not cancelled
+        begin
+          // Search for the Item that's to get transported in the order
+          tblItems.First ;
+          Inc(iUnpaidCount);
+          bItemFound := False;
+          while not tblItems.eof and (bItemFound = False) do
+          begin
+
+            if tblOrders['ItemID'] = tblItems['ItemID']  then
+            begin
+              bItemFound := True;
+                // Get if the order was paid in string form
+              if tblOrders['Paid'] = True then
+              sPaid := 'Yes'
+              else
+              sPaid := 'No';
+
+              // Set the display to display the orders info
+              redOrderOut.SelAttributes.Color := clBlue  ;
+              redOrderOut.Lines.Add(inttostr(tblOrders['OrderID'])+ #9+inttostr(tblOrders['CompanyID'])+#9+ inttostr(tblOrders['weight'])+ #9+ tblOrders['Pickup Country']+#9+ tblOrders['Drop of Country']+#9 +tblOrders['Status']+#9+ sPaid+#9+DateToStr(tblOrders['Order Date'])+#9+tblItems['Item Name']  )   ;
+            end;
+          tblItems.Next;
+          end;
+
+        end;
+        tblOrders.Next ;
+    end;
+    // Dispaly a counter
+    redOrderOut.SelAttributes.Size := 13;
+    redOrderOut.Lines.Add(#13+'There are a total of ' + IntToStr(iUnpaidCount)+ ' unpaid orders' ) ;
 end;
 
 procedure TfrmVolitant_Express.btnOrderSumAdminClick(Sender: TObject);
