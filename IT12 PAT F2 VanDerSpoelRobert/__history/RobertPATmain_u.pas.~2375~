@@ -1440,10 +1440,81 @@ tsManageCompany.TabVisible := true;
 end;
 
 procedure TfrmVolitant_Express.btnOrderPhaseAdminClick(Sender: TObject);
+var
+  bItemFound : boolean;
+  sPaid : string;
 begin
 // Search and list orders that are in a spesific phase
 
 // Validation
+  if cmbOrderPhaseSearch.ItemIndex = -1 then
+  begin
+    ShowMessage('Select phase to search from above box') ;
+    exit;
+  end;
+
+  // Search and display orders in phase
+    // Set tab stops
+    redorderout.Clear ;
+    // Set heading for search
+    redOrderOut.SelAttributes.Size := 14;
+   redOrderOut.Lines.Add('Order in phase: '+ cmbOrderPhaseSearch.Items[cmbOrderPhaseSearch.ItemIndex]) ;
+     // Setup tabstops for display of orders in that phase
+    redOrderout.SelAttributes.Color := clGreen;
+    redOrderout.Paragraph.TabCount := 8;
+    {
+     redOrderout.Paragraph.Tab[0] := 65;
+      redOrderout.Paragraph.Tab[1] := 75;
+    redOrderout.Paragraph.Tab[2] := 185;
+    redOrderout.Paragraph.Tab[3] := 310;
+    redOrderout.Paragraph.Tab[4] := 460;
+    redOrderout.Paragraph.Tab[5] := 560;
+    redOrderout.Paragraph.Tab[6] := 610;
+    redOrderout.Paragraph.Tab[7] := 700;      }
+      redOrderout.Paragraph.Tab[0] := 60;   // OrderID
+  redOrderout.Paragraph.Tab[1] := 130;  // CompanyID
+  redOrderout.Paragraph.Tab[2] := 210;  // Weight(kg)
+  redOrderout.Paragraph.Tab[3] := 300;  // Pickup Country
+  redOrderout.Paragraph.Tab[4] := 440;  // Drop-Off Country
+  redOrderout.Paragraph.Tab[5] := 580;  // Status
+  redOrderout.Paragraph.Tab[6] := 650;  // Paid
+  redOrderout.Paragraph.Tab[7] := 720;  // Date of Placement
+    redOrderout.Lines.Add('OrderID'+#9+'CompanyID'+ #9+ 'Weight(kg)'+ #9 + 'Pickup Country'+ #9+'Drop-Off Country'+#9+'Status'+ #9+'Paid'+#9+'Date of Placement'+#9+'Item Name') ;
+
+    // find the orders
+    tblOrders.First;
+    while not tblOrders.Eof do
+    begin
+        if tblOrders['Status'] = cmbOrderPhaseSearch.Items[cmbOrderPhaseSearch.ItemIndex]  then // If a order was found that is listed under the status beign searched for
+        begin
+
+          // Search for the Item that's to get transported in the order
+          tblItems.First ;
+          bItemFound := False;
+          while not tblItems.eof and (bItemFound = False) do
+          begin
+
+            if tblOrders['ItemID'] = tblItems['ItemID']  then
+            begin
+              bItemFound := True;
+
+              if tblOrders['Paid'] = True then
+              sPaid := 'Yes'
+              else
+              sPaid := 'No';
+
+              // Set the display to display the orders info
+              redCompanyOut.SelAttributes.Color := clBlack ;
+              redCompanyOut.Lines.Add(inttostr(tblOrders['OrderID'])+ #9+ inttostr(tblOrders['weight'])+ #9+ tblOrders['Pickup Country']+#9+ tblOrders['Drop of Country']+#9 +tblOrders['Status']+#9+ sPaid+#9+DateToStr(tblOrders['Order Date'])+#9+tblItems['Item Name']  )   ;
+
+
+            end;
+          tblItems.Next;
+          end;
+
+        end;
+        tblOrders.Next ;
+    end;
 end;
 
 procedure TfrmVolitant_Express.btnOrderSumAdminClick(Sender: TObject);
