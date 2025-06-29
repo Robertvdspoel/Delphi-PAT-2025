@@ -25432,7 +25432,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 56
         Width = 945
         Height = 481
-        ActivePage = tsPlanesAdmin
+        ActivePage = tsOrdersAdmin
         TabOrder = 0
         OnChange = pgcAdminChange
         object tsItemsAdmin: TTabSheet
@@ -26107,7 +26107,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               MinValue = 1
               ParentFont = False
               TabOrder = 5
-              Value = 0
+              Value = 1
             end
           end
         end
@@ -26132,7 +26132,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             Top = 62
             Width = 849
             Height = 379
-            ActivePage = tsOrderUpdate
+            ActivePage = tsOrderOutput
             TabOrder = 0
             object tsOrderUpdate: TTabSheet
               Caption = 'Update an Order'
@@ -26183,8 +26183,8 @@ object frmVolitant_Express: TfrmVolitant_Express
                 end
                 object btnSearchForOrders: TButton
                   Left = 24
-                  Top = 66
-                  Width = 177
+                  Top = 67
+                  Width = 193
                   Height = 34
                   Caption = 'Search for Orders'
                   Font.Charset = DEFAULT_CHARSET
@@ -26243,7 +26243,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                 end
                 object sedEnterCNameSearchOrderUpdate: TSpinEdit
                   Left = 320
-                  Top = 43
+                  Top = 51
                   Width = 89
                   Height = 24
                   MaxValue = 0
@@ -26289,9 +26289,9 @@ object frmVolitant_Express: TfrmVolitant_Express
               object btnOrderSumAdmin: TButton
                 Left = 24
                 Top = 31
-                Width = 153
+                Width = 377
                 Height = 59
-                Caption = 'Orders Sum'
+                Caption = 'Orders Summary'
                 Font.Charset = DEFAULT_CHARSET
                 Font.Color = clWindowText
                 Font.Height = -15
@@ -26300,20 +26300,6 @@ object frmVolitant_Express: TfrmVolitant_Express
                 ParentFont = False
                 TabOrder = 1
                 OnClick = btnOrderSumAdminClick
-              end
-              object btnOrderInfoAdmin: TButton
-                Left = 224
-                Top = 31
-                Width = 153
-                Height = 59
-                Caption = 'Orders Info'
-                Font.Charset = DEFAULT_CHARSET
-                Font.Color = clWindowText
-                Font.Height = -15
-                Font.Name = 'Segoe UI'
-                Font.Style = [fsBold]
-                ParentFont = False
-                TabOrder = 2
               end
               object btnOrdersOutstandingPayment: TButton
                 Left = 432
@@ -26327,7 +26313,8 @@ object frmVolitant_Express: TfrmVolitant_Express
                 Font.Name = 'Segoe UI'
                 Font.Style = [fsBold]
                 ParentFont = False
-                TabOrder = 3
+                TabOrder = 2
+                OnClick = btnOrdersOutstandingPaymentClick
               end
               object btnOrderPhaseAdmin: TButton
                 Left = 656
@@ -26341,7 +26328,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                 Font.Name = 'Segoe UI'
                 Font.Style = [fsBold]
                 ParentFont = False
-                TabOrder = 4
+                TabOrder = 3
                 OnClick = btnOrderPhaseAdminClick
               end
               object cmbOrderPhaseSearch: TComboBox
@@ -26352,7 +26339,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                 Hint = 'Select Order Phase to Search'
                 ParentShowHint = False
                 ShowHint = True
-                TabOrder = 5
+                TabOrder = 4
                 TextHint = 'Select Phase'
                 Items.Strings = (
                   'Waiting for delivery'
@@ -26373,7 +26360,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                 Font.Name = 'Segoe UI'
                 Font.Style = [fsBold]
                 ParentFont = False
-                TabOrder = 6
+                TabOrder = 5
                 OnClick = btnTOorderUpdateClick
               end
             end

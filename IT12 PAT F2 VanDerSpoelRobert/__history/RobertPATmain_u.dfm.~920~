@@ -25432,7 +25432,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 56
         Width = 945
         Height = 481
-        ActivePage = tsPlanesAdmin
+        ActivePage = tsOrdersAdmin
         TabOrder = 0
         OnChange = pgcAdminChange
         object tsItemsAdmin: TTabSheet
@@ -26010,6 +26010,13 @@ object frmVolitant_Express: TfrmVolitant_Express
               Height = 15
               Caption = 'Select a plane to Update'
             end
+            object lblUpdateAmountOfPlane: TLabel
+              Left = 24
+              Top = 258
+              Width = 95
+              Height = 15
+              Caption = 'Amount Of Plane:'
+            end
             object chkRetirePlane: TCheckBox
               Left = 32
               Top = 284
@@ -26086,6 +26093,22 @@ object frmVolitant_Express: TfrmVolitant_Express
               TabOrder = 4
               OnClick = btnUpdatePlaneClick
             end
+            object sedUpdatePlaneCount: TSpinEdit
+              Left = 136
+              Top = 247
+              Width = 121
+              Height = 31
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -16
+              Font.Name = 'Segoe UI'
+              Font.Style = []
+              MaxValue = 40
+              MinValue = 1
+              ParentFont = False
+              TabOrder = 5
+              Value = 1
+            end
           end
         end
         object tsOrdersAdmin: TTabSheet
@@ -26109,7 +26132,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             Top = 62
             Width = 849
             Height = 379
-            ActivePage = tsOrderUpdate
+            ActivePage = tsOrderOutput
             TabOrder = 0
             object tsOrderUpdate: TTabSheet
               Caption = 'Update an Order'
@@ -26160,8 +26183,8 @@ object frmVolitant_Express: TfrmVolitant_Express
                 end
                 object btnSearchForOrders: TButton
                   Left = 24
-                  Top = 66
-                  Width = 177
+                  Top = 67
+                  Width = 193
                   Height = 34
                   Caption = 'Search for Orders'
                   Font.Charset = DEFAULT_CHARSET
@@ -26220,7 +26243,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                 end
                 object sedEnterCNameSearchOrderUpdate: TSpinEdit
                   Left = 320
-                  Top = 43
+                  Top = 51
                   Width = 89
                   Height = 24
                   MaxValue = 0
@@ -26305,6 +26328,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                 Font.Style = [fsBold]
                 ParentFont = False
                 TabOrder = 3
+                OnClick = btnOrdersOutstandingPaymentClick
               end
               object btnOrderPhaseAdmin: TButton
                 Left = 656

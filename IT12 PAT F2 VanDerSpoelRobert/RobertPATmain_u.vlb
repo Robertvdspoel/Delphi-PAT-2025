@@ -214,9 +214,6 @@ Coordinates=1007,620,172,58
 [tsRegConfirm]
 Coordinates=10,1006,93,36
 
-[btnOrderInfoAdmin]
-Coordinates=1285,688,123,58
-
 [btnCustomSQL]
 Coordinates=1623,144,102,58
 
@@ -669,7 +666,7 @@ Visible=True
 Coordinates=436,144,91,58
 
 []
-Coordinates=1749,570,91,36
+Coordinates=1285,688,123,58
 
 [lblTopAge]
 Coordinates=1156,10,73,58

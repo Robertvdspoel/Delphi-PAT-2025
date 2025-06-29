@@ -225,7 +225,6 @@ type
     tsOrderOutput: TTabSheet;
     redOrderOut: TRichEdit;
     btnOrderSumAdmin: TButton;
-    btnOrderInfoAdmin: TButton;
     btnOrdersOutstandingPayment: TButton;
     btnOrderPhaseAdmin: TButton;
     cmbOrderPhaseSearch: TComboBox;
@@ -388,7 +387,8 @@ type
     procedure btnOrderSumAdminClick(Sender: TObject);
     procedure btnHomeThemeDefaultClick(Sender: TObject);
     procedure CGhomeThemeClick(Sender: TObject);
-    procedure btnOrdersOutstandingPaymentClick(Sender: TObject);    // For the dynamic object
+    procedure btnOrdersOutstandingPaymentClick(Sender: TObject);
+    procedure btnToOrdersClick(Sender: TObject);    // For the dynamic object
   private
     { Private declarations }
 
@@ -1457,6 +1457,7 @@ begin
   // Search and display orders in phase
     // Set tab stops
     redorderout.Clear ;
+     redOrderOut.Font.Size := 9;
     // Set heading for search
     redOrderOut.SelAttributes.Size := 14;
    redOrderOut.Lines.Add('Order in phase: '+ cmbOrderPhaseSearch.Items[cmbOrderPhaseSearch.ItemIndex]) ;
@@ -1514,6 +1515,7 @@ var
 begin
 // Display all orders with outstandigng payments. Exlude canecelled orders
   redOrderOut.Clear ;
+   redOrderOut.Font.Size := 9;
      // Setup tabstops for display of orders in that phase
     redOrderout.SelAttributes.Color := clPurple ;
     redOrderout.Paragraph.TabCount := 8;
@@ -1560,13 +1562,79 @@ begin
         end;
         tblOrders.Next ;
     end;
+    // Dispaly a counter
     redOrderOut.SelAttributes.Size := 13;
     redOrderOut.Lines.Add(#13+'There are a total of ' + IntToStr(iUnpaidCount)+ ' unpaid orders' ) ;
 end;
 
 procedure TfrmVolitant_Express.btnOrderSumAdminClick(Sender: TObject);
+var
+  rAveWeight, rAveDistance  : real;
+  iOrderCount, iTotalMinutes : integer ;
+  sAvePickupTime : string;
 begin
 // Give a summary about stats everything order related
+  redOrderOut.Clear ;
+  redOrderOut.Font.Size := 12;
+   // Set the variables
+   rAveWeight := 0;
+   rAveDistance := 0 ;
+   iTotalMinutes := 0;
+   iOrderCount := 0 ;
+
+  tblOrders.First;
+  while not tblOrders.eof do  // loop thru the order table to gather stats
+  begin
+    // Get the totals
+    rAveWeight := rAveWeight + tblOrders['Weight'] ;
+    rAveDistance := rAveDistance + tblOrders['Distance'] ;
+    iTotalMinutes := iTotalMinutes + MinuteOf(tblOrders['Pickup Date']) + HourOf(tblOrders['Pickup Date']) * 60; // Convert the time to minutes as a common 'time keeping' thing  
+    Inc(iOrderCount );
+    tblOrders.next;
+  end;
+    // Average order weight
+    rAveWeight := rAveWeight / iOrderCount ;
+    redOrderOut.Lines.Add('Average Order Weight: '+ FloatToStrF(rAveWeight, ffCurrency , 10,2)+ ' kg' );
+    // Average order distance of transportation
+    rAveDistance := rAveDistance ;
+    redOrderOut.Lines.Add('Average order Transportation Distance: '+ floattostrF(rAveDistance, ffFixed , 10,2)+ ' km');
+    // Average pickup time     
+    iTotalMinutes := (iTotalMinutes div iOrderCount) ;
+    sAvePickupTime :=  IntToStr(iTotalMinutes div 60) + ' : ' + IntToStr(iTotalMinutes mod 60);
+    redOrderOut.Lines.Add('Average Pickup TIME for orders: ' + sAvePickupTime ); 
+    
+  // Calculate the most made trip between countries
+  qrySQL.SQL.Text := 'Select TOP 1 [Pickup Country], [Drop of Country], COUNT(*) AS TripCount from tblOrders Group By [Pickup Country], [Drop of Country] Order By Count(*) DESC';
+  qrySQL.Open ;
+  // Get the most done trips; there can be more than one
+   redOrderOut.Lines.Add('Top trips between countries from Pickup Country: ')   ;
+  qrySQL.First ;
+  while not qrySQL.eof do
+  begin
+     redOrderOut.Lines.Add(qrySQL['Pickup Country']+ '  --  '+ qrySQL['Drop of Country']) ;
+   qrySQL.Next ;
+  end;
+
+  // Calculate the top items being used in orders
+  qrySQL.SQL.Text := 'Select tblOrders.ItemID,  [Item Name], Category, [T_Cost/kg], Count(*) as ItemUseCount from tblItems, tblOrders where tblOrders.ItemID = tblItems.ItemID Group By [Item Name], Category, [T_Cost/kg], tblOrders.ItemID Order By Count(*) DESC' ;
+  qrySQL.Open ;
+  // Retrive and display the stats collected from the query
+
+  redOrderOut.Lines.Add(#13+ 'Most transported items Sorted from Most to Least:'+ #13) ;
+  redOrderOut.SelAttributes.Color := clGreen;
+  // Set the tab stops
+  redOrderOut.Paragraph.TabCount := 4;
+  redOrderOut.Paragraph.Tab[0] := 60;
+  redOrderOut.Paragraph.Tab[1] := 220;
+  redOrderOut.Paragraph.Tab[2] := 340;
+  redOrderOut.Paragraph.Tab[3] := 470;
+  redOrderOut.Lines.Add('Item ID' + #9+'Item Name'+ #9+ 'Category'+ #9+ 'Cost per KG'+ #9+ 'Transported Count') ;// Set the heading
+  qrySQL.First ;
+  while not qrySQL.eof do   // Loop thru the SQL results and display in the rich edit
+  begin
+  redOrderOut.Lines.Add(IntToStr(qrySQL['ItemID'])+#9+qrySQL['Item Name']+ #9+ qrySQL['Category']+ #9+ FloatToStrF(qrySQL['T_Cost/kg'], ffCurrency , 10,2)+ #9+ IntToStr(qrySQL['ItemUseCount'])   );
+  qrySQL.Next ;
+  end;
 
 end;
 
@@ -1937,6 +2005,13 @@ tsPOrder.TabVisible := True ;
 end;
 
 
+
+procedure TfrmVolitant_Express.btnToOrdersClick(Sender: TObject);
+begin
+// Go the the orders admin page from any other of the admin pages
+
+ redOrderOut.Font.Size := 9;
+end;
 
 procedure TfrmVolitant_Express.btnToOrdersOutputClick(Sender: TObject);
 begin

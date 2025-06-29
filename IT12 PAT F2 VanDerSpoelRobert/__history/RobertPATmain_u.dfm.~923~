@@ -25432,7 +25432,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 56
         Width = 945
         Height = 481
-        ActivePage = tsPlanesAdmin
+        ActivePage = tsOrdersAdmin
         TabOrder = 0
         OnChange = pgcAdminChange
         object tsItemsAdmin: TTabSheet
@@ -25983,36 +25983,43 @@ object frmVolitant_Express: TfrmVolitant_Express
             Caption = 'Manage Planes'
             TabOrder = 1
             object lblUpdateFuelPrice: TLabel
-              Left = 104
-              Top = 185
+              Left = 120
+              Top = 177
               Width = 172
               Height = 15
               Caption = 'Update Plane Fuel Cost per Hour'
             end
             object lblUpdateFuelRands: TLabel
               Left = 32
-              Top = 206
+              Top = 190
               Width = 32
               Height = 15
               Caption = 'Rands'
             end
             object lblUpdateFuelCents: TLabel
               Left = 218
-              Top = 206
+              Top = 190
               Width = 30
               Height = 15
               Caption = 'Cents'
             end
             object lblSelectPlaneUpdate: TLabel
               Left = 3
-              Top = 29
+              Top = 21
               Width = 127
               Height = 15
               Caption = 'Select a plane to Update'
             end
+            object lblUpdateAmountOfPlane: TLabel
+              Left = 24
+              Top = 258
+              Width = 95
+              Height = 15
+              Caption = 'Amount Of Plane:'
+            end
             object chkRetirePlane: TCheckBox
               Left = 32
-              Top = 264
+              Top = 284
               Width = 137
               Height = 17
               Caption = 'Retire Plane'
@@ -26026,7 +26033,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
             object sedUpdateFuelRands: TSpinEdit
               Left = 33
-              Top = 227
+              Top = 211
               Width = 129
               Height = 31
               Font.Charset = DEFAULT_CHARSET
@@ -26042,7 +26049,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
             object sedUpdateFuelCents: TSpinEdit
               Left = 214
-              Top = 227
+              Top = 211
               Width = 113
               Height = 31
               Font.Charset = DEFAULT_CHARSET
@@ -26058,7 +26065,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
             object lstManagePlane: TListBox
               Left = 3
-              Top = 50
+              Top = 42
               Width = 435
               Height = 129
               Font.Charset = DEFAULT_CHARSET
@@ -26073,7 +26080,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
             object btnUpdatePlane: TButton
               Left = 3
-              Top = 295
+              Top = 307
               Width = 435
               Height = 42
               Caption = 'Update Plane'
@@ -26085,6 +26092,22 @@ object frmVolitant_Express: TfrmVolitant_Express
               ParentFont = False
               TabOrder = 4
               OnClick = btnUpdatePlaneClick
+            end
+            object sedUpdatePlaneCount: TSpinEdit
+              Left = 136
+              Top = 247
+              Width = 121
+              Height = 31
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -16
+              Font.Name = 'Segoe UI'
+              Font.Style = []
+              MaxValue = 40
+              MinValue = 1
+              ParentFont = False
+              TabOrder = 5
+              Value = 1
             end
           end
         end
@@ -26109,7 +26132,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             Top = 62
             Width = 849
             Height = 379
-            ActivePage = tsOrderUpdate
+            ActivePage = tsOrderOutput
             TabOrder = 0
             object tsOrderUpdate: TTabSheet
               Caption = 'Update an Order'
@@ -26160,8 +26183,8 @@ object frmVolitant_Express: TfrmVolitant_Express
                 end
                 object btnSearchForOrders: TButton
                   Left = 24
-                  Top = 66
-                  Width = 177
+                  Top = 67
+                  Width = 193
                   Height = 34
                   Caption = 'Search for Orders'
                   Font.Charset = DEFAULT_CHARSET
@@ -26220,7 +26243,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                 end
                 object sedEnterCNameSearchOrderUpdate: TSpinEdit
                   Left = 320
-                  Top = 43
+                  Top = 51
                   Width = 89
                   Height = 24
                   MaxValue = 0
@@ -26249,8 +26272,8 @@ object frmVolitant_Express: TfrmVolitant_Express
               Caption = 'Order Output'
               ImageIndex = 1
               object redOrderOut: TRichEdit
-                Left = 24
-                Top = 96
+                Left = 40
+                Top = 103
                 Width = 785
                 Height = 201
                 Font.Charset = ANSI_CHARSET
@@ -26266,9 +26289,9 @@ object frmVolitant_Express: TfrmVolitant_Express
               object btnOrderSumAdmin: TButton
                 Left = 24
                 Top = 31
-                Width = 153
+                Width = 377
                 Height = 59
-                Caption = 'Orders Sum'
+                Caption = 'Orders Summary'
                 Font.Charset = DEFAULT_CHARSET
                 Font.Color = clWindowText
                 Font.Height = -15
@@ -26277,20 +26300,6 @@ object frmVolitant_Express: TfrmVolitant_Express
                 ParentFont = False
                 TabOrder = 1
                 OnClick = btnOrderSumAdminClick
-              end
-              object btnOrderInfoAdmin: TButton
-                Left = 224
-                Top = 31
-                Width = 153
-                Height = 59
-                Caption = 'Orders Info'
-                Font.Charset = DEFAULT_CHARSET
-                Font.Color = clWindowText
-                Font.Height = -15
-                Font.Name = 'Segoe UI'
-                Font.Style = [fsBold]
-                ParentFont = False
-                TabOrder = 2
               end
               object btnOrdersOutstandingPayment: TButton
                 Left = 432
@@ -26304,7 +26313,8 @@ object frmVolitant_Express: TfrmVolitant_Express
                 Font.Name = 'Segoe UI'
                 Font.Style = [fsBold]
                 ParentFont = False
-                TabOrder = 3
+                TabOrder = 2
+                OnClick = btnOrdersOutstandingPaymentClick
               end
               object btnOrderPhaseAdmin: TButton
                 Left = 656
@@ -26318,7 +26328,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                 Font.Name = 'Segoe UI'
                 Font.Style = [fsBold]
                 ParentFont = False
-                TabOrder = 4
+                TabOrder = 3
                 OnClick = btnOrderPhaseAdminClick
               end
               object cmbOrderPhaseSearch: TComboBox
@@ -26329,7 +26339,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                 Hint = 'Select Order Phase to Search'
                 ParentShowHint = False
                 ShowHint = True
-                TabOrder = 5
+                TabOrder = 4
                 TextHint = 'Select Phase'
                 Items.Strings = (
                   'Waiting for delivery'
@@ -26350,7 +26360,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                 Font.Name = 'Segoe UI'
                 Font.Style = [fsBold]
                 ParentFont = False
-                TabOrder = 6
+                TabOrder = 5
                 OnClick = btnTOorderUpdateClick
               end
             end
@@ -27171,6 +27181,7 @@ object frmVolitant_Express: TfrmVolitant_Express
           Height = 37
           Caption = 'Orders'
           TabOrder = 2
+          OnClick = btnToOrdersClick
         end
         object btnToCompanies: TButton
           Left = 16
