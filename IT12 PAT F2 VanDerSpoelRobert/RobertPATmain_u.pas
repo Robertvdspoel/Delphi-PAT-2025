@@ -403,6 +403,7 @@ type
 
     Function ValidateEmail(pEmail: string): Boolean;
     Function DeleteAccount(pID : integer): boolean;
+    Function CalcOrderPrice(pOrderID: integer) : real;
 
 
     Procedure WriteToFormTheme(pFileName : string; pColorValue : integer); // For writing to the files for system themes
@@ -1713,7 +1714,7 @@ begin
 
  // Top plain
  qrySQL.SQL.Text := 'SELECT TOP 1 PlaneID AS Result FROM tblOrders Group By PlaneID ORDER BY Count(*) DESC';
-  qrySQL.Open ;  
+  qrySQL.Open ;
  iNum := qrySQL['Result'];
  qrySQL.SQL.Text := 'Select [Plane Name] as Result from tblPlanes where PlaneID = '+ IntToStr(iNum);
  qrySQL.Open ; 
@@ -1723,7 +1724,7 @@ begin
   //  Top Item  
   qrySQL.SQL.Text := 'Select TOP 1 [Item Name] As Result from tblItems, tblOrders where tblOrders.ItemID = tblItems.itemID Group By tblItems.[Item Name] ORDER BY Count(*) DESC'; 
   qrySQL.Open ;
-  lblTopItem.Caption := 'Top Item: ' + qrySQL['Result']; 
+  lblTopItem.Caption := 'Top Item: ' + qrySQL['Result'];
 
   // Top Pickup Country
   qrySQL.SQL.Text := 'Select TOP 1 [Pickup Country] as Result from tblOrders Group By [Pickup Country] Order By Count(*) DESC'  ;
@@ -1744,14 +1745,12 @@ begin
    begin
       if tblOrders['Paid'] = true then   // Checks that the order has been paid, before adding it to revenue sum
       begin
-
         rRevenue := rRevenue + tblOrders['Base Cost'] ; // Add the base cost to total revenue
-        tblItems.First ;
 
         if (YearOF(tblOrders['Pickup Date']) = YearOf(Date))  then // inc the orders that occured this year specificaly counter
         Inc(iYearlyOrdersGoal) ;
 
-
+         tblItems.First ;
         bFound := False;
         while not tblItems.eof and (bFound = false) do // Loop thru items table to get the price for an item per kg
         begin
@@ -1786,7 +1785,7 @@ begin
 
           tblPlanes.Next ;
         end;
-      
+
       end;
       tblOrders.Next ;
    end;
@@ -1796,7 +1795,7 @@ begin
     qrySQL.SQL.Text := 'Select AVG(Weight) as Result from tblOrders'  ;
    qrySQL.Open ;
    lblAverageWeight.Caption := 'Average Order Weight: ' + floattostrf((qrySQL['Result']), ffFixed, 10,2) + ' kg';
-   
+
   // Set the progress bars for the yearly goals
 
   // For revenue goal
@@ -1804,8 +1803,6 @@ begin
   PBrevenue.Max := 100;
 
 PBrevenue.Position := Floor(rYearlyRevenueGoal / RevenueGoal* 100 ) ;
-
-
 
   // For the order goal
   PBOrders.Min := 0 ;
@@ -1925,16 +1922,17 @@ bNothing := True;     // If none of the below conditions are met, display all ed
        if (bNothing = True) and not (tblOrders['Status'] = 'Delivered') and not (tblOrders['Status'] = 'Canceled') {(tblOrders['Status'] in ['Delivered', 'Canceled'])} then  // Turns out ID is only usable for Ordinal types
        begin
          bOrdersFound := True;
-         lstSelectOrderAdmin.Items.Add(IntToStr(tblOrders['OrderID']) + '--'+ DateTimeToStr(tblOrders['Pickup Date']) +'--'+ tblOrders['Pickup Country'] + ' -TO- ' + tblOrders['Drop of Country'] + '@TEMP_T_Cost') ;   // Add item to the lst box
+         lstSelectOrderAdmin.Items.Add(IntToStr(tblOrders['OrderID']) + '--'+ DateTimeToStr(tblOrders['Pickup Date']) +'--'+ tblOrders['Pickup Country'] + ' -TO- ' + tblOrders['Drop of Country'] + ' - '+FloatToStrF(CalcOrderPrice(tblOrders['OrderID']), ffCurrency , 10,2 ) ) ;   // Add item to the lst box
        end
        else  // If something was entered
        if ((bID = True) or (bName = True)) and (tblOrders['CompanyID'] = iIDsearch)and not (tblOrders['Status'] = 'Delivered') and not (tblOrders['Status'] = 'Canceled') then  // If a companyID was entered or after the CompanyID was located from the database based on the Name entered
        begin
           bOrdersFound := True;
-        lstSelectOrderAdmin.Items.Add(IntToStr(tblOrders['OrderID']) + '--'+ DateTimeToStr(tblOrders['Pickup Date']) +'--'+ tblOrders['Pickup Country'] + ' -TO- ' + tblOrders['Drop of Country'] + '@TEMP_T_Cost') ;   // Add item to the lst box
+        lstSelectOrderAdmin.Items.Add(IntToStr(tblOrders['OrderID']) + '--'+ DateTimeToStr(tblOrders['Pickup Date']) +'--'+ tblOrders['Pickup Country'] + ' -TO- ' + tblOrders['Drop of Country'] + ' - '+FloatToStrF(CalcOrderPrice(tblOrders['OrderID']), ffCurrency , 10,2 ) ) ;  // Add item to the lst box
        end;
       tblOrders.Next ;
     end;
+
     if not bOrdersFound  then // Tell admin if no orders were found that were valid
     begin
       ShowMessage('No orders matching the Criteria/ Input found to manage!') ;
@@ -2355,6 +2353,73 @@ begin
   2: dbgDifferentTables.DataSource := dsrCompany ;
   3: dbgDifferentTables.DataSource := dsrItems ;
   end;
+end;
+
+function TfrmVolitant_Express.CalcOrderPrice(pOrderID: integer): real;
+var
+  bOrderFound, bItemFound, bPlaneFound : boolean;
+  rRevenueCalc, rHours : real;
+  tFile : textFile ;
+  sItemPrice, sFuelPrice  : string ;
+begin
+  // Calculate the price of an order
+
+    // Search for the Spesific order
+    bOrderFound := False;
+    rRevenueCalc := 0 ;
+    tblOrders.First ;
+    while not tblOrders.Eof and (bOrderFound = False) do
+    begin
+      if tblOrders['OrderID'] = pOrderID  then   // Find a matching order
+      begin
+         bOrderFound := True ;
+         // Calculate Revenue
+        rRevenueCalc := rRevenueCalc+ tblOrders['Base Cost'] ;// Set the base cost
+          // Check that the file containing the prises of the order exists and contains valid info
+          AssignFile(tFile, 'History_Log/'+ inttostr(tblOrders['OrderID'])+'.txt');
+          if not FileExists('History_Log/'+ inttostr(tblOrders['OrderID'])+ '.txt' ) or ((tblOrders['Paid']= False ) and (YearsBetween(tblOrders['Pickup Date'], Date) > 1))  then  // If the file containing the prices was not found or the order pickup date is more than a year away- Rewrite the file and write the current prises to the file
+          begin
+            Rewrite(tFile) ;
+            // Get the Current item prise
+             bItemFound := False;
+             tblItems.First ;
+            while not tblItems.eof and (bItemFound = false) do // Loop thru items table to get the price for an item per kg
+            begin
+              if tblItems['ItemID'] = tblOrders['ItemID'] then // If a matcging item was found
+              begin
+                bItemFound := true;
+                Writeln(tFile, FloatToStr(tblItems['T_Cost/kg']) ) ;  // Write the price of the item to the txt file
+              end;
+
+              tblItems.Next ;
+            end;
+            // Get the current price of the cost of fuel for that plane being used per hour
+            bPlaneFound := False ;
+             tblPlanes.First;
+            while not tblPlanes.Eof and (bPlaneFound = false) do
+            begin
+               if tblPlanes['PlaneID'] = tblOrders['PlaneID'] then // if a maching plane was found
+               begin
+                  bPlaneFound := True;
+                  Writeln(tFile, FloatToStr(tblPlanes['FuelCost']) );  // Write the price of the fuel to the txt file
+               end;
+              tblPlanes.Next ;
+            end;
+          end;
+             Reset(TFile); // Prepare file for reading
+       // Calc price of the item
+          Readln(tFile,sItemPrice) ;
+          rRevenueCalc := rRevenueCalc + StrToFloat(sItemPrice) * tblOrders['Weight'];
+          // Calc the price of the fuel
+          Readln(tFile, sFuelPrice );
+           rHours  := (tblOrders['E/D Date'] - tblOrders['Pickup Date']) * 24 ; // Get the difference in time and convert it to hours
+          rRevenueCalc := rRevenueCalc + StrToFloat(sFuelPrice) * rHours ;
+
+          CloseFile(tFile) ;
+      end;
+      tblOrders.Next ;
+    end;
+    Result := rRevenueCalc ;
 end;
 
 procedure TfrmVolitant_Express.CGhomeThemeClick(Sender: TObject);

@@ -25432,7 +25432,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 56
         Width = 945
         Height = 481
-        ActivePage = tsOrdersAdmin
+        ActivePage = tsAdminSum
         TabOrder = 0
         OnChange = pgcAdminChange
         object tsItemsAdmin: TTabSheet
@@ -26841,7 +26841,7 @@ object frmVolitant_Express: TfrmVolitant_Express
           end
           object btnReloadSum: TButton
             Left = 512
-            Top = 0
+            Top = 3
             Width = 345
             Height = 35
             Caption = 'Reload Page'
