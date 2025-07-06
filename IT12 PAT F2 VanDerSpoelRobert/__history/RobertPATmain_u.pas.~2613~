@@ -316,6 +316,7 @@ type
     sedAddPlaneAmount: TSpinEdit;
     sedUpdatePlaneCount: TSpinEdit;
     lblUpdateAmountOfPlane: TLabel;
+    lblAdminSelectOrderInfo: TLabel;
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnRegisterGOClick(Sender: TObject);
@@ -388,7 +389,11 @@ type
     procedure btnHomeThemeDefaultClick(Sender: TObject);
     procedure CGhomeThemeClick(Sender: TObject);
     procedure btnOrdersOutstandingPaymentClick(Sender: TObject);
-    procedure btnToOrdersClick(Sender: TObject);    // For the dynamic object
+    procedure btnToOrdersClick(Sender: TObject);
+    procedure BitBtnClearOrderSearchClick(Sender: TObject);
+    procedure edtCompanyNameSearchOrdersClick(Sender: TObject);
+    procedure sedEnterCNameSearchOrderUpdateChange(Sender: TObject);
+    procedure lstSelectOrderAdminClick(Sender: TObject);    // For the dynamic object
   private
     { Private declarations }
 
@@ -434,6 +439,13 @@ var
 implementation
 
 {$R *.dfm}
+
+procedure TfrmVolitant_Express.BitBtnClearOrderSearchClick(Sender: TObject);
+begin
+// Clear the inputs for earching for a Company using their name or ID
+edtCompanyNameSearchOrders.Clear;
+sedEnterCNameSearchOrderUpdate.Value := 0 ;
+end;
 
 procedure TfrmVolitant_Express.bitbtnCloseProgramClick(Sender: TObject);
 begin
@@ -1594,7 +1606,7 @@ begin
   end;
 
   if iOrderCount = 0 then // Only if there are orders in the database; just to be sure to prevent errors 
-    exit;
+  exit;
     // Average order weight
     rAveWeight := rAveWeight / iOrderCount ;
     redOrderOut.Lines.Add('Average Order Weight: '+ FloatToStrF(rAveWeight, ffCurrency , 10,2)+ ' kg' );
@@ -1864,11 +1876,79 @@ begin
 end;
 
 procedure TfrmVolitant_Express.btnSearchForOrdersClick(Sender: TObject);
+var
+  bNothing, bID, bName, bCompFound, bOrdersFound : boolean ;
+  sNameSearch : string ;
+  iIDsearch : integer ;
 begin
-// Show all orders
+// Display all orders to edit, depending on input criteria
+bNothing := True;     // If none of the below conditions are met, display all editable orders
+  // Determine the type of search for orders  by the admin
+  if sedEnterCNameSearchOrderUpdate.Value > 0 then // Check if an ID was entered
+  begin
+    bNothing := False ;
+    bID := True;
+    iIDsearch :=  sedEnterCNameSearchOrderUpdate.Value;
+  end
+  else
+  if not (edtCompanyNameSearchOrders.Text = '') then // Check if a name was entered, if an ID was not entered
+  begin
+    bNothing := False;
+    bName := True ;
+    sNameSearch :=  edtCompanyNameSearchOrders.Text;
+    // Get the ID of the company to be used
+    tblCompany.First ;
+    bCompFound := False ;
+    while not tblCompany.Eof and (bCompFound = FAlse) do // Search for a matching company
+    begin
+      if (UpperCase(sNameSearch ) = UpperCase(tblCompany['CompanyName']))  or (UpperCase(sNameSearch ) = UpperCase(tblCompany['Username']))  then // If a matching company is found based on username or CompanyName
+      begin
+        bCompFound := True ;
+        iIDsearch := tblCompany['CompanyID']
+      end;
+      tblCompany.Next ;
+    end;
+    if bCompFound = False then  // if no matching company was found
+    begin
+      ShowMessage('No matching Company found based on the input provided') ;
+      exit;
+    end;
+  end;
 
+  // find matching orders on the company
+  lstSelectOrderAdmin.Clear ;
+    tblOrders.First ;
+    bOrdersFound := False ;
+    while not tblOrders.Eof  do    // exlude orders that has been CANCELLED OR DELIVERED
+    begin
+       // To do if Nothing was entered- Show all orders that can be edded
+       if (bNothing = True) and not (tblOrders['Status'] = 'Delivered') and not (tblOrders['Status'] = 'Canceled') {(tblOrders['Status'] in ['Delivered', 'Canceled'])} then  // Turns out ID is only usable for Ordinal types
+       begin
+         bOrdersFound := True;
+         lstSelectOrderAdmin.Items.Add(IntToStr(tblOrders['OrderID']) + '--'+ DateTimeToStr(tblOrders['Pickup Date']) +'--'+ tblOrders['Pickup Country'] + ' -TO- ' + tblOrders['Drop of Country'] + '@TEMP_T_Cost') ;   // Add item to the lst box
+       end
+       else  // If something was entered
+       if (bID = True) or (bName = True) and (tblOrders['CompanyID'] = iIDsearch)and not (tblOrders['Status'] = 'Delivered') and not (tblOrders['Status'] = 'Canceled') then  // If a companyID was entered or after the CompanyID was located from the database based on the Name entered
+       begin
+          bOrdersFound := True;
 
-// Add button for displaying orders that will be due in short time
+            lstSelectOrderAdmin.Items.Add(IntToStr(tblOrders['OrderID']) + '--'+ DateTimeToStr(tblOrders['Pickup Date']) +'--'+ tblOrders['Pickup Country'] + ' -TO- ' + tblOrders['Drop of Country'] + '@TEMP_T_Cost') ;   // Add item to the lst box
+       end;
+     {  else
+       if (bName = True) and (tblOrders[''])  or () then // If a Company name was entered. Also allow a username to be entered.
+       begin
+
+       end; }
+            
+       
+    
+    tblOrders.Next ;
+    end;
+
+    if not bOrdersFound  then // Tell admin if no orders were found that were valid
+    begin
+      ShowMessage('No orders matching the Criteria/ Input found to manage!') ;
+    end;
 end;
 
 procedure TfrmVolitant_Express.btnSeatchForCompanyClick(Sender: TObject);
@@ -2141,6 +2221,9 @@ begin
   // Remember to update date that the trip took
 
   // Suspounded account order not to be processed
+
+  // Remove order from lst box if its status is set to Cancelled or Delivered as it can not longer be updated thereafter
+
 end;
 
 procedure TfrmVolitant_Express.btnUpdatePlaneClick(Sender: TObject);
@@ -2340,6 +2423,12 @@ begin   // Return if the deletetion was successfull
   qrySQL.ExecSQL ;
 
   Result := True; // Return a True if the deletion was successfull
+end;
+
+procedure TfrmVolitant_Express.edtCompanyNameSearchOrdersClick(Sender: TObject);
+begin
+//Clear the spin edit used for searching for a company, as spinedit will be prioritized above Company name, thus should be cleared to prvent it
+ sedEnterCNameSearchOrderUpdate.Value := 0 ;
 end;
 
 procedure TfrmVolitant_Express.edtSearchForItemChange(Sender: TObject);
@@ -2749,10 +2838,26 @@ begin
 
 end;
 
+procedure TfrmVolitant_Express.lstSelectOrderAdminClick(Sender: TObject);
+begin
+// Onlick for orders to be managed by admin
+
+  // When clicking on an order in the lst box= Show a message that gives more info about the order
+
+  // Load the current status of the order into radiogroup where it can be changed
+end;
+
 procedure TfrmVolitant_Express.pgcAdminChange(Sender: TObject);
 begin
 // Change things on the tabpages when a change is made
 redCompanyOut.Clear ;
+end;
+
+procedure TfrmVolitant_Express.sedEnterCNameSearchOrderUpdateChange(
+  Sender: TObject);
+begin
+// Clear the edt for searching for a company, as ID will be valued above C Name
+edtCompanyNameSearchOrders.Clear;
 end;
 
 procedure TfrmVolitant_Express.sedEnterCompanyIDChange(Sender: TObject);

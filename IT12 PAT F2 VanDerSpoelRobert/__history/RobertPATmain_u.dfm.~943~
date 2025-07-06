@@ -26132,7 +26132,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             Top = 62
             Width = 849
             Height = 379
-            ActivePage = tsOrderOutput
+            ActivePage = tsOrderUpdate
             TabOrder = 0
             object tsOrderUpdate: TTabSheet
               Caption = 'Update an Order'
@@ -26146,9 +26146,11 @@ object frmVolitant_Express: TfrmVolitant_Express
                 object lblCompanyNameToSearch: TLabel
                   Left = 24
                   Top = 21
-                  Width = 230
+                  Width = 606
                   Height = 15
-                  Caption = 'Enter a company name to search (Optional)'
+                  Caption = 
+                    'Enter a company name or Username to search or a CompanyID (Optio' +
+                    'nal) else, search to display all available orders'
                 end
                 object lblSelectOrderStatus: TLabel
                   Left = 239
@@ -26179,7 +26181,8 @@ object frmVolitant_Express: TfrmVolitant_Express
                   ParentShowHint = False
                   ShowHint = False
                   TabOrder = 1
-                  TextHint = 'Enter company name to search'
+                  TextHint = 'Enter company name/ username to search'
+                  OnClick = edtCompanyNameSearchOrdersClick
                 end
                 object btnSearchForOrders: TButton
                   Left = 24
@@ -26197,20 +26200,21 @@ object frmVolitant_Express: TfrmVolitant_Express
                   OnClick = btnSearchForOrdersClick
                 end
                 object BitBtnClearOrderSearch: TBitBtn
-                  Left = 438
-                  Top = 38
-                  Width = 75
-                  Height = 25
+                  Left = 454
+                  Top = 40
+                  Width = 59
+                  Height = 27
                   Caption = 'Clear'
                   Kind = bkRetry
                   NumGlyphs = 2
                   TabOrder = 3
+                  OnClick = BitBtnClearOrderSearchClick
                 end
                 object rgpOrderStatus: TRadioGroup
                   Left = 570
-                  Top = 24
+                  Top = 40
                   Width = 217
-                  Height = 233
+                  Height = 217
                   Caption = 'Select Order status'
                   Font.Charset = DEFAULT_CHARSET
                   Font.Color = clWindowText
@@ -26229,7 +26233,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                 object btnUpdateOrderStatus: TButton
                   Left = 24
                   Top = 263
-                  Width = 745
+                  Width = 767
                   Height = 40
                   Caption = 'Update Status'
                   Font.Charset = ANSI_CHARSET
@@ -26242,14 +26246,18 @@ object frmVolitant_Express: TfrmVolitant_Express
                   OnClick = btnUpdateOrderStatusClick
                 end
                 object sedEnterCNameSearchOrderUpdate: TSpinEdit
-                  Left = 320
-                  Top = 51
+                  Left = 328
+                  Top = 42
                   Width = 89
                   Height = 24
-                  MaxValue = 0
+                  Hint = 'ID will be used above Name'
+                  MaxValue = 1000000
                   MinValue = 0
+                  ParentShowHint = False
+                  ShowHint = True
                   TabOrder = 6
                   Value = 0
+                  OnChange = sedEnterCNameSearchOrderUpdateChange
                 end
               end
               object btnToOrdersOutput: TButton
@@ -26272,9 +26280,9 @@ object frmVolitant_Express: TfrmVolitant_Express
               Caption = 'Order Output'
               ImageIndex = 1
               object redOrderOut: TRichEdit
-                Left = 40
-                Top = 103
-                Width = 785
+                Left = 24
+                Top = 96
+                Width = 801
                 Height = 201
                 Font.Charset = ANSI_CHARSET
                 Font.Color = clWindowText
