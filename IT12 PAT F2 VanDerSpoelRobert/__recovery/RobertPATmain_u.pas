@@ -15,7 +15,8 @@ uses
   Vcl.DBCtrls, Vcl.CheckLst, Soap.InvokeRegistry, Soap.WSDLIntf,
   Soap.SOAPPasInv, Soap.SOAPHTTPPasInv, VclTee.TeeGDIPlus, VCLTee.TeEngine,
   VCLTee.Series, VCLTee.TeeProcs, VCLTee.Chart, DateUtils, math, clsDistance_u, clsUsername_u,
-  Vcl.FileCtrl, Xml.xmldom, Xml.XmlTransform, Vcl.TabNotBk, VCLTee.TeeDraw3D;
+  Vcl.FileCtrl, Xml.xmldom, Xml.XmlTransform, Vcl.TabNotBk, VCLTee.TeeDraw3D,
+  Vcl.WinXPickers, System.Sensors, System.Sensors.Components;
 
 type
   TfrmVolitant_Express = class(TForm)
@@ -150,7 +151,6 @@ type
     grbAddPlane: TGroupBox;
     lblManagePlanes: TLabel;
     grbManagePlanes: TGroupBox;
-    ListBox1: TListBox;
     lstSelectItemManage: TListBox;
     lblSelectItemTomanage: TLabel;
     btnRetireItem: TButton;
@@ -317,6 +317,16 @@ type
     sedUpdatePlaneCount: TSpinEdit;
     lblUpdateAmountOfPlane: TLabel;
     lblAdminSelectOrderInfo: TLabel;
+    grbUpdatePickupDate: TGroupBox;
+    tpUpdatePickupTime: TTimePicker;
+    lblUpdatePickupDate: TLabel;
+    lblUpdatePickupTime: TLabel;
+    dpUpdatePickupDate: TDatePicker;
+    btnOrderToSummary: TButton;
+    BitBtnPlaceOrder: TBitBtn;
+    BitBtnBackToPlaceOrderPage: TBitBtn;
+    BitBtnBackHomeFromOrders: TBitBtn;
+    lblManageCompany: TLabel;
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnRegisterGOClick(Sender: TObject);
@@ -393,7 +403,12 @@ type
     procedure BitBtnClearOrderSearchClick(Sender: TObject);
     procedure edtCompanyNameSearchOrdersClick(Sender: TObject);
     procedure sedEnterCNameSearchOrderUpdateChange(Sender: TObject);
-    procedure lstSelectOrderAdminClick(Sender: TObject);    // For the dynamic object
+    procedure lstSelectOrderAdminClick(Sender: TObject);
+    procedure rgpOrderStatusClick(Sender: TObject);
+    procedure btnOrderToSummaryClick(Sender: TObject);
+    procedure BitBtnPlaceOrderClick(Sender: TObject);
+    procedure BitBtnBackToPlaceOrderPageClick(Sender: TObject);
+    procedure BitBtnBackHomeFromOrdersClick(Sender: TObject);    // For the dynamic object
   private
     { Private declarations }
 
@@ -407,6 +422,8 @@ type
 
 
     Procedure WriteToFormTheme(pFileName : string; pColorValue : integer); // For writing to the files for system themes
+    Procedure SetOrderStatusItemIndex(pStatus : string);
+    Procedure SendEmail(pEmailAddress, pMessage: string) ;
 
   public
     { Public declarations }
@@ -451,6 +468,20 @@ end;
 procedure TfrmVolitant_Express.bitbtnCloseProgramClick(Sender: TObject);
 begin
 // Closes/ ends the program
+end;
+
+procedure TfrmVolitant_Express.BitBtnBackHomeFromOrdersClick(Sender: TObject);
+begin
+// Go back to the home page from the place an order page
+tsPOrder.TabVisible := False ;
+tsHome.TabVisible := True ;
+end;
+
+procedure TfrmVolitant_Express.BitBtnBackToPlaceOrderPageClick(Sender: TObject);
+begin
+// Go back to the place an order page
+tsOrderSummary.TabVisible := False ;
+tsPlaceOrder.TabVisible := true;
 end;
 
 procedure TfrmVolitant_Express.BitBtnBackTOWelcomeFromVidClick(Sender: TObject);
@@ -549,7 +580,17 @@ begin
 
  tsContact.TabVisible := False ;
  tsLastInfo.TabVisible := True ;
- 
+
+end;
+
+procedure TfrmVolitant_Express.BitBtnPlaceOrderClick(Sender: TObject);
+begin
+// Place an order
+
+
+
+// Return back to the Place an Order page
+BitBtnBackToPlaceOrderPage.Click ;
 end;
 
 procedure TfrmVolitant_Express.BitBtnRegisterClick(Sender: TObject);
@@ -614,6 +655,8 @@ begin
   tblCompany.Post ;
 
 // Go to the Home page
+tsRegister.TabVisible := false;
+tsHome.TabVisible := True ;
 end;
 
 procedure TfrmVolitant_Express.BitBtnretryPaySelectClick(Sender: TObject);
@@ -1428,7 +1471,7 @@ begin
     end
     else
     begin // If the account is suspended
-      ShowMessage('Account is suspended'+ #13+'Contact admins to resolve your issue')  ;
+      ShowMessage('Account is suspended'+ #13+'Contact admins to resolve your issue'+#13+'Admin email: 10867@hsrandburg.co.za')  ;
     end;
   end
   else
@@ -1651,6 +1694,13 @@ begin
   redOrderOut.Lines.Add(IntToStr(qrySQL['ItemID'])+#9+qrySQL['Item Name']+ #9+ qrySQL['Category']+ #9+ FloatToStrF(qrySQL['T_Cost/kg'], ffCurrency , 10,2)+ #9+ IntToStr(qrySQL['ItemUseCount'])   );
   qrySQL.Next ;
   end;
+end;
+
+procedure TfrmVolitant_Express.btnOrderToSummaryClick(Sender: TObject);
+begin
+// Go to the order summary tab page
+tsPlaceOrder.TabVisible := False ;
+tsOrderSummary.TabVisible := true;
 end;
 
 procedure TfrmVolitant_Express.btnPauseVidClick(Sender: TObject);
@@ -1876,7 +1926,7 @@ procedure TfrmVolitant_Express.btnSearchForOrdersClick(Sender: TObject);
 var
   bNothing, bID, bName, bCompFound, bOrdersFound : boolean ;
   sNameSearch : string ;
-  iIDsearch : integer ;
+  iIDsearch, iRecordNumKeep : integer ;
 begin
 // Display all orders to edit, depending on input criteria
   lstSelectOrderAdmin.Clear ;
@@ -1919,16 +1969,20 @@ bNothing := True;     // If none of the below conditions are met, display all ed
     while not tblOrders.Eof  do    // exlude orders that has been CANCELLED OR DELIVERED
     begin
        // To do if Nothing was entered- Show all orders that can be edded
-       if (bNothing = True) and not (tblOrders['Status'] = 'Delivered') and not (tblOrders['Status'] = 'Canceled') {(tblOrders['Status'] in ['Delivered', 'Canceled'])} then  // Turns out ID is only usable for Ordinal types
+       if (bNothing = True) and (tblOrders['Status'] <> 'Delivered') and (tblOrders['Status'] <> 'Canceled'){(tblOrders['Status'] in ['Delivered', 'Canceled'])} then  // Turns out ID is only usable for Ordinal types
        begin
          bOrdersFound := True;
-         lstSelectOrderAdmin.Items.Add(IntToStr(tblOrders['OrderID']) + '--'+ DateTimeToStr(tblOrders['Pickup Date']) +'--'+ tblOrders['Pickup Country'] + ' -TO- ' + tblOrders['Drop of Country'] + ' - '+FloatToStrF(CalcOrderPrice(tblOrders['OrderID']), ffCurrency , 10,2 ) ) ;   // Add item to the lst box
+         iRecordNumKeep := tblOrders.RecNo ;// I must store the record, as I loop thru the db in the function, in order keep going from where I was in the process
+         lstSelectOrderAdmin.Items.Add(IntToStr(tblOrders['OrderID']) +'--'+ tblOrders['Pickup Country'] + ' -TO- ' + tblOrders['Drop of Country'] + ' - '+FloatToStrF(CalcOrderPrice(tblOrders['OrderID']), ffCurrency , 10,2 ) ) ;   // Add item to the lst box
+         tblOrders.RecNo := iRecordNumKeep ;// Set pointer where be were before calling the function
        end
        else  // If something was entered
        if ((bID = True) or (bName = True)) and (tblOrders['CompanyID'] = iIDsearch)and not (tblOrders['Status'] = 'Delivered') and not (tblOrders['Status'] = 'Canceled') then  // If a companyID was entered or after the CompanyID was located from the database based on the Name entered
        begin
           bOrdersFound := True;
-        lstSelectOrderAdmin.Items.Add(IntToStr(tblOrders['OrderID']) + '--'+ DateTimeToStr(tblOrders['Pickup Date']) +'--'+ tblOrders['Pickup Country'] + ' -TO- ' + tblOrders['Drop of Country'] + ' - '+FloatToStrF(CalcOrderPrice(tblOrders['OrderID']), ffCurrency , 10,2 ) ) ;  // Add item to the lst box
+          iRecordNumKeep := tblOrders.RecNo ;// I must store the record, as I loop thru the db in the function, in order keep going from where I was in the process
+        lstSelectOrderAdmin.Items.Add(IntToStr(tblOrders['OrderID']) +'--'+ tblOrders['Pickup Country'] + ' -TO- ' + tblOrders['Drop of Country'] + ' - '+FloatToStrF(CalcOrderPrice(tblOrders['OrderID']), ffCurrency , 10,2 ) ) ;  // Add item to the lst box
+         tblOrders.RecNo := iRecordNumKeep ;// Set pointer where be were before calling the function
        end;
       tblOrders.Next ;
     end;
@@ -2072,9 +2126,8 @@ begin
 // Go to the page to place an order for a transport from the home page
 tsHome.TabVisible := False;
 tsPOrder.TabVisible := True ;
+tsOrderSummary.TabVisible := False;
 end;
-
-
 
 procedure TfrmVolitant_Express.btnToOrdersClick(Sender: TObject);
 begin
@@ -2202,15 +2255,134 @@ begin
 end;
 
 procedure TfrmVolitant_Express.btnUpdateOrderStatusClick(Sender: TObject);
+var
+  dtPickup : TDateTime ;
+  iOrderID : integer ;
+  bOrderFound, bCompanyFound : boolean ;
+  sUpdatedStatus : string;
 begin
+// Commit order update as an Admin
+  // Validation
+    // Ensure that order to manage was selected
+      if lstSelectOrderAdmin.ItemIndex = -1 then
+      begin
+        ShowMessage('Please select an order to manage')  ;
+        exit;
+      end;
+    // Ensure that updated date is in the future
+    dtPickup := dpUpdatePickupDate.Date + tpUpdatePickupTime.Time ; // Create the time variable
+    if not (dtPickup > Now) then
+    begin
+      ShowMessage('Updated Date and Time must be in the future') ;
+      exit;
+    end;
+    // Ensure than a status is selected
+    if rgpOrderStatus.ItemIndex = -1 then
+    begin
+      ShowMessage('Ensure that a status has been selected') ;
+      exit ;
+    end;
+  // Get the order ID
+  iOrderID := strtoint(Copy(lstSelectOrderAdmin.Items[lstSelectOrderAdmin.ItemIndex], 1, Pos('--', lstSelectOrderAdmin.Items[lstSelectOrderAdmin.ItemIndex])-1));
+  bOrderFound := False ;
+  sUpdatedStatus := rgpOrderStatus.Items[rgpOrderStatus.ItemIndex] ;
+  tblOrders.first;
+  while not tblOrders.Eof and (bOrderFound = false) do // Search for the order to update
+  begin
+    if tblOrders['OrderID'] = iOrderID then // Find a matching orders
+    begin
+      bOrderFound := True;
+      // Prevent certain status changes
+        // Prevent In transit To Canceled
+        if (tblOrders['Status'] = 'In Transit') and (sUpdatedStatus = 'Canceled') then
+        begin
+          ShowMessage('You are not allowed to change the order status from In Transit TO Canceled');
+          SetOrderStatusItemIndex(tblOrders['Status']); // Set the order status radio group tp the right itemIndex
+          exit;
+        end;
+        // Prevent any other status change that goes to Delivered if it is not In Transit
+        if (sUpdatedStatus = 'Delivered') and not (tblOrders['Status'] = 'In Transit') then
+        begin
+          ShowMessage('A orders status can only be changed to Delivered from a In Transit Status') ;
+            SetOrderStatusItemIndex(tblOrders['Status']); // Set the order status radio group tp the right itemIndex
+          exit;
+        end;
+        // Only allow an order to be put into transit from the Waiting for pickup status
+        if (sUpdatedStatus = 'In Transit') and not (tblOrders['Status'] = 'Waiting for Pickup') and not (tblOrders['Status'] = 'In Transit') then
+        begin
+            ShowMessage('A orders status can only be changed to an In Transit Status from a Wating for Pickup Status') ;
+            SetOrderStatusItemIndex(tblOrders['Status']); // Set the order status radio group tp the right itemIndex
+          exit;
+        end;
+        // Only allow certain functions if a company, say has paid  for the order
+        if (tblOrders['Paid'] = False) and (sUpdatedStatus = 'In Transit')  then
+        begin
+          ShowMessage('An order can''t be put into transit if it has not been payed');
+            SetOrderStatusItemIndex(tblOrders['Status']); // Set the order status radio group tp the right itemIndex
+          exit;
+        end;
+        // Ensure that if a new time is entered, that it is more than a day away from the current date and time
+        if not (tblOrders['Pickup Date'] = dtPickup) then
+        begin
+          if ((dtPickup - Now) <= 1) then
+          begin
+            ShowMessage('New date should be more than a day away from the current date');
+              SetOrderStatusItemIndex(tblOrders['Status']); // Set the order status radio group tp the right itemIndex
+            exit;
+          end;
+        end;
+       // Ensure that the status is not changed to Waiting for Pickup unless from Delayed
+       if (sUpdatedStatus = 'Waiting for Pickup') and not (tblOrders['Status'] = 'Delayed') and not (tblOrders['Status'] = 'Waiting for Pickup') then
+       begin
+         ShowMessage('You can''t give an order a ''Waiting for Pickup'' status if it is in any other status than the ''Delayed'' status');
+           SetOrderStatusItemIndex(tblOrders['Status']); // Set the order status radio group tp the right itemIndex
+         exit;
+       end;
+      // Ensure that account is not suspended- suspended account will not be allowed to have orders changed from waiting to pickup or Delayed to In Transit
+      bCompanyFound := False;
+      tblCompany.First ;
+      while not tblCompany.Eof and (bCompanyFound = False) do // Search for the company of the order
+      begin
+        if tblCompany['CompanyID'] = tblOrders['CompanyID'] then  // if a matching company is found
+        begin
+          bCompanyFound := True;
 
-  // Only allow certain functions if a company, say has paid
+            // If an in transit order is changed to delayed, ensure that a new date in the furure, at least a week away is selected
+           if (sUpdatedStatus = 'Delayed') and (tblOrders['Status'] = 'In Transit') then
+           begin
+             // Ensure that a new date for the order is selected, more than 7 days away  \
+              if ((dtPickup - Now) <= 7) then
+              begin
+                ShowMessage('New date for the order should be more than a week away from the current date');
+                  SetOrderStatusItemIndex(tblOrders['Status']); // Set the order status radio group tp the right itemIndex
+                exit;
+              end;
+             SendEmail(tblCompany['Email'], 'Order with ID' + IntToStr(iOrderID) + 'has been delayed while in transit.'+#13+' A new PICKUP DATE has been set to '+DateTimeToStr(dtPickup) +#13+'. Login to manage the order and put it in the ''Wating for delivery stage''' );
+           end;
 
-  // Remember to update date that the trip took
+          if tblCompany['suspended'] = True then   // if the company is suspended
+          begin
+            if (tblOrders['Status'] = 'Waiting for Pickup') and (sUpdatedStatus = 'In Transit') then  // A suspended companies many not put orders into transit
+            begin
+                ShowMessage('Suspended account order may not be put into transit'+ #13+'Recommended: Change order to Delayed');
+                  SetOrderStatusItemIndex(tblOrders['Status']); // Set the order status radio group tp the right itemIndex
+                exit;
+            end;
+          end;
+        end;
+        tblCompany.Next ;
+      end;
 
-  // Suspounded account order not to be processed
+      // Update the order
 
-  // Remove order from lst box if its status is set to Cancelled or Delivered as it can not longer be updated thereafter
+
+       // Remember to update the E/D date
+
+      // Remove order from lst box if its status is set to Cancelled or Delivered as it can not longer be updated thereafter
+    end;
+
+      tblOrders.next;
+  end;
 
 end;
 
@@ -2894,18 +3066,93 @@ begin
 end;
 
 procedure TfrmVolitant_Express.lstSelectOrderAdminClick(Sender: TObject);
+var
+  I: Integer;
+  bOrderFound, bItemFound, bPlaneFound : boolean;
+  sInfo : string ;
 begin
 // Onlick for orders to be managed by admin
+  // validation
+  // Ensure than an order was selected
+  if lstSelectOrderAdmin.ItemIndex = -1 then
+  begin
+    ShowMessage('Please select a valid order to manage')  ;
+    exit;
+  end;
 
   // When clicking on an order in the lst box= Show a message that gives more info about the order
-
-  // Load the current status of the order into radiogroup where it can be changed
+  tblOrders.First ;
+  bOrderFound := False;
+  while not tblOrders.Eof and not (bOrderFound) do
+  begin
+    if tblOrders['OrderID']= strtoint(Copy(lstSelectOrderAdmin.Items[lstSelectOrderAdmin.ItemIndex], 1, Pos('--', lstSelectOrderAdmin.Items[lstSelectOrderAdmin.ItemIndex])-1))  then
+    begin
+      bOrderFound := True ;
+        // Load the current status of the order into radiogroup where it can be changed
+        for I := 0 to 4 do
+        begin
+          if rgpOrderStatus.Items[i] = tblOrders['Status']  then  // If the status that matches was found
+          rgpOrderStatus.ItemIndex := I;
+        end;
+        // Load the componets to update the date info
+        dpUpdatePickupDate.Date := DateOf(tblOrders['Pickup Date']);
+        tpUpdatePickupTime.Time := TimeOf(tblOrders['Pickup Date']) ;
+        // Show more info of the order
+        sInfo := 'Order Info:' +#13+
+        'Weight: ' + FloatToStr(tblOrders['Weight']) + ' kg' + #13+
+                'Order Placed Date: ' + DateToStr(tblOrders['Order Date']) + #13+
+                'Pickup Country: ' + tblOrders['Pickup Country'] + #13+
+                'Drop of Country: ' + tblOrders['Drop of Country'] + #13+
+                'Pickup Date: ' + DateTimeToStr(tblOrders['Pickup Date']) +#13+
+                'Estimated Drop of Date: ' + DateTimeToStr(tblOrders['E/D Date'])+ #13+
+                'Distance: ' + FloatToStr(tblOrders['Distance']) + ' km' + #13;
+          // Get if the order has been paid
+          if tblOrders['Paid'] then
+          sInfo := sInfo + 'Paid: YES'  + #13
+          else
+          sInfo := sInfo + 'PAID: NO' +#13;
+          // Get the item being used in the order
+          bItemFound := False;
+          tblItems.First ;
+          while not tblItems.eof and (bItemFound = FAlse)do    // Search for a matching item
+          begin
+            if tblItems['ItemID'] = tblOrders['ItemID'] then  // if a matching item was found
+            begin
+              bItemFound := True ;
+              sInfo := sInfo + 'Item: ' + tblItems['Item Name'] + #13;
+            end;
+            tblItems.Next ;
+          end;
+          // Get the plane being used in the order
+          bPlaneFound := False;
+          tblPlanes.First ;
+          while not tblPlanes.Eof and (bPlaneFound = False) do    // Search for a matching plane
+          begin
+            if tblPlanes['PlaneID'] = tblOrders['PlaneID'] then     // If a matching plane was found
+            begin
+              bPlaneFound := True ;
+              sInfo := sInfo + 'Plane: '+ tblPlanes['Plane Name']+ #13;
+            end;
+            tblPlanes.Next ;
+          end;
+    end;
+    tblOrders.Next ;
+  end;
+  ShowMessage(sInfo) ;
 end;
 
 procedure TfrmVolitant_Express.pgcAdminChange(Sender: TObject);
 begin
 // Change things on the tabpages when a change is made
 redCompanyOut.Clear ;
+end;
+
+procedure TfrmVolitant_Express.rgpOrderStatusClick(Sender: TObject);
+begin
+// Warn that set to delivered / Cancelled can not be undone; Cancelled will refund money. This is on the admin update order page
+if (rgpOrderStatus.Items[rgpOrderStatus.ItemIndex] = 'Delivered') or (rgpOrderStatus.Items[rgpOrderStatus.ItemIndex] = 'Canceled') then
+ShowMessage('WARNING!!'+ #13+ 'If the order is set to Delivered or Canceled, no updates will be posible to the order in the future.'+#13+'A canceled order will refund any paid money');
+
 end;
 
 procedure TfrmVolitant_Express.sedEnterCNameSearchOrderUpdateChange(
@@ -2924,13 +3171,31 @@ begin
   btnLoadCompany.Enabled := True;
 end;
 
+procedure TfrmVolitant_Express.SendEmail(pEmailAddress, pMessage: string);
+begin
+// Send the email
+
+  ShowMessage('');
+end;
+
+procedure TfrmVolitant_Express.SetOrderStatusItemIndex(pStatus: string);
+var
+  I: Integer;
+begin
+  for I := 0 to 4 do
+  begin
+    if rgpOrderStatus.Items[i] = pStatus then
+    rgpOrderStatus.ItemIndex := i ;
+  end;
+end;
+
 procedure TfrmVolitant_Express.tFlightAnimationTimer(Sender: TObject);
 begin
  // Timer code
  // Change the image location
- imgPlaneAnimation.Left := imgPlaneAnimation.Left + 30;
+ imgPlaneAnimation.Left := imgPlaneAnimation.Left + 30; // Move it more to the left
 
- if imgPlaneAnimation.Left > 1100 then
+ if imgPlaneAnimation.Left > 1100 then // If the image reaches to the right, reset it to the left
  imgPlaneAnimation.Left := 0 ;
 end;
 
