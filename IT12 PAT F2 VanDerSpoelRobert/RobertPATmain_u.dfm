@@ -2,8 +2,8 @@ object frmVolitant_Express: TfrmVolitant_Express
   Left = 368
   Top = 166
   Caption = 'Volitant Express'
-  ClientHeight = 663
-  ClientWidth = 1250
+  ClientHeight = 648
+  ClientWidth = 1234
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -6425,8 +6425,8 @@ object frmVolitant_Express: TfrmVolitant_Express
   OnCreate = FormCreate
   TextHeight = 15
   object pgcMain: TPageControl
-    Left = 8
-    Top = 16
+    Left = 0
+    Top = 0
     Width = 1234
     Height = 609
     ActivePage = tsAdmin
@@ -25430,9 +25430,9 @@ object frmVolitant_Express: TfrmVolitant_Express
       object pgcAdmin: TPageControl
         Left = 248
         Top = 56
-        Width = 905
+        Width = 945
         Height = 481
-        ActivePage = tsCompaniesAdmin
+        ActivePage = tsOrdersAdmin
         TabOrder = 0
         OnChange = pgcAdminChange
         object tsItemsAdmin: TTabSheet
@@ -25843,6 +25843,13 @@ object frmVolitant_Express: TfrmVolitant_Express
               Height = 15
               Caption = 'Cents'
             end
+            object lblEnterPlaneAmounts: TLabel
+              Left = 248
+              Top = 160
+              Width = 164
+              Height = 15
+              Caption = 'Amount of plains being added:'
+            end
             object edtAddPlaneName: TEdit
               Left = 32
               Top = 49
@@ -25858,7 +25865,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
             object sedAddPlaneMLoad: TSpinEdit
               Left = 32
-              Top = 111
+              Top = 109
               Width = 137
               Height = 31
               Font.Charset = DEFAULT_CHARSET
@@ -25866,7 +25873,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Height = -16
               Font.Name = 'Segoe UI'
               Font.Style = []
-              MaxValue = 0
+              MaxValue = 2000000
               MinValue = 0
               ParentFont = False
               TabOrder = 1
@@ -25874,7 +25881,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
             object sedAddPlaneCSpeed: TSpinEdit
               Left = 232
-              Top = 111
+              Top = 109
               Width = 137
               Height = 31
               Font.Charset = DEFAULT_CHARSET
@@ -25882,7 +25889,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Height = -16
               Font.Name = 'Segoe UI'
               Font.Style = []
-              MaxValue = 0
+              MaxValue = 10000
               MinValue = 0
               ParentFont = False
               TabOrder = 2
@@ -25898,7 +25905,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Height = -16
               Font.Name = 'Segoe UI'
               Font.Style = []
-              MaxValue = 0
+              MaxValue = 2000000
               MinValue = 0
               ParentFont = False
               TabOrder = 3
@@ -25914,7 +25921,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Height = -16
               Font.Name = 'Segoe UI'
               Font.Style = []
-              MaxValue = 0
+              MaxValue = 99
               MinValue = 0
               ParentFont = False
               TabOrder = 4
@@ -25930,7 +25937,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Height = -16
               Font.Name = 'Segoe UI'
               Font.Style = []
-              MaxValue = 0
+              MaxValue = 21000
               MinValue = 0
               ParentFont = False
               TabOrder = 5
@@ -25951,45 +25958,68 @@ object frmVolitant_Express: TfrmVolitant_Express
               TabOrder = 6
               OnClick = btnAddPlaneClick
             end
+            object sedAddPlaneAmount: TSpinEdit
+              Left = 248
+              Top = 181
+              Width = 129
+              Height = 31
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -16
+              Font.Name = 'Segoe UI'
+              Font.Style = []
+              MaxValue = 20
+              MinValue = 1
+              ParentFont = False
+              TabOrder = 7
+              Value = 1
+            end
           end
           object grbManagePlanes: TGroupBox
-            Left = 488
+            Left = 480
             Top = 65
-            Width = 369
+            Width = 441
             Height = 352
             Caption = 'Manage Planes'
             TabOrder = 1
             object lblUpdateFuelPrice: TLabel
-              Left = 32
-              Top = 145
+              Left = 120
+              Top = 177
               Width = 172
               Height = 15
               Caption = 'Update Plane Fuel Cost per Hour'
             end
             object lblUpdateFuelRands: TLabel
               Left = 32
-              Top = 166
+              Top = 190
               Width = 32
               Height = 15
               Caption = 'Rands'
             end
             object lblUpdateFuelCents: TLabel
               Left = 218
-              Top = 166
+              Top = 190
               Width = 30
               Height = 15
               Caption = 'Cents'
             end
             object lblSelectPlaneUpdate: TLabel
               Left = 3
-              Top = 29
+              Top = 21
               Width = 127
               Height = 15
               Caption = 'Select a plane to Update'
             end
+            object lblUpdateAmountOfPlane: TLabel
+              Left = 24
+              Top = 258
+              Width = 95
+              Height = 15
+              Caption = 'Amount Of Plane:'
+            end
             object chkRetirePlane: TCheckBox
               Left = 32
-              Top = 248
+              Top = 284
               Width = 137
               Height = 17
               Caption = 'Retire Plane'
@@ -26003,7 +26033,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
             object sedUpdateFuelRands: TSpinEdit
               Left = 33
-              Top = 187
+              Top = 211
               Width = 129
               Height = 31
               Font.Charset = DEFAULT_CHARSET
@@ -26011,15 +26041,15 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Height = -16
               Font.Name = 'Segoe UI'
               Font.Style = []
-              MaxValue = 0
+              MaxValue = 90000000
               MinValue = 0
               ParentFont = False
               TabOrder = 1
               Value = 0
             end
             object sedUpdateFuelCents: TSpinEdit
-              Left = 192
-              Top = 187
+              Left = 214
+              Top = 211
               Width = 113
               Height = 31
               Font.Charset = DEFAULT_CHARSET
@@ -26027,7 +26057,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Font.Height = -16
               Font.Name = 'Segoe UI'
               Font.Style = []
-              MaxValue = 0
+              MaxValue = 99
               MinValue = 0
               ParentFont = False
               TabOrder = 2
@@ -26035,9 +26065,9 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
             object lstManagePlane: TListBox
               Left = 3
-              Top = 50
-              Width = 350
-              Height = 79
+              Top = 42
+              Width = 435
+              Height = 129
               Font.Charset = DEFAULT_CHARSET
               Font.Color = clWindowText
               Font.Height = -16
@@ -26046,12 +26076,13 @@ object frmVolitant_Express: TfrmVolitant_Express
               ItemHeight = 21
               ParentFont = False
               TabOrder = 3
+              OnClick = lstManagePlaneClick
             end
             object btnUpdatePlane: TButton
-              Left = 24
-              Top = 296
-              Width = 321
-              Height = 41
+              Left = 3
+              Top = 307
+              Width = 435
+              Height = 42
               Caption = 'Update Plane'
               Font.Charset = DEFAULT_CHARSET
               Font.Color = clWindowText
@@ -26061,6 +26092,22 @@ object frmVolitant_Express: TfrmVolitant_Express
               ParentFont = False
               TabOrder = 4
               OnClick = btnUpdatePlaneClick
+            end
+            object sedUpdatePlaneCount: TSpinEdit
+              Left = 136
+              Top = 247
+              Width = 121
+              Height = 31
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -16
+              Font.Name = 'Segoe UI'
+              Font.Style = []
+              MaxValue = 40
+              MinValue = 1
+              ParentFont = False
+              TabOrder = 5
+              Value = 1
             end
           end
         end
@@ -26083,38 +26130,56 @@ object frmVolitant_Express: TfrmVolitant_Express
           object pgcAdminOrders: TPageControl
             Left = 16
             Top = 62
-            Width = 849
-            Height = 371
+            Width = 905
+            Height = 379
             ActivePage = tsOrderUpdate
             TabOrder = 0
             object tsOrderUpdate: TTabSheet
               Caption = 'Update an Order'
               object grpUpdateOrder: TGroupBox
                 Left = -4
-                Top = 3
-                Width = 790
+                Top = 0
+                Width = 898
                 Height = 306
                 Caption = 'Update Order'
                 TabOrder = 0
                 object lblCompanyNameToSearch: TLabel
                   Left = 24
                   Top = 21
-                  Width = 230
+                  Width = 606
                   Height = 15
-                  Caption = 'Enter a company name to search (Optional)'
+                  Caption = 
+                    'Enter a company name or Username to search or a CompanyID (Optio' +
+                    'nal) else, search to display all available orders'
                 end
                 object lblSelectOrderStatus: TLabel
-                  Left = 232
+                  Left = 239
                   Top = 81
                   Width = 119
                   Height = 15
                   Caption = 'Select order to update:'
                 end
-                object lstSelectOrderAdmin: TListBox
-                  Left = 24
+                object lblAdminSelectOrderInfo: TLabel
+                  Left = 80
                   Top = 102
-                  Width = 521
-                  Height = 155
+                  Width = 358
+                  Height = 15
+                  Caption = 
+                    'ORDER ID  -- Pickup to DropOf Country -- Order Total Cost -- Sta' +
+                    'tus'
+                end
+                object lblSearchOrderByCID: TLabel
+                  Left = 327
+                  Top = 47
+                  Width = 14
+                  Height = 15
+                  Caption = 'ID:'
+                end
+                object lstSelectOrderAdmin: TListBox
+                  Left = 11
+                  Top = 120
+                  Width = 518
+                  Height = 137
                   Font.Charset = DEFAULT_CHARSET
                   Font.Color = clWindowText
                   Font.Height = -15
@@ -26123,6 +26188,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                   ItemHeight = 20
                   ParentFont = False
                   TabOrder = 0
+                  OnClick = lstSelectOrderAdminClick
                 end
                 object edtCompanyNameSearchOrders: TEdit
                   Left = 24
@@ -26132,12 +26198,13 @@ object frmVolitant_Express: TfrmVolitant_Express
                   ParentShowHint = False
                   ShowHint = False
                   TabOrder = 1
-                  TextHint = 'Enter company name to search'
+                  TextHint = 'Enter company name/ username to search'
+                  OnClick = edtCompanyNameSearchOrdersClick
                 end
                 object btnSearchForOrders: TButton
-                  Left = 24
-                  Top = 66
-                  Width = 177
+                  Left = 3
+                  Top = 69
+                  Width = 214
                   Height = 34
                   Caption = 'Search for Orders'
                   Font.Charset = DEFAULT_CHARSET
@@ -26147,22 +26214,24 @@ object frmVolitant_Express: TfrmVolitant_Express
                   Font.Style = [fsBold]
                   ParentFont = False
                   TabOrder = 2
+                  OnClick = btnSearchForOrdersClick
                 end
                 object BitBtnClearOrderSearch: TBitBtn
-                  Left = 438
-                  Top = 38
-                  Width = 75
-                  Height = 25
+                  Left = 454
+                  Top = 40
+                  Width = 59
+                  Height = 27
                   Caption = 'Clear'
                   Kind = bkRetry
                   NumGlyphs = 2
                   TabOrder = 3
+                  OnClick = BitBtnClearOrderSearchClick
                 end
                 object rgpOrderStatus: TRadioGroup
-                  Left = 551
-                  Top = 96
+                  Left = 678
+                  Top = 40
                   Width = 217
-                  Height = 161
+                  Height = 217
                   Caption = 'Select Order status'
                   Font.Charset = DEFAULT_CHARSET
                   Font.Color = clWindowText
@@ -26170,16 +26239,19 @@ object frmVolitant_Express: TfrmVolitant_Express
                   Font.Name = 'Segoe UI'
                   Font.Style = []
                   Items.Strings = (
-                    'Waiting for delivery'
+                    'Waiting for Pickup'
                     'In Transit'
-                    'Delivered')
+                    'Delivered'
+                    'Delayed'
+                    'Canceled')
                   ParentFont = False
                   TabOrder = 4
+                  OnClick = rgpOrderStatusClick
                 end
                 object btnUpdateOrderStatus: TButton
-                  Left = 24
+                  Left = 11
                   Top = 263
-                  Width = 753
+                  Width = 886
                   Height = 40
                   Caption = 'Update Status'
                   Font.Charset = ANSI_CHARSET
@@ -26189,23 +26261,82 @@ object frmVolitant_Express: TfrmVolitant_Express
                   Font.Style = [fsBold]
                   ParentFont = False
                   TabOrder = 5
+                  OnClick = btnUpdateOrderStatusClick
                 end
-                object SpinEdit2: TSpinEdit
-                  Left = 311
-                  Top = 39
-                  Width = 121
+                object sedEnterCNameSearchOrderUpdate: TSpinEdit
+                  Left = 359
+                  Top = 42
+                  Width = 89
                   Height = 24
-                  MaxValue = 0
+                  Hint = 'ID will be used above Name'
+                  MaxValue = 1000000
                   MinValue = 0
+                  ParentShowHint = False
+                  ShowHint = True
                   TabOrder = 6
                   Value = 0
+                  OnChange = sedEnterCNameSearchOrderUpdateChange
+                end
+                object grbUpdatePickupDate: TGroupBox
+                  Left = 535
+                  Top = 114
+                  Width = 137
+                  Height = 143
+                  Caption = 'Update Pickup Date'
+                  Font.Charset = DEFAULT_CHARSET
+                  Font.Color = clWindowText
+                  Font.Height = -13
+                  Font.Name = 'Segoe UI'
+                  Font.Style = []
+                  ParentFont = False
+                  TabOrder = 7
+                  object lblUpdatePickupDate: TLabel
+                    Left = 3
+                    Top = 23
+                    Width = 109
+                    Height = 17
+                    Caption = 'Select Pickup Date:'
+                  end
+                  object lblUpdatePickupTime: TLabel
+                    Left = 3
+                    Top = 84
+                    Width = 107
+                    Height = 17
+                    Caption = 'Select Pickup Time'
+                  end
+                  object tpUpdatePickupTime: TTimePicker
+                    Left = 3
+                    Top = 107
+                    Width = 118
+                    Font.Charset = DEFAULT_CHARSET
+                    Font.Color = clWindowText
+                    Font.Height = -16
+                    Font.Name = 'Segoe UI'
+                    Font.Style = []
+                    TabOrder = 0
+                    Time = 45845.423916273150000000
+                    TimeFormat = 'hh:nn'
+                  end
+                  object dpUpdatePickupDate: TDatePicker
+                    Left = 3
+                    Top = 46
+                    Width = 118
+                    Date = 45845.000000000000000000
+                    DateFormat = 'yyyy/mm/dd'
+                    Font.Charset = DEFAULT_CHARSET
+                    Font.Color = clWindowText
+                    Font.Height = -16
+                    Font.Name = 'Segoe UI'
+                    Font.Style = []
+                    TabOrder = 1
+                  end
                 end
               end
               object btnToOrdersOutput: TButton
                 Left = 632
                 Top = 312
                 Width = 155
-                Height = 28
+                Height = 34
                 Caption = 'Go to Orders Output Page'
                 Font.Charset = DEFAULT_CHARSET
                 Font.Color = clWindowText
@@ -26221,10 +26352,10 @@ object frmVolitant_Express: TfrmVolitant_Express
               Caption = 'Order Output'
               ImageIndex = 1
               object redOrderOut: TRichEdit
-                Left = 24
+                Left = 56
                 Top = 96
-                Width = 785
-                Height = 209
+                Width = 801
+                Height = 201
                 Font.Charset = ANSI_CHARSET
                 Font.Color = clWindowText
                 Font.Height = -12
@@ -26236,11 +26367,11 @@ object frmVolitant_Express: TfrmVolitant_Express
                 TabOrder = 0
               end
               object btnOrderSumAdmin: TButton
-                Left = 24
+                Left = 56
                 Top = 31
-                Width = 153
+                Width = 377
                 Height = 59
-                Caption = 'Orders Sum'
+                Caption = 'Orders Summary'
                 Font.Charset = DEFAULT_CHARSET
                 Font.Color = clWindowText
                 Font.Height = -15
@@ -26248,23 +26379,10 @@ object frmVolitant_Express: TfrmVolitant_Express
                 Font.Style = [fsBold]
                 ParentFont = False
                 TabOrder = 1
-              end
-              object btnOrderInfoAdmin: TButton
-                Left = 224
-                Top = 31
-                Width = 153
-                Height = 59
-                Caption = 'Orders Info'
-                Font.Charset = DEFAULT_CHARSET
-                Font.Color = clWindowText
-                Font.Height = -15
-                Font.Name = 'Segoe UI'
-                Font.Style = [fsBold]
-                ParentFont = False
-                TabOrder = 2
+                OnClick = btnOrderSumAdminClick
               end
               object btnOrdersOutstandingPayment: TButton
-                Left = 432
+                Left = 481
                 Top = 31
                 Width = 161
                 Height = 59
@@ -26275,10 +26393,11 @@ object frmVolitant_Express: TfrmVolitant_Express
                 Font.Name = 'Segoe UI'
                 Font.Style = [fsBold]
                 ParentFont = False
-                TabOrder = 3
+                TabOrder = 2
+                OnClick = btnOrdersOutstandingPaymentClick
               end
               object btnOrderPhaseAdmin: TButton
-                Left = 656
+                Left = 696
                 Top = 31
                 Width = 153
                 Height = 59
@@ -26289,29 +26408,31 @@ object frmVolitant_Express: TfrmVolitant_Express
                 Font.Name = 'Segoe UI'
                 Font.Style = [fsBold]
                 ParentFont = False
-                TabOrder = 4
+                TabOrder = 3
                 OnClick = btnOrderPhaseAdminClick
               end
               object cmbOrderPhaseSearch: TComboBox
-                Left = 656
-                Top = 3
+                Left = 696
+                Top = 2
                 Width = 153
                 Height = 23
                 Hint = 'Select Order Phase to Search'
                 ParentShowHint = False
                 ShowHint = True
-                TabOrder = 5
+                TabOrder = 4
                 TextHint = 'Select Phase'
                 Items.Strings = (
                   'Waiting for Pickup'
                   'In Transit'
-                  'Delivered')
+                  'Delivered'
+                  'Delayed'
+                  'Canceled')
               end
               object btnTOorderUpdate: TButton
-                Left = 656
-                Top = 311
-                Width = 155
-                Height = 27
+                Left = 672
+                Top = 303
+                Width = 187
+                Height = 35
                 Caption = 'To Update Order Page'
                 Font.Charset = DEFAULT_CHARSET
                 Font.Color = clWindowText
@@ -26319,7 +26440,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                 Font.Name = 'Segoe UI'
                 Font.Style = [fsBold]
                 ParentFont = False
-                TabOrder = 6
+                TabOrder = 5
                 OnClick = btnTOorderUpdateClick
               end
             end
@@ -26621,6 +26742,7 @@ object frmVolitant_Express: TfrmVolitant_Express
             Top = 22
             Width = 857
             Height = 210
+            ReadOnly = True
             TabOrder = 0
             TitleFont.Charset = DEFAULT_CHARSET
             TitleFont.Color = clWindowText
@@ -26685,6 +26807,7 @@ object frmVolitant_Express: TfrmVolitant_Express
               Top = 49
               Width = 574
               Height = 112
+              ReadOnly = True
               TabOrder = 0
               TitleFont.Charset = DEFAULT_CHARSET
               TitleFont.Color = clWindowText
@@ -26780,7 +26903,7 @@ object frmVolitant_Express: TfrmVolitant_Express
           end
           object btnReloadSum: TButton
             Left = 512
-            Top = 0
+            Top = 3
             Width = 345
             Height = 35
             Caption = 'Reload Page'
@@ -26991,11 +27114,11 @@ object frmVolitant_Express: TfrmVolitant_Express
               Left = 19
               Top = 61
               Width = 384
-              Height = 184
+              Height = 220
               ParentShowHint = False
               ShowHint = False
               TabOrder = 0
-              OnChange = CGhomeThemeChange
+              OnClick = CGhomeThemeClick
             end
             object btnHomeThemeDefault: TButton
               Left = 302
@@ -27005,15 +27128,6 @@ object frmVolitant_Express: TfrmVolitant_Express
               Caption = 'Default'
               TabOrder = 1
               OnClick = btnHomeThemeDefaultClick
-            end
-            object btnGroupBoxDefaultColor: TButton
-              Left = 16
-              Top = 251
-              Width = 387
-              Height = 39
-              Caption = 'Change Group Box color to default (clBtnFace)'
-              TabOrder = 2
-              OnClick = btnGroupBoxDefaultColorClick
             end
           end
           object grbUpdateWelcomeLabel: TGroupBox
@@ -27044,6 +27158,70 @@ object frmVolitant_Express: TfrmVolitant_Express
             end
           end
         end
+        object tsGrid: TTabSheet
+          Caption = 'Grid'
+          ImageIndex = 8
+          object lblSortDatabase: TLabel
+            Left = 168
+            Top = 3
+            Width = 498
+            Height = 45
+            Caption = 'Sort And Control Database in Grid'
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clAqua
+            Font.Height = -32
+            Font.Name = 'Segoe UI Semibold'
+            Font.Style = [fsBold]
+            ParentFont = False
+          end
+          object dbgGridDisplay: TDBGrid
+            Left = 3
+            Top = 54
+            Width = 918
+            Height = 187
+            ReadOnly = True
+            TabOrder = 0
+            TitleFont.Charset = DEFAULT_CHARSET
+            TitleFont.Color = clWindowText
+            TitleFont.Height = -12
+            TitleFont.Name = 'Segoe UI'
+            TitleFont.Style = []
+          end
+          object grbGrid: TGroupBox
+            Left = 3
+            Top = 256
+            Width = 918
+            Height = 177
+            Caption = 'Press a button to Run statement'
+            TabOrder = 1
+            object btnItemOrderPrice: TButton
+              Left = 3
+              Top = 24
+              Width = 174
+              Height = 25
+              Caption = 'Order Items Based On Price'
+              TabOrder = 0
+              OnClick = btnItemOrderPriceClick
+            end
+          end
+        end
+        object tsAdminManage: TTabSheet
+          Caption = 'Manage Admin'
+          ImageIndex = 9
+          object lblManageAdmin: TLabel
+            Left = 288
+            Top = 24
+            Width = 308
+            Height = 37
+            Caption = 'Manage Admin Accounts'
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clNavy
+            Font.Height = -27
+            Font.Name = 'Segoe UI Semibold'
+            Font.Style = [fsBold]
+            ParentFont = False
+          end
+        end
       end
       object grbAdminQuick: TGroupBox
         Left = 16
@@ -27060,34 +27238,36 @@ object frmVolitant_Express: TfrmVolitant_Express
         TabOrder = 1
         object btnToItems: TButton
           Left = 16
-          Top = 31
+          Top = 26
           Width = 153
-          Height = 49
+          Height = 39
           Caption = 'Items'
           TabOrder = 0
           OnClick = btnToItemsClick
         end
         object btnToPlanes: TButton
           Left = 16
-          Top = 86
+          Top = 71
           Width = 153
-          Height = 49
+          Height = 42
           Caption = 'Planes'
           TabOrder = 1
+          OnClick = btnToPlanesClick
         end
         object btnToOrders: TButton
           Left = 16
-          Top = 141
+          Top = 119
           Width = 153
-          Height = 49
+          Height = 37
           Caption = 'Orders'
           TabOrder = 2
+          OnClick = btnToOrdersClick
         end
         object btnToCompanies: TButton
           Left = 16
-          Top = 196
+          Top = 162
           Width = 153
-          Height = 49
+          Height = 40
           Caption = 'Companies'
           TabOrder = 3
         end
@@ -27095,37 +27275,53 @@ object frmVolitant_Express: TfrmVolitant_Express
           Left = 16
           Top = 251
           Width = 153
-          Height = 49
+          Height = 39
           Caption = 'Emails'
           TabOrder = 4
           OnClick = btnToEmailsClick
         end
         object btnToSummary: TButton
           Left = 16
-          Top = 306
+          Top = 208
           Width = 153
-          Height = 49
+          Height = 37
           Caption = 'Summary'
           TabOrder = 5
           OnClick = btnToSummaryClick
         end
         object btnToCustom: TButton
           Left = 16
-          Top = 361
+          Top = 296
           Width = 153
-          Height = 49
+          Height = 37
           Caption = 'Custom SQL'
           TabOrder = 6
           OnClick = btnToCustomClick
         end
         object btnToTheme: TButton
           Left = 16
-          Top = 416
+          Top = 339
           Width = 153
-          Height = 48
+          Height = 37
           Caption = 'Theme'
           TabOrder = 7
           OnClick = btnToThemeClick
+        end
+        object btnToGrid: TButton
+          Left = 16
+          Top = 382
+          Width = 153
+          Height = 37
+          Caption = 'Grid'
+          TabOrder = 8
+        end
+        object btnToAdminManage: TButton
+          Left = 16
+          Top = 425
+          Width = 153
+          Height = 37
+          Caption = 'Manage Admins'
+          TabOrder = 9
         end
       end
       object bitbtnAdminHelp: TBitBtn
@@ -27364,40 +27560,1213 @@ object frmVolitant_Express: TfrmVolitant_Express
         Left = 40
         Top = 83
         Width = 1137
-        Height = 406
+        Height = 438
         ActivePage = tsPlaceOrder
         TabOrder = 0
         object tsPlaceOrder: TTabSheet
           Caption = 'Place  Oder'
-          object ListBox1: TListBox
-            Left = 424
-            Top = 120
-            Width = 121
-            Height = 97
-            ItemHeight = 15
-            Items.Strings = (
-              'w'
-              'd'
-              'as'
-              'wad'
-              's'
-              'awd'
-              'wa'
-              'ds'
-              'awd'
-              'wa')
+          object btnOrderToSummary: TButton
+            Left = 3
+            Top = 336
+            Width = 1123
+            Height = 69
+            Caption = 'Go To Order Summary'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -32
+            Font.Name = 'Segoe UI'
+            Font.Style = [fsBold]
+            ParentFont = False
             TabOrder = 0
+            OnClick = btnOrderToSummaryClick
           end
         end
         object tsOrderSummary: TTabSheet
           Caption = 'Order Summary'
           ImageIndex = 1
+          object BitBtnPlaceOrder: TBitBtn
+            Left = -1
+            Top = 300
+            Width = 1127
+            Height = 105
+            Caption = 'Place Order!'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -48
+            Font.Name = 'Segoe UI'
+            Font.Style = [fsBold]
+            Kind = bkYes
+            NumGlyphs = 2
+            ParentFont = False
+            TabOrder = 0
+            OnClick = BitBtnPlaceOrderClick
+          end
+          object BitBtnBackToPlaceOrderPage: TBitBtn
+            Left = 880
+            Top = 261
+            Width = 246
+            Height = 33
+            Caption = 'Back To Place Order Page'
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -15
+            Font.Name = 'Segoe UI Semibold'
+            Font.Style = [fsBold]
+            Glyph.Data = {
+              52270000424D5227000000000000420000002800000032000000320000000100
+              20000300000010270000000000000000000000000000000000000000FF0000FF
+              0000FF0000004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C70470000000005000000054C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047000000000500000059000000930000007B0000001E4C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047000000000500000059000000E9000000FF000000F70000
+              007B4C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C70470000000059000000E9000000FF0000
+              00FF000000FF000000C24C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047000000000500000049000000E90000
+              00FF000000FF000000FF000000F70000007B4C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C70470000000005000000590000
+              00E9000000FF000000FF000000FF000000F700000093000000144C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C704700000000050000
+              0059000000E9000000FF000000FF000000FF000000FF0000009E000000144C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047001100
+              000100000049000000E9000000FF000000FF000000FF000000FF0000009E4C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47000000000500000059000000E9000000FF000000FF000000FF000000F70000
+              0093000000054C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047000000000500000059000000E9000000FF000000FF000000FF0000
+              00FF00000093000000144C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047001100000100000059000000E9000000FF000000FF0000
+              00FF000000FF0000009E000000054C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047000000000500000049000000E9000000FF0000
+              00FF000000FF000000F7000000934C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047000000000500000059000000E90000
+              00FF000000FF000000FF000000F700000093000000144C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C70470000000005000000590000
+              00E9000000FF000000FF000000FF000000FF00000093000000144C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C704700110000010000
+              0049000000E9000000FF000000FF000000FF000000F7000000934C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047000000
+              000500000049000000E9000000FF000000FF000000FF000000FF000000C20000
+              0035000000350000003500000035000000350000003500000035000000350000
+              0035000000350000003500000035000000350000003500000035000000350000
+              0035000000350000003500000035000000350000003500000035000000350000
+              0035000000350000003500000035000000350000003500000035000000350000
+              00350000003500000035000000350000002A000000054C7047004C7047004C70
+              47001100000100000059000000E9000000FF000000FF000000FF000000FF0000
+              00FF000000E9000000E0000000E0000000E0000000E0000000E0000000E00000
+              00E0000000E0000000E0000000E0000000E0000000E0000000E0000000E00000
+              00E0000000E0000000E0000000E0000000E0000000E0000000E0000000E00000
+              00E0000000E0000000E0000000E0000000E0000000E0000000E0000000E00000
+              00E0000000E0000000E0000000E0000000E0000000E0000000D9000000591100
+              00014C7047004C70470000000014000000C2000000FF000000FF000000FF0000
+              00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+              00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+              00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+              00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+              00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+              00FF000000C2000000144C7047004C70470000000014000000C2000000FF0000
+              00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+              00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+              00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+              00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+              00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+              00FF000000FF000000FF000000C2000000144C7047004C704700110000010000
+              0059000000E9000000FF000000FF000000FF000000FF000000FF000000E90000
+              00D9000000D9000000D9000000D9000000D9000000D9000000D9000000D90000
+              00D9000000D9000000D9000000D9000000D9000000D9000000D9000000D90000
+              00D9000000D9000000D9000000D9000000D9000000D9000000D9000000D90000
+              00D9000000D9000000D9000000D9000000D9000000D9000000D9000000D90000
+              00D9000000D9000000D9000000D9000000C200000059110000014C7047004C70
+              47004C7047000000000500000049000000E9000000FF000000FF000000FF0000
+              00FF000000C2000000350000002A0000002A0000002A0000002A0000002A0000
+              002A0000002A0000002A0000002A0000002A0000002A0000002A0000002A0000
+              002A0000002A0000002A0000002A0000002A0000002A0000002A0000002A0000
+              002A0000002A0000002A0000002A0000002A0000002A0000002A0000002A0000
+              002A0000002A0000002A0000002A0000002A0000002A0000001E000000054C70
+              47004C7047004C7047004C7047004C7047004C70470000000049000000E90000
+              00FF000000FF000000FF000000FF0000009E4C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047000000
+              000500000059000000E0000000FF000000FF000000FF000000FF0000009E0000
+              001E4C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047000000000500000059000000E9000000FF000000FF0000
+              00FF000000F70000009E000000144C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C70470011000001000000350000
+              00E9000000FF000000FF000000FF000000F70000009E4C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47001100000100000059000000E0000000FF000000FF000000FF000000FF0000
+              009E000000144C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047000000000500000059000000E9000000FF0000
+              00FF000000FF000000FF0000009E0000001E4C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C704700000000050000
+              0049000000E9000000FF000000FF000000FF000000F70000009E000000144C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C70470000000035000000E9000000FF000000FF000000FF0000
+              00FF0000009E4C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047001100000100000059000000E00000
+              00FF000000FF000000FF000000FF0000009E000000144C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047000000
+              000500000059000000E9000000FF000000FF000000FF000000F7000000930000
+              00144C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047000000000500000035000000E9000000FF000000FF0000
+              00FF000000F70000007B4C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C704700000000490000
+              00E9000000FF000000FF000000FF000000C24C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47000000000500000059000000E0000000FF000000F7000000934C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047000000000500000049000000930000007B0000
+              001E4C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047000000
+              0005110000014C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+              47004C7047004C7047004C7047004C7047004C704700}
+            ParentFont = False
+            TabOrder = 1
+            OnClick = BitBtnBackToPlaceOrderPageClick
+          end
         end
+      end
+      object BitBtnBackHomeFromOrders: TBitBtn
+        Left = 985
+        Top = 527
+        Width = 185
+        Height = 46
+        Caption = 'Home'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -24
+        Font.Name = 'Segoe UI Semibold'
+        Font.Style = [fsBold]
+        Glyph.Data = {
+          52270000424D5227000000000000420000002800000032000000320000000100
+          20000300000010270000000000000000000000000000000000000000FF0000FF
+          0000FF0000004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C70470000000005000000054C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047000000000500000059000000930000007B0000001E4C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047000000000500000059000000E9000000FF000000F70000
+          007B4C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C70470000000059000000E9000000FF0000
+          00FF000000FF000000C24C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047000000000500000049000000E90000
+          00FF000000FF000000FF000000F70000007B4C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C70470000000005000000590000
+          00E9000000FF000000FF000000FF000000F700000093000000144C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C704700000000050000
+          0059000000E9000000FF000000FF000000FF000000FF0000009E000000144C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047001100
+          000100000049000000E9000000FF000000FF000000FF000000FF0000009E4C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47000000000500000059000000E9000000FF000000FF000000FF000000F70000
+          0093000000054C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047000000000500000059000000E9000000FF000000FF000000FF0000
+          00FF00000093000000144C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047001100000100000059000000E9000000FF000000FF0000
+          00FF000000FF0000009E000000054C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047000000000500000049000000E9000000FF0000
+          00FF000000FF000000F7000000934C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047000000000500000059000000E90000
+          00FF000000FF000000FF000000F700000093000000144C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C70470000000005000000590000
+          00E9000000FF000000FF000000FF000000FF00000093000000144C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C704700110000010000
+          0049000000E9000000FF000000FF000000FF000000F7000000934C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047000000
+          000500000049000000E9000000FF000000FF000000FF000000FF000000C20000
+          0035000000350000003500000035000000350000003500000035000000350000
+          0035000000350000003500000035000000350000003500000035000000350000
+          0035000000350000003500000035000000350000003500000035000000350000
+          0035000000350000003500000035000000350000003500000035000000350000
+          00350000003500000035000000350000002A000000054C7047004C7047004C70
+          47001100000100000059000000E9000000FF000000FF000000FF000000FF0000
+          00FF000000E9000000E0000000E0000000E0000000E0000000E0000000E00000
+          00E0000000E0000000E0000000E0000000E0000000E0000000E0000000E00000
+          00E0000000E0000000E0000000E0000000E0000000E0000000E0000000E00000
+          00E0000000E0000000E0000000E0000000E0000000E0000000E0000000E00000
+          00E0000000E0000000E0000000E0000000E0000000E0000000D9000000591100
+          00014C7047004C70470000000014000000C2000000FF000000FF000000FF0000
+          00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+          00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+          00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+          00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+          00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+          00FF000000C2000000144C7047004C70470000000014000000C2000000FF0000
+          00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+          00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+          00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+          00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+          00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+          00FF000000FF000000FF000000C2000000144C7047004C704700110000010000
+          0059000000E9000000FF000000FF000000FF000000FF000000FF000000E90000
+          00D9000000D9000000D9000000D9000000D9000000D9000000D9000000D90000
+          00D9000000D9000000D9000000D9000000D9000000D9000000D9000000D90000
+          00D9000000D9000000D9000000D9000000D9000000D9000000D9000000D90000
+          00D9000000D9000000D9000000D9000000D9000000D9000000D9000000D90000
+          00D9000000D9000000D9000000D9000000C200000059110000014C7047004C70
+          47004C7047000000000500000049000000E9000000FF000000FF000000FF0000
+          00FF000000C2000000350000002A0000002A0000002A0000002A0000002A0000
+          002A0000002A0000002A0000002A0000002A0000002A0000002A0000002A0000
+          002A0000002A0000002A0000002A0000002A0000002A0000002A0000002A0000
+          002A0000002A0000002A0000002A0000002A0000002A0000002A0000002A0000
+          002A0000002A0000002A0000002A0000002A0000002A0000001E000000054C70
+          47004C7047004C7047004C7047004C7047004C70470000000049000000E90000
+          00FF000000FF000000FF000000FF0000009E4C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047000000
+          000500000059000000E0000000FF000000FF000000FF000000FF0000009E0000
+          001E4C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047000000000500000059000000E9000000FF000000FF0000
+          00FF000000F70000009E000000144C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C70470011000001000000350000
+          00E9000000FF000000FF000000FF000000F70000009E4C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47001100000100000059000000E0000000FF000000FF000000FF000000FF0000
+          009E000000144C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047000000000500000059000000E9000000FF0000
+          00FF000000FF000000FF0000009E0000001E4C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C704700000000050000
+          0049000000E9000000FF000000FF000000FF000000F70000009E000000144C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C70470000000035000000E9000000FF000000FF000000FF0000
+          00FF0000009E4C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047001100000100000059000000E00000
+          00FF000000FF000000FF000000FF0000009E000000144C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047000000
+          000500000059000000E9000000FF000000FF000000FF000000F7000000930000
+          00144C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047000000000500000035000000E9000000FF000000FF0000
+          00FF000000F70000007B4C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C704700000000490000
+          00E9000000FF000000FF000000FF000000C24C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47000000000500000059000000E0000000FF000000F7000000934C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047000000000500000049000000930000007B0000
+          001E4C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047000000
+          0005110000014C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C704700}
+        ParentFont = False
+        TabOrder = 1
+        OnClick = BitBtnBackHomeFromOrdersClick
       end
     end
     object tsManageCompany: TTabSheet
       Caption = 'Manage Company'
       ImageIndex = 9
+      object lblManageCompany: TLabel
+        Left = 376
+        Top = 3
+        Width = 410
+        Height = 65
+        Caption = 'Manage Company'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clGreen
+        Font.Height = -48
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object BitBtnUpdateCompanyInfo: TBitBtn
+        Left = 6
+        Top = 456
+        Width = 1217
+        Height = 72
+        Caption = 'Update Company Info'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -32
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        Kind = bkOK
+        NumGlyphs = 2
+        ParentFont = False
+        TabOrder = 0
+        OnClick = BitBtnUpdateCompanyInfoClick
+      end
+      object BitBtnToHomeFromManageCompany: TBitBtn
+        Left = 1040
+        Top = 534
+        Width = 183
+        Height = 42
+        Caption = 'Home'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -19
+        Font.Name = 'Segoe UI Semibold'
+        Font.Style = [fsBold]
+        Glyph.Data = {
+          52270000424D5227000000000000420000002800000032000000320000000100
+          20000300000010270000000000000000000000000000000000000000FF0000FF
+          0000FF0000004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C70470000000005000000054C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047000000000500000059000000930000007B0000001E4C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047000000000500000059000000E9000000FF000000F70000
+          007B4C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C70470000000059000000E9000000FF0000
+          00FF000000FF000000C24C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047000000000500000049000000E90000
+          00FF000000FF000000FF000000F70000007B4C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C70470000000005000000590000
+          00E9000000FF000000FF000000FF000000F700000093000000144C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C704700000000050000
+          0059000000E9000000FF000000FF000000FF000000FF0000009E000000144C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047001100
+          000100000049000000E9000000FF000000FF000000FF000000FF0000009E4C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47000000000500000059000000E9000000FF000000FF000000FF000000F70000
+          0093000000054C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047000000000500000059000000E9000000FF000000FF000000FF0000
+          00FF00000093000000144C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047001100000100000059000000E9000000FF000000FF0000
+          00FF000000FF0000009E000000054C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047000000000500000049000000E9000000FF0000
+          00FF000000FF000000F7000000934C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047000000000500000059000000E90000
+          00FF000000FF000000FF000000F700000093000000144C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C70470000000005000000590000
+          00E9000000FF000000FF000000FF000000FF00000093000000144C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C704700110000010000
+          0049000000E9000000FF000000FF000000FF000000F7000000934C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047000000
+          000500000049000000E9000000FF000000FF000000FF000000FF000000C20000
+          0035000000350000003500000035000000350000003500000035000000350000
+          0035000000350000003500000035000000350000003500000035000000350000
+          0035000000350000003500000035000000350000003500000035000000350000
+          0035000000350000003500000035000000350000003500000035000000350000
+          00350000003500000035000000350000002A000000054C7047004C7047004C70
+          47001100000100000059000000E9000000FF000000FF000000FF000000FF0000
+          00FF000000E9000000E0000000E0000000E0000000E0000000E0000000E00000
+          00E0000000E0000000E0000000E0000000E0000000E0000000E0000000E00000
+          00E0000000E0000000E0000000E0000000E0000000E0000000E0000000E00000
+          00E0000000E0000000E0000000E0000000E0000000E0000000E0000000E00000
+          00E0000000E0000000E0000000E0000000E0000000E0000000D9000000591100
+          00014C7047004C70470000000014000000C2000000FF000000FF000000FF0000
+          00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+          00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+          00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+          00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+          00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+          00FF000000C2000000144C7047004C70470000000014000000C2000000FF0000
+          00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+          00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+          00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+          00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+          00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000
+          00FF000000FF000000FF000000C2000000144C7047004C704700110000010000
+          0059000000E9000000FF000000FF000000FF000000FF000000FF000000E90000
+          00D9000000D9000000D9000000D9000000D9000000D9000000D9000000D90000
+          00D9000000D9000000D9000000D9000000D9000000D9000000D9000000D90000
+          00D9000000D9000000D9000000D9000000D9000000D9000000D9000000D90000
+          00D9000000D9000000D9000000D9000000D9000000D9000000D9000000D90000
+          00D9000000D9000000D9000000D9000000C200000059110000014C7047004C70
+          47004C7047000000000500000049000000E9000000FF000000FF000000FF0000
+          00FF000000C2000000350000002A0000002A0000002A0000002A0000002A0000
+          002A0000002A0000002A0000002A0000002A0000002A0000002A0000002A0000
+          002A0000002A0000002A0000002A0000002A0000002A0000002A0000002A0000
+          002A0000002A0000002A0000002A0000002A0000002A0000002A0000002A0000
+          002A0000002A0000002A0000002A0000002A0000002A0000001E000000054C70
+          47004C7047004C7047004C7047004C7047004C70470000000049000000E90000
+          00FF000000FF000000FF000000FF0000009E4C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047000000
+          000500000059000000E0000000FF000000FF000000FF000000FF0000009E0000
+          001E4C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047000000000500000059000000E9000000FF000000FF0000
+          00FF000000F70000009E000000144C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C70470011000001000000350000
+          00E9000000FF000000FF000000FF000000F70000009E4C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47001100000100000059000000E0000000FF000000FF000000FF000000FF0000
+          009E000000144C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047000000000500000059000000E9000000FF0000
+          00FF000000FF000000FF0000009E0000001E4C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C704700000000050000
+          0049000000E9000000FF000000FF000000FF000000F70000009E000000144C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C70470000000035000000E9000000FF000000FF000000FF0000
+          00FF0000009E4C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047001100000100000059000000E00000
+          00FF000000FF000000FF000000FF0000009E000000144C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047000000
+          000500000059000000E9000000FF000000FF000000FF000000F7000000930000
+          00144C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047000000000500000035000000E9000000FF000000FF0000
+          00FF000000F70000007B4C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C704700000000490000
+          00E9000000FF000000FF000000FF000000C24C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47000000000500000059000000E0000000FF000000F7000000934C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047000000000500000049000000930000007B0000
+          001E4C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047000000
+          0005110000014C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C7047004C7047004C7047004C70
+          47004C7047004C7047004C7047004C7047004C704700}
+        ParentFont = False
+        TabOrder = 1
+        OnClick = BitBtnToHomeFromManageCompanyClick
+      end
+      object grbManageCompany: TGroupBox
+        Left = 3
+        Top = 64
+        Width = 1220
+        Height = 363
+        Caption = 'Change any attribute to update the Company'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -16
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+        TabOrder = 2
+        object lblUpdateCompanyName: TLabel
+          Left = 40
+          Top = 32
+          Width = 167
+          Height = 21
+          Caption = 'Update Company Name'
+        end
+        object lblUpdatePassword: TLabel
+          Left = 40
+          Top = 102
+          Width = 120
+          Height = 21
+          Caption = 'Update Password'
+        end
+        object lblUpdatePasswordConfirm: TLabel
+          Left = 40
+          Top = 164
+          Width = 190
+          Height = 21
+          Caption = 'Confirm Updated Password'
+        end
+        object lblUpdateEmail: TLabel
+          Left = 40
+          Top = 240
+          Width = 92
+          Height = 21
+          Caption = 'Update Email'
+        end
+        object lblUpdateCountryBased: TLabel
+          Left = 472
+          Top = 32
+          Width = 155
+          Height = 21
+          Caption = 'Update Country Based'
+        end
+        object lblUpdateDefaultHours: TLabel
+          Left = 472
+          Top = 102
+          Width = 150
+          Height = 21
+          Caption = 'Update Default Hours'
+        end
+        object imgUpdateCountryBased: TImage
+          Left = 776
+          Top = 32
+          Width = 433
+          Height = 297
+          Stretch = True
+        end
+        object edtUpdateCompanyName: TEdit
+          Left = 40
+          Top = 59
+          Width = 313
+          Height = 29
+          TabOrder = 0
+        end
+        object edtUpdatePassword: TEdit
+          Left = 40
+          Top = 129
+          Width = 313
+          Height = 29
+          TabOrder = 1
+        end
+        object edtConfirmUpdatedPassword: TEdit
+          Left = 40
+          Top = 191
+          Width = 313
+          Height = 29
+          TabOrder = 2
+        end
+        object edtUpdateEmail: TEdit
+          Left = 40
+          Top = 267
+          Width = 313
+          Height = 29
+          TabOrder = 3
+        end
+        object cmbUpdateCountryBased: TComboBox
+          Left = 472
+          Top = 59
+          Width = 281
+          Height = 29
+          TabOrder = 4
+          OnChange = cmbUpdateCountryBasedChange
+        end
+        object sedUpdateDefaultHours: TSpinEdit
+          Left = 472
+          Top = 129
+          Width = 155
+          Height = 31
+          MaxValue = 300
+          MinValue = 24
+          TabOrder = 5
+          Value = 24
+        end
+        object chkUpdateGovernment: TCheckBox
+          Left = 472
+          Top = 186
+          Width = 249
+          Height = 34
+          Caption = 'Government (Update)'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -21
+          Font.Name = 'Segoe UI'
+          Font.Style = []
+          ParentFont = False
+          TabOrder = 6
+        end
+        object chkUpdateNewsletter: TCheckBox
+          Left = 472
+          Top = 234
+          Width = 233
+          Height = 30
+          Caption = 'Newsletter (Update)'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -21
+          Font.Name = 'Segoe UI'
+          Font.Style = []
+          ParentFont = False
+          TabOrder = 7
+        end
+      end
     end
     object tsLog: TTabSheet
       Caption = 'View Log'
@@ -27405,8 +28774,8 @@ object frmVolitant_Express: TfrmVolitant_Express
     end
   end
   object bitbtnCloseProgram: TBitBtn
-    Left = 1036
-    Top = 627
+    Left = 1028
+    Top = 615
     Width = 206
     Height = 33
     Font.Charset = ANSI_CHARSET
@@ -27419,6 +28788,15 @@ object frmVolitant_Express: TfrmVolitant_Express
     ParentFont = False
     TabOrder = 1
     OnClick = bitbtnCloseProgramClick
+  end
+  object Button1: TButton
+    Left = 392
+    Top = 616
+    Width = 177
+    Height = 25
+    Caption = 'Temp Set ID for Testing'
+    TabOrder = 2
+    OnClick = Button1Click
   end
   object conDB: TADOConnection
     ConnectionString = 
@@ -27480,5 +28858,14 @@ object frmVolitant_Express: TfrmVolitant_Express
   object ColorDialogFORM: TColorDialog
     Left = 96
     Top = 632
+  end
+  object qryGrid: TADOQuery
+    Parameters = <>
+    Left = 240
+    Top = 672
+  end
+  object dsrGrid: TDataSource
+    Left = 272
+    Top = 680
   end
 end

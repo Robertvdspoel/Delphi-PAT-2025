@@ -1,0 +1,10 @@
+The idea is to keep track of the prices of items/ planes fuel price before the price gets updated to be able to see the total price of a order at the time that it was places
+
+
+
+Or we can Create a txt file named after the ORDER id that just contains the prices at that time, instead of logging the price every time we update
+
+
+LINE 1 : ITEMCOST/kg
+
+LINE 2 : FUELCOSR/h
