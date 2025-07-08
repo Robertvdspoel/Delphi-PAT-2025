@@ -325,6 +325,27 @@ type
     btnOrderToSummary: TButton;
     BitBtnPlaceOrder: TBitBtn;
     BitBtnBackToPlaceOrderPage: TBitBtn;
+    BitBtnBackHomeFromOrders: TBitBtn;
+    lblManageCompany: TLabel;
+    BitBtnUpdateCompanyInfo: TBitBtn;
+    BitBtnToHomeFromManageCompany: TBitBtn;
+    grbManageCompany: TGroupBox;
+    lblUpdateCompanyName: TLabel;
+    lblUpdatePassword: TLabel;
+    lblUpdatePasswordConfirm: TLabel;
+    lblUpdateEmail: TLabel;
+    lblUpdateCountryBased: TLabel;
+    lblUpdateDefaultHours: TLabel;
+    edtUpdateCompanyName: TEdit;
+    edtUpdatePassword: TEdit;
+    edtConfirmUpdatedPassword: TEdit;
+    edtUpdateEmail: TEdit;
+    cmbUpdateCountryBased: TComboBox;
+    sedUpdateDefaultHours: TSpinEdit;
+    chkUpdateGovernment: TCheckBox;
+    chkUpdateNewsletter: TCheckBox;
+    imgUpdateCountryBased: TImage;
+    Button1: TButton;
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnRegisterGOClick(Sender: TObject);
@@ -405,7 +426,12 @@ type
     procedure rgpOrderStatusClick(Sender: TObject);
     procedure btnOrderToSummaryClick(Sender: TObject);
     procedure BitBtnPlaceOrderClick(Sender: TObject);
-    procedure BitBtnBackToPlaceOrderPageClick(Sender: TObject);    // For the dynamic object
+    procedure BitBtnBackToPlaceOrderPageClick(Sender: TObject);
+    procedure BitBtnBackHomeFromOrdersClick(Sender: TObject);
+    procedure BitBtnToHomeFromManageCompanyClick(Sender: TObject);
+    procedure BitBtnUpdateCompanyInfoClick(Sender: TObject);
+    procedure cmbUpdateCountryBasedChange(Sender: TObject);
+    procedure Button1Click(Sender: TObject);    // For the dynamic object
   private
     { Private declarations }
 
@@ -434,7 +460,7 @@ type
     arrSpecialCharacters : array[1..32] of char;
 
   // Variable declararion
-  sID : string ;
+  iID : integer ;
   iCountryCount,  iSpecialCharacterCount : integer ;
   bTimer : boolean;
 
@@ -467,6 +493,13 @@ begin
 // Closes/ ends the program
 end;
 
+procedure TfrmVolitant_Express.BitBtnBackHomeFromOrdersClick(Sender: TObject);
+begin
+// Go back to the home page from the place an order page
+tsPOrder.TabVisible := False ;
+tsHome.TabVisible := True ;
+end;
+
 procedure TfrmVolitant_Express.BitBtnBackToPlaceOrderPageClick(Sender: TObject);
 begin
 // Go back to the place an order page
@@ -493,15 +526,13 @@ var
 begin
     // go to the reg confirmation page from the last info page
       redConfirmRegInfo.Clear ;
+      // Validation
      // Check to make sure that the date of the companies establishment is in the past and NOT in the furure
-
      if dtpEstablishedDate.Date > date then
      begin
        ShowMessage('Invalid date of establishment') ;
       Exit;
      end;
-
-
      // Fill the fields on the registration page
 
      pnlConfirmPass.Caption := 'You Password: ' + edtCreatePassword.Text ;
@@ -577,6 +608,10 @@ procedure TfrmVolitant_Express.BitBtnPlaceOrderClick(Sender: TObject);
 begin
 // Place an order
 
+
+
+// Return back to the Place an Order page
+BitBtnBackToPlaceOrderPage.Click ;
 end;
 
 procedure TfrmVolitant_Express.BitBtnRegisterClick(Sender: TObject);
@@ -784,6 +819,160 @@ begin
 
    tsDetails.TabVisible := False;
    tsContact.TabVisible := True ;   
+end;
+
+procedure TfrmVolitant_Express.BitBtnToHomeFromManageCompanyClick(
+  Sender: TObject);
+begin
+// Go to the Home page from the manage company page
+tsManageCompany.TabVisible := False ;
+tsHome.TabVisible := True ;
+end;
+
+procedure TfrmVolitant_Express.BitBtnUpdateCompanyInfoClick(Sender: TObject);
+var
+  sName, sPassword, sEmail: string ;
+  I: Integer;
+  cChar, c : char;
+  bErrorCharacter, bNumber, bCapital, bSpecialCharacter : boolean ;
+begin
+// Update the Company details
+  //Validation
+
+    sName := edtUpdateCompanyName.Text ;
+    sPassword := edtUpdatePassword.Text ;
+   sEmail := edtUpdateEmail.Text ;
+   // Company Name
+   if (sName = '') or (sName = ' ') then
+   begin
+     ShowMessageUser('Please enter your Company Name') ;
+     Exit;
+   end;
+   // Range Check
+   if not ((Length(sName) >=1) and (Length(sName) <= 30 )) then
+   begin
+     ShowMessage('Company Name Length should be between 1 and 30 characters');
+     Exit;
+   end;
+   // Last character may not be a space
+   if sName[Length(sName) ] = ' ' then
+   begin
+     ShowMessage('The last character of the name may not be a space');
+     exit;
+   end;
+    // Check that the Company Name does not contain any elegal characters
+   for I := 1 to Length(sName)  do
+    begin
+      if not ((sName[i] in ['A'..'Z']) or (sName[i] in ['a'..'z']) or (sName[i] in ['$', '-', ',', '.', '''', ' ']) or (sName[i] in ['0'..'9'])) then
+      begin
+        ShowMessage('Only alphabet characters, spaces and these special characters are allowed in the Name: '+ #13+ '$ - , . ''');
+        Exit;
+      end;
+    end;
+    // Check that the Company Name does not already exist (Check that the company has not been registered )
+    tblCompany.first;
+    while not tblCompany.Eof do
+    begin
+      if UpperCase(sName) = Uppercase(tblCompany['CompanyName'])  then
+      begin
+        ShowMessage('Company Already Registered.');
+        Exit;
+      end;
+      tblCompany.Next ;
+    end;
+
+    // CountryBased. Make sure that a country was entered
+    if cmbUpdateCountryBased.ItemIndex = -1 then
+    begin
+      ShowMessage('Please Select/Enter a valid Country Based');
+      Exit;
+    end;
+
+   // Password
+     bNumber := False;
+     bCapital := false;
+     bSpecialCharacter := False;
+
+     // Check that the password is in range
+      if not ((Length(sPassword) >= 6) and (Length(sPassword) <= 20 )) then
+      begin
+        ShowMessage('Password Should be between 6 and 20 character long.');
+        exit;
+      end;
+      // Check that the password is a valid passowrd
+      for cChar  in sPassword  do
+      begin
+         bErrorCharacter := true;
+        for c in arrSpecialCharacters do    // Checks that all the characters are valid
+        begin
+            if  (cChar = c) or (cChar in ['A'..'Z']) or (cChar in ['a'..'z']) or (cChar in ['0'..'9']) then
+            begin
+            bErrorCharacter := False ;
+            break;     // exit the loop but not the procedure. Performance
+            end
+
+        end;
+        if bErrorCharacter = true then
+        begin
+          ShowMessage('Invalid/Unsupported character in Password'+#13+'(Spaces are not allowed)')  ;
+          exit;
+        end ;
+
+        // Check that password is secure
+        if cChar in ['0'..'9'] then
+        bNumber := True ;
+
+        if cChar in ['A'..'Z'] then
+         bCapital := True;
+
+          if bSpecialCharacter = false then
+          begin
+              for c in arrSpecialCharacters  do
+              begin
+                 if cChar = c then
+                 begin
+                 bSpecialCharacter := true ;
+
+                 break ;   // exit the loop but not the procedure.Performance
+                 end;
+              end;
+          end;
+      end;
+      // Password secure dialogue
+      if not (bNumber = true and bCapital = true and bSpecialCharacter = true) then
+      begin
+        ShowMessage('Password does not meet the requirement.'+#13+'Password should contain atleast 1:'+#13+'-Special character'+#13+'-Capital Letter'+#13+'-Number');
+        exit;
+      end;
+      // Make sure that you have entered the password that you think you have
+      if not (sPassword = edtConfirmUpdatedPassword.Text ) then
+      begin
+        ShowMessage('Password do not match' )  ;
+        exit;
+      end;
+      // Email
+      if not  ValidateEmail(sEmail) then // if the email was not correct then exit the program
+      exit;
+     // Locate the company to upate
+     tblCompany.First ;
+     while not tblCompany.Eof do // Search for the company
+     begin
+      if tblCompany['CompanyID']= iID then   // If a matching company is found
+      begin
+        // Update the Companys details
+        tblCompany.Edit ;
+
+        tblCompany['CompanyName'] := sName ;
+        tblCompany['Password'] := sPassword ;
+        tblCompany['Email'] := sEmail ;
+        tblCompany['Government Agency'] := chkUpdateGovernment.Checked ;
+
+        tblCompany.Post ;
+       Exit; // Prevent the loop from continueing after all updates  is done
+      end;
+       tblCompany.Next ;
+     end;
+
 end;
 
 procedure TfrmVolitant_Express.btnAboutUsClick(Sender: TObject);
@@ -1448,7 +1637,7 @@ begin
     if qrySQL['Suspended'] = False then  // if the account is not suspended
     begin
 
-     sID := inttostr(qrySQL['CompanyID'])  ;
+     iID := qrySQL['CompanyID'] ;
 
      ShowMessage('Logged in succesfully!');
       // Change the tabsheets
@@ -1457,7 +1646,7 @@ begin
     end
     else
     begin // If the account is suspended
-      ShowMessage('Account is suspended'+ #13+'Contact admins to resolve your issue')  ;
+      ShowMessage('Account is suspended'+ #13+'Contact admins to resolve your issue'+#13+'Admin email: 10867@hsrandburg.co.za')  ;
     end;
   end
   else
@@ -1476,9 +1665,48 @@ tsLogin.TabVisible := True;
 end;
 
 procedure TfrmVolitant_Express.btnManageCompanyClick(Sender: TObject);
+var
+  I : integer ;
+  bCompanyFound : boolean ;
 begin
 // Go to the page to manage company info page from the home page
 tsHome.TabVisible := False;
+
+   // Load the countries into selection boxe for the Update Country based
+    cmbUpdateCountryBased.Clear ; // Clears any txt that may have been in the comboBox
+    for I := 1 to iCountryCount do
+    cmbUpdateCountryBased.Items.Add(arrCountryName[i]) ;
+
+    // Load the companies data to the fields
+ // Find the company
+  bCompanyFound := False ;
+  tblCompany.First ;
+  while not tblCompany.Eof and (bCompanyFound = False) do // Search for the Company
+  begin
+    if tblCompany['CompanyID'] = iID  then  // If a matching company is found
+    begin
+      bCompanyFound := True;
+      // Fill the components for updating
+      edtUpdateCompanyName.Text := tblCompany['CompanyName'];
+      edtUpdatePassword.Text := tblCompany['Password'];
+      edtConfirmUpdatedPassword.Text  := tblCompany['Password'];
+      edtUpdateEmail.Text := tblCompany['Email'];
+      // Set the combobox
+      for I := 0 to iCountryCount-1  do
+        begin
+          if cmbUpdateCountryBased.items[i] =  tblCompany['Location Based'] then // if a matching item is found
+          begin
+            cmbUpdateCountryBased.ItemIndex := i;
+            Break; // End the loop once a matching record is found to save performance
+          end;
+        end;
+      sedUpdateDefaultHours.Value := tblCompany['Defualt Hours'];
+      chkUpdateGovernment.Checked := tblCompany['Goverment Agency'];
+      chkUpdateNewsletter.Checked := tblCompany['Newsletter'];
+    end;
+    tblCompany.Next ;
+  end;
+
 tsManageCompany.TabVisible := true;
 end;
 
@@ -2115,8 +2343,6 @@ tsPOrder.TabVisible := True ;
 tsOrderSummary.TabVisible := False;
 end;
 
-
-
 procedure TfrmVolitant_Express.btnToOrdersClick(Sender: TObject);
 begin
 // Go the the orders admin page from any other of the admin pages
@@ -2483,12 +2709,17 @@ begin
   ShowMessage('Welcome label theme updated');
 end;
 
+procedure TfrmVolitant_Express.Button1Click(Sender: TObject);
+begin
+iID := 1;
+end;
+
 procedure TfrmVolitant_Express.cmbCountryBasedChange(Sender: TObject);
 var
   sFileName, sCountryName : string;
   I: Integer;
 begin
-// Display the flag of the selected Based country in the image component
+// Display the flag of the selected Based country in the image by the register component
 
   if cmbCountryBased.ItemIndex >=0 then // Make sure than an option was selected
   begin
@@ -2500,7 +2731,6 @@ begin
   end
   else
    imgBasedFlag.Picture.LoadFromFile('Flags/Not_Found.jpg') ; // If no valid images was selected
-
 end;
 
 procedure TfrmVolitant_Express.cmbSelectTableChange(Sender: TObject);
@@ -2513,6 +2743,25 @@ begin
   2: dbgDifferentTables.DataSource := dsrCompany ;
   3: dbgDifferentTables.DataSource := dsrItems ;
   end;
+end;
+
+procedure TfrmVolitant_Express.cmbUpdateCountryBasedChange(Sender: TObject);
+var
+  sFileName : string ;
+begin
+// Display the flag of the selected Based country in the image component by the update country based
+
+  if cmbUpdateCountryBased.ItemIndex >=0 then // Make sure than an option was selected
+  begin
+    sFileName := 'Flags/' + arrCountryCode[cmbUpdateCountryBased.ItemIndex+1] + '.jpg';  // Create the name of the file to open
+    if FileExists(sFileName) then
+    imgUpdateCountryBased.Picture.LoadFromFile(sFileName) // Load the image
+    else
+    imgUpdateCountryBased.Picture.LoadFromFile('Flags/Not_Found.jpg') ;    // If, for some reason, The file cannot be found, display not found
+  end
+  else
+  imgUpdateCountryBased.Picture.LoadFromFile('Flags/Not_Found.jpg') ; // If no valid images was selected
+
 end;
 
 function TfrmVolitant_Express.CalcOrderPrice(pOrderID: integer): real;
@@ -2673,7 +2922,7 @@ var
 begin
 // Form Acticvate
 iCountryCount := 0 ;
-sID := '';
+iID := 0 ;
 // Set the admin company controll buttons
 btnDeleteCompanyAdmin.Enabled := False;
 chkSuspendAccount.Enabled := False;
