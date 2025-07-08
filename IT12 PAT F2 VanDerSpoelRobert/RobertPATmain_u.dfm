@@ -6429,7 +6429,7 @@ object frmVolitant_Express: TfrmVolitant_Express
     Top = 0
     Width = 1234
     Height = 609
-    ActivePage = tsManageCompany
+    ActivePage = tsAdmin
     TabOrder = 0
     object tsWelcome: TTabSheet
       Caption = 'Welcome'
@@ -26162,9 +26162,18 @@ object frmVolitant_Express: TfrmVolitant_Express
                 object lblAdminSelectOrderInfo: TLabel
                   Left = 80
                   Top = 102
-                  Width = 310
+                  Width = 358
                   Height = 15
-                  Caption = 'ORDER ID  -- Pickup to DropOf Country -- Order Total Cost'
+                  Caption = 
+                    'ORDER ID  -- Pickup to DropOf Country -- Order Total Cost -- Sta' +
+                    'tus'
+                end
+                object lblSearchOrderByCID: TLabel
+                  Left = 327
+                  Top = 47
+                  Width = 14
+                  Height = 15
+                  Caption = 'ID:'
                 end
                 object lstSelectOrderAdmin: TListBox
                   Left = 11
@@ -26255,7 +26264,7 @@ object frmVolitant_Express: TfrmVolitant_Express
                   OnClick = btnUpdateOrderStatusClick
                 end
                 object sedEnterCNameSearchOrderUpdate: TSpinEdit
-                  Left = 328
+                  Left = 359
                   Top = 42
                   Width = 89
                   Height = 24

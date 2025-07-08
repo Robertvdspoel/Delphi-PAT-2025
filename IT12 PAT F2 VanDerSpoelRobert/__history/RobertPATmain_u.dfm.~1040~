@@ -14484,7 +14484,7 @@ object frmVolitant_Express: TfrmVolitant_Express
         Top = 96
         Width = 1017
         Height = 473
-        ActivePage = tsDetails
+        ActivePage = tsRegConfirm
         TabOrder = 0
         object tsDetails: TTabSheet
           Caption = 'Company Details'

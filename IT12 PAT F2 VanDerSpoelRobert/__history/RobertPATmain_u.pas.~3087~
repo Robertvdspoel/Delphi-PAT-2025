@@ -346,6 +346,7 @@ type
     chkUpdateNewsletter: TCheckBox;
     imgUpdateCountryBased: TImage;
     Button1: TButton;
+    lblSearchOrderByCID: TLabel;
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnRegisterGOClick(Sender: TObject);
@@ -442,6 +443,7 @@ type
     Function ValidateEmail(pEmail: string): Boolean;
     Function DeleteAccount(pID : integer): boolean;
     Function CalcOrderPrice(pOrderID: integer) : real;
+    Function GetPlainCruisingSpeed(pPlaneID : integer) : real;
 
 
     Procedure WriteToFormTheme(pFileName : string; pColorValue : integer); // For writing to the files for system themes
@@ -515,9 +517,7 @@ mpIntroVideo.Stop;     // Stop the video
 // Change pages
 tsIntroVideo.TabVisible := false;
 tsWelcome.TabVisible:= True ;
-
 end;
-
 
 procedure TfrmVolitant_Express.BitBtnNextToConfirmClick(Sender: TObject);
 var
@@ -865,11 +865,11 @@ begin
         Exit;
       end;
     end;
-    // Check that the Company Name does not already exist (Check that the company has not been registered )
+    // Check that the Company Name does not already exist (Check that the company has not been registered) or that the name is not changed to an existing registered Company Name
     tblCompany.first;
     while not tblCompany.Eof do
     begin
-      if UpperCase(sName) = Uppercase(tblCompany['CompanyName'])  then
+      if (UpperCase(sName) = Uppercase(tblCompany['CompanyName'])) and not (iID = tblCompany['CompanyID'])  then
       begin
         ShowMessage('Company Already Registered.');
         Exit;
@@ -961,16 +961,17 @@ begin
         tblCompany['CompanyName'] := sName ;
         tblCompany['Password'] := sPassword ;
         tblCompany['Email'] := sEmail ;
-        tblCompany['Government Agency'] := chkUpdateGovernment.Checked ;
+        tblCompany['Goverment Agency'] := chkUpdateGovernment.Checked ;
         tblCompany['Newsletter']  := chkUpdateNewsletter.Checked ;
         tblCompany['Location Based'] := cmbUpdateCountryBased.Items[cmbUpdateCountryBased.ItemIndex] ;
+        tblCompany['Defualt Hours'] := sedUpdateDefaultHours.Value ;
 
         tblCompany.Post ;
+        ShowMessage('Company Updated Successfully') ;
        Exit; // Prevent the loop from continueing after all updates  is done
       end;
        tblCompany.Next ;
      end;
-
 end;
 
 procedure TfrmVolitant_Express.btnAboutUsClick(Sender: TObject);
@@ -2185,7 +2186,7 @@ bNothing := True;     // If none of the below conditions are met, display all ed
        begin
          bOrdersFound := True;
          iRecordNumKeep := tblOrders.RecNo ;// I must store the record, as I loop thru the db in the function, in order keep going from where I was in the process
-         lstSelectOrderAdmin.Items.Add(IntToStr(tblOrders['OrderID']) +'--'+ tblOrders['Pickup Country'] + ' -TO- ' + tblOrders['Drop of Country'] + ' - '+FloatToStrF(CalcOrderPrice(tblOrders['OrderID']), ffCurrency , 10,2 ) ) ;   // Add item to the lst box
+         lstSelectOrderAdmin.Items.Add(IntToStr(tblOrders['OrderID']) +'--'+ tblOrders['Pickup Country'] + ' -TO- ' + tblOrders['Drop of Country'] + ' -- '+ tblOrders['Status']+ ' - ' +FloatToStrF(CalcOrderPrice(tblOrders['OrderID']), ffCurrency , 10,2 ) )  ;   // Add item to the lst box
          tblOrders.RecNo := iRecordNumKeep ;// Set pointer where be were before calling the function
        end
        else  // If something was entered
@@ -2193,7 +2194,7 @@ bNothing := True;     // If none of the below conditions are met, display all ed
        begin
           bOrdersFound := True;
           iRecordNumKeep := tblOrders.RecNo ;// I must store the record, as I loop thru the db in the function, in order keep going from where I was in the process
-        lstSelectOrderAdmin.Items.Add(IntToStr(tblOrders['OrderID']) +'--'+ tblOrders['Pickup Country'] + ' -TO- ' + tblOrders['Drop of Country'] + ' - '+FloatToStrF(CalcOrderPrice(tblOrders['OrderID']), ffCurrency , 10,2 ) ) ;  // Add item to the lst box
+        lstSelectOrderAdmin.Items.Add(IntToStr(tblOrders['OrderID']) +'--'+ tblOrders['Pickup Country'] + ' -TO- ' + tblOrders['Drop of Country'] + ' -- '+ tblOrders['Status']+ ' - ' +FloatToStrF(CalcOrderPrice(tblOrders['OrderID']), ffCurrency , 10,2 ) )  ;   // Add item to the lst box
          tblOrders.RecNo := iRecordNumKeep ;// Set pointer where be were before calling the function
        end;
       tblOrders.Next ;
@@ -2468,12 +2469,14 @@ end;
 
 procedure TfrmVolitant_Express.btnUpdateOrderStatusClick(Sender: TObject);
 var
-  dtPickup : TDateTime ;
+  dtPickup, dtEDDropoff : TDateTime ;
   iOrderID : integer ;
   bOrderFound, bCompanyFound : boolean ;
-  sUpdatedStatus : string;
+  sUpdatedStatus, sEmail : string;
+  rTripLength : real;
 begin
 // Commit order update as an Admin
+  sEmail := '';
   // Validation
     // Ensure that order to manage was selected
       if lstSelectOrderAdmin.ItemIndex = -1 then
@@ -2558,7 +2561,7 @@ begin
         if tblCompany['CompanyID'] = tblOrders['CompanyID'] then  // if a matching company is found
         begin
           bCompanyFound := True;
-
+           sEmail := tblCompany['Email'] ;// Get the companies email
             // If an in transit order is changed to delayed, ensure that a new date in the furure, at least a week away is selected
            if (sUpdatedStatus = 'Delayed') and (tblOrders['Status'] = 'In Transit') then
            begin
@@ -2569,7 +2572,7 @@ begin
                   SetOrderStatusItemIndex(tblOrders['Status']); // Set the order status radio group tp the right itemIndex
                 exit;
               end;
-             SendEmail(tblCompany['Email'], 'Order with ID' + IntToStr(iOrderID) + 'has been delayed while in transit.'+#13+' A new PICKUP DATE has been set to '+DateTimeToStr(dtPickup) +#13+'. Login to manage the order and put it in the ''Wating for delivery stage''' );
+             SendEmail(tblCompany['Email'], 'Order with ID ' + IntToStr(iOrderID) + 'has been delayed while in transit.'+#13+' A new PICKUP DATE has been set to '+DateTimeToStr(dtPickup) +#13+'. Login to manage the order and put it in the ''Waiting for delivery stage''' );
            end;
 
           if tblCompany['suspended'] = True then   // if the company is suspended
@@ -2584,15 +2587,42 @@ begin
         end;
         tblCompany.Next ;
       end;
-
       // Update the order
+        // Calculate the E/D date
+        rTripLength := (tblOrders['Distance'] / GetPlainCruisingSpeed(tblOrders['PlaneID']) / 24) ; // Get the trip length in hours and theravter convert it to days
+        dtEDDropoff := dtPickup + rTripLength ;
+        // Write the updated order to the db
+        tblOrders.Edit;
 
+          // Refund the money of the order if the user has paid for it in the past
+         if (sUpdatedStatus = 'Canceled') and not (tblOrders['Status'] = 'Canceled') and (tblOrders['Paid'] = True) then
+         begin
+          tblOrders['Paid'] := False;
+          ShowMessage('Company has been refunded for the Now Canceled order');
+          SendEmail(sEmail, 'Your order with ID '+ IntToStr(tblOrders['OrderID']) + ' has been canceled. The money you paid has been refunded' ) ;
+         end;
+         tblOrders['Pickup Date'] := dtPickup ;
+        tblOrders['E/D Date'] := dtEDDropoff ;
+        tblOrders['Status'] := sUpdatedStatus ;
 
-       // Remember to update the E/D date
-
+        tblOrders.Post ;
       // Remove order from lst box if its status is set to Cancelled or Delivered as it can not longer be updated thereafter
-    end;
+      if (sUpdatedStatus = 'Canceled') or (sUpdatedStatus = 'Delivered') then
+      begin
+        lstSelectOrderAdmin.Items.Delete(lstSelectOrderAdmin.ItemIndex) ;// Delete the item in the list box
+      end
+      else
+      begin // if any other status then update the list box to show the new status
+        lstSelectOrderAdmin.Items[lstSelectItemManage.ItemIndex] := IntToStr(tblOrders['OrderID']) +'--'+ tblOrders['Pickup Country'] + ' -TO- ' + tblOrders['Drop of Country'] + ' -- '+ tblOrders['Status']+ ' - ' +FloatToStrF(CalcOrderPrice(tblOrders['OrderID']), ffCurrency , 10,2 );
+      end;
+      // Clear compoents
+      rgpOrderStatus.ItemIndex := -1;
+      dpUpdatePickupDate.Date := Today ;
+      tpUpdatePickupTime.Time := Time;
 
+
+      ShowMessage('Order Updated Successfully!');
+    end;
       tblOrders.next;
   end;
 
@@ -3178,6 +3208,27 @@ tsGallery.TabVisible := False;
 
 end;
 
+function TfrmVolitant_Express.GetPlainCruisingSpeed(pPlaneID: integer): real;
+var
+  bPlaneFound : boolean ;
+begin
+// Get the cruising speed for a plane
+  tblPlanes.First ;
+  bPlaneFound := False ;
+  while not tblPlanes.Eof and not (bPlaneFound) do   // Search for the plane matching the ID
+  begin
+    if tblPlanes['PlaneID'] = pPlaneID  then // If a matching plane is found
+    begin
+      bPlaneFound := True ;
+      Result := tblPlanes['Cruising Speed'];
+    end;
+    tblPlanes.Next ;
+  end;
+  // Incase, for some reason, a plane is not found
+  if not bPlaneFound then
+  Result := 550 ;
+end;
+
 procedure TfrmVolitant_Express.imgDynamicOnclick;
 var
   sString : string;
@@ -3294,10 +3345,8 @@ begin
         sedUpdateItemRands.Value := Trunc(tblItems['T_Cost/kg']);
         sedUpdateItemCents.Value := Round(Frac(tblItems['T_Cost/kg'])*100);
     end;
-
     tblItems.Next ;
   end;
-
 end;
 
 procedure TfrmVolitant_Express.lstSelectOrderAdminClick(Sender: TObject);
