@@ -49,6 +49,7 @@ end;
 function TDistance.GetDistance: real;
 begin
 // Return only the distance from the calculations
+CalculateDistance;
 Result := fDistance ;
 end;
 
@@ -68,7 +69,7 @@ var
   sString : string ;
 begin
   // ToString Function
-
+  CalculateDistance;
   sString := 'The Distance of your Travels: ' + FloatToStrf(fDistance, ffFixed, 10, 2)+' km'+ #13 ;
   sString := sString +'Trip: '+ fPickupCountry + ' TO ' + fDropOfCountry + #13;
   sString := sString + 'Coordinates: ' + #13 + RealCoordinates ;

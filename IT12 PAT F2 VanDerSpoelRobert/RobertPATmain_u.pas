@@ -16,7 +16,8 @@ uses
   Soap.SOAPPasInv, Soap.SOAPHTTPPasInv, VclTee.TeeGDIPlus, VCLTee.TeEngine,
   VCLTee.Series, VCLTee.TeeProcs, VCLTee.Chart, DateUtils, math, clsDistance_u, clsUsername_u,
   Vcl.FileCtrl, Xml.xmldom, Xml.XmlTransform, Vcl.TabNotBk, VCLTee.TeeDraw3D,
-  Vcl.WinXPickers, System.Sensors, System.Sensors.Components;
+  Vcl.WinXPickers, System.Sensors, System.Sensors.Components, Vcl.NumberBox,
+  Vcl.Outline, Vcl.Samples.DirOutln, Vcl.Imaging.pngimage;
 
 type
   TfrmVolitant_Express = class(TForm)
@@ -347,6 +348,30 @@ type
     imgUpdateCountryBased: TImage;
     Button1: TButton;
     lblSearchOrderByCID: TLabel;
+    lblEnterOrderDetails: TLabel;
+    grbSelectOrderCountries: TGroupBox;
+    lblSelectPickupCountry: TLabel;
+    lblSelectDropOfCountry: TLabel;
+    cmbSelectPickupCountry: TComboBox;
+    cmbSelectDropOffCountry: TComboBox;
+    grbChooseItems: TGroupBox;
+    lblChooseItem: TLabel;
+    sedAddOrderKg: TSpinEdit;
+    sedOrderGrams: TSpinEdit;
+    lblAddOrderKg: TLabel;
+    lblOrderAddGram: TLabel;
+    lstSelectTransportItem: TListBox;
+    cmbCategory: TComboBox;
+    lblSelectCategory: TLabel;
+    grbChoosePickupTime: TGroupBox;
+    dtpChoosePickupDate: TDateTimePicker;
+    tpChoosePickupTime: TTimePicker;
+    lblChoosePickupDate: TLabel;
+    lblChoosePickupTime: TLabel;
+    grbChooseOrderWeight: TGroupBox;
+    imgPickupCountry: TImage;
+    imgDropOffCountry: TImage;
+    lblFromTransportCountries: TLabel;
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnRegisterGOClick(Sender: TObject);
@@ -432,7 +457,13 @@ type
     procedure BitBtnToHomeFromManageCompanyClick(Sender: TObject);
     procedure BitBtnUpdateCompanyInfoClick(Sender: TObject);
     procedure cmbUpdateCountryBasedChange(Sender: TObject);
-    procedure Button1Click(Sender: TObject);    // For the dynamic object
+    procedure Button1Click(Sender: TObject);
+    procedure lstSelectTransportItemClick(Sender: TObject);
+    procedure cmbCategoryChange(Sender: TObject);
+    procedure cmbSelectPickupCountryChange(Sender: TObject);
+    procedure cmbSelectDropOffCountryChange(Sender: TObject);
+    procedure lstPaymentClick(Sender: TObject);
+    procedure BitBtnPayClick(Sender: TObject);    // For the dynamic object
   private
     { Private declarations }
 
@@ -444,6 +475,7 @@ type
     Function DeleteAccount(pID : integer): boolean;
     Function CalcOrderPrice(pOrderID: integer) : real;
     Function GetPlainCruisingSpeed(pPlaneID : integer) : real;
+    Function GetRightPlane(rWeight, rDistance : real) : string;
 
 
     Procedure WriteToFormTheme(pFileName : string; pColorValue : integer); // For writing to the files for system themes
@@ -602,6 +634,86 @@ begin
  tsContact.TabVisible := False ;
  tsLastInfo.TabVisible := True ;
 
+end;
+
+procedure TfrmVolitant_Express.BitBtnPayClick(Sender: TObject);
+var
+  sLine, sCardNumber, sPaymentConfirmation : string ;
+  iOrderID : integer;
+  bOrderFound : boolean;
+  I: Integer;
+begin
+// Pay the order
+  redPaymentConfirm.Clear ;
+  //Validation
+    // Ensure that a valid order to pay is selected
+    if lstPayment.ItemIndex = -1 then
+    begin
+      ShowMessage('Please Select a valid Order to pay') ;
+      exit ;
+    end;
+        // Ask for the card number (Concept)
+        /// Generate a card number for the concept
+        sCardNumber := '';
+        for I := 1 to 4 do
+        begin
+          sCardNumber := sCardNumber + IntToStr(RandomRange(0, 10000) )  ;
+        end;
+        // If the card number is shorter than 16 characters, add 0's at the front
+        while Length(sCardNumber) < 16  do
+        Insert('0', sCardNumber,1);
+        // receive the card number to make the payment
+      sCardNumber := InputBox('Enter your Company Bank account number to Pay for your order', 'Add no spaces please',  sCardNumber ) ;
+      // Validate that the entered card number is shorter than 16 characters
+      if not (Length(sCardNumber) = 16)  then
+      begin
+        ShowMessage('Invalid Card Number. Enter a valid card number') ;
+        exit ;
+      end;
+      // Validate that all of the entered card numbers is valid, by checking that it only contains numbers
+      for I := 1 to 16 do
+      begin
+        if not (sCardNumber[i] in ['0'..'9']) then
+        begin
+          ShowMessage('Invalid card number entered. Enter a valid card number to proceed with payment') ;
+          exit;
+        end;
+      end;
+    // get the order ID
+    slIne := lstPayment.Items[lstPayment.ItemIndex] ;
+    Delete(sLine, 1, Pos(':', sLine) ) ;
+    iOrderID := StrToInt(Copy(sLine, 1 ,Pos(' --Item:', sLIne)-1) )   ;
+      // Search for the ID
+      tblOrders.First ;
+      bOrderFound := false;
+      while not tblOrders.Eof and (bOrderFound = False) do
+      begin
+        if tblOrders['OrderID'] = iOrderID then  // If a matching ID is found
+        begin
+          bOrderFound := True ;
+
+            if MessageDlg('Confirm that you would like to pay your transport fee for order number: ' + IntToStr(iOrderID) , TMsgDlgType.mtConfirmation, [mbYes, mbNo], 0) = mrYes  then
+            begin
+              tblOrders.Edit ;
+              tblOrders['Paid'] := true ;
+              tblOrders.Post ;
+              // Remove paid order from lst box
+              lstPayment.Items.Delete(lstPayment.ItemIndex) ;
+                // give paid order confirmation in the rich edit
+                sPaymentConfirmation := 'Payment Confirmation:' + #13+ 'OrderID: ' + IntToStr(iorderID) +#13+ 'Total order price: ' + FloatToStrF(CalcOrderPrice(iOrderID), ffCurrency , 10,2 ) + #13+ 'Order Paid SUCCESSFULLY' ;
+                redPaymentConfirm.Lines.Add(sPaymentConfirmation)  ;
+                // Send email pop
+                  // Get email addres
+                  qrySQL.SQL.Text := 'Select Email from tblCompany where CompanyID =' + IntToStr(iID)  ;
+                  qrySQL.Open ;
+                  SendEmail(qrySQL['Email'], sPaymentConfirmation) ;
+              ShowMessage('Transportation payment made successfully for order '+ IntToStr(iOrderID) );
+            end
+            else
+            ShowMessage('Transport payment cancelled.') ;
+        end;
+        tblOrders.Next ;
+      end;
 end;
 
 procedure TfrmVolitant_Express.BitBtnPlaceOrderClick(Sender: TObject);
@@ -1912,6 +2024,44 @@ end;
 procedure TfrmVolitant_Express.btnOrderToSummaryClick(Sender: TObject);
 begin
 // Go to the order summary tab page
+  // Validation
+    // Ensure an item is selected
+    if lstSelectTransportItem.ItemIndex = -1 then
+    begin
+      ShowMessage('Please select a valid Item!');
+      exit
+    end;
+   // Ensure that a weight larger than 1 kg has been entered
+   if not (sedAddOrderKg.Value >= 1) then
+   begin
+     ShowMessage('Order Weight must be larger or equel than 1 kg');
+     exit;
+   end;
+   // Ensure that Pickup country has been selected
+   if cmbSelectPickupCountry.ItemIndex = -1 then
+   begin
+     ShowMessage('Please select a valid Pickup Country');
+     exit;
+   end;
+   // Ensure that a Drop off country has been selected
+   if cmbSelectDropOffCountry.ItemIndex = -1 then
+   begin
+     ShowMessage('Please select a valid Drop Off Country');
+     exit;
+   end;
+   // Ensure that the Pickup and Dropf Off Countries are not the same country
+   if cmbSelectPickupCountry.ItemIndex = cmbSelectDropOffCountry.ItemIndex then
+   begin
+     ShowMessage('Pickup and Drop off Countries may not be the smae place') ;
+     exit;
+   end;
+
+
+
+  // Find a plane for the transporting operation
+
+  // Load the summary on the summary page
+
 tsPlaceOrder.TabVisible := False ;
 tsOrderSummary.TabVisible := true;
 end;
@@ -2335,8 +2485,87 @@ tsLog.TabVisible := True ;
 end;
 
 procedure TfrmVolitant_Express.btnTOorderClick(Sender: TObject);
+var
+  I, iHeighest, iDefaultHours : integer ;
+  tFile : textfile;
+  sLine : string ;
+  dtSetDefaultDateTimeOfPickup : TDateTime ;
 begin
 // Go to the page to place an order for a transport from the home page
+
+  // Load the info into the Place order page componets
+    // Load the countries into the combo boxes  for the Pickup/ Drop Country
+    cmbSelectPickupCountry.Clear ; // Clears any txt that may have been in the comboBox
+    cmbSelectDropOffCountry.Clear ;
+    for I := 1 to iCountryCount do
+    begin // Load the countries into the comvbo boxes
+      cmbSelectPickupCountry.Items.Add(arrCountryName[i]) ;
+      cmbSelectDropOffCountry.Items.Add(arrCountryName[i]) ;
+    end;
+    // Load categories into the combobox
+  if not FileExists('Item_Categories.txt')  then  // Check that the file exists
+  begin // If not, create the file
+      AssignFile(tFile, 'Item_Categories.txt');
+    Rewrite(Tfile)  ;
+   CloseFile(tFile);
+  end
+  else
+  begin
+    // Read categories from txt file into combobox, if the file does exis
+    AssignFile(tFile, 'Item_Categories.txt');
+    Reset(tFile);
+    while not Eof(tFile)  do
+    begin
+      Readln(tFile, sLine);
+      cmbCategory.Items.Add(sLine) ;
+    end;
+    CloseFile(tFile);
+  end;
+  cmbCategory.ItemIndex := 0 ; // Set it to all
+
+    // Load the items into the listbox
+    lstSelectTransportItem.Clear ;
+  tblItems.First ;
+  while not tblItems.eof do
+  begin
+    if (tblItems['Retired'] = False) then // If the user wants to see all of the items from tall of the category
+    begin
+       lstSelectTransportItem.Items.Add(tblItems['Item Name']) ;
+    end;
+    tblItems.Next ;
+  end;
+
+    // Set the max weight that a order can be based on the current active planes
+    // Find the active plain with the max load
+    tblPlanes.First ;
+    iHeighest := 1;
+    while not tblPlanes.eof do
+    begin
+      if (tblPlanes['Max Load'] > iHeighest) and (tblPlanes['Retired'] = False) then // If a larger max load is found
+      iHeighest := Floor(tblPlanes['Max Load']) ;
+    tblPlanes.Next ;
+    end;
+    sedAddOrderKg.MaxValue := iHeighest -1; // Minus one to account for cents and stuff
+
+    // Get the distance for the order
+
+
+
+
+
+  //  Set pickup date time compoemts to default hours from now
+    // Get the defualt hours if the company
+    iDefaultHours := 0 ;
+    qrySQL.SQL.Text := 'Select [Defualt Hours] as Result from tblCompany where CompanyID = '+ IntToStr(iID);
+    qrySQL.Open ;
+    iDefaultHours := qrySQL['Result'] ;
+    dtSetDefaultDateTimeOfPickup := Now + (iDefaultHours / 24);
+    // Update the Date  and time in the componets
+    dtpChoosePickupDate.Date := Trunc(dtSetDefaultDateTimeOfPickup)  ;// Set the date and convert default hours part to days
+    tpChoosePickupTime.Time := Frac(dtSetDefaultDateTimeOfPickup) ;
+
+
+
 tsHome.TabVisible := False;
 tsPOrder.TabVisible := True ;
 tsOrderSummary.TabVisible := False;
@@ -2362,13 +2591,47 @@ pgcAdminOrders.ActivePage := tsOrderUpdate ;
 end;
 
 procedure TfrmVolitant_Express.btnTOpaymentClick(Sender: TObject);
+var
+  bPayFound, bItemFound : boolean;
+  sItemName : string ;
 begin
 // Go to the page to manage payments page from the home page
+  lstPayment.Clear ;
+  // Load all payable orders into the list box
+  tblOrders.First ;
+  bPayFound := False;
+  bItemFound := false;
+  sItemName := '';
+  while not tblOrders.Eof do  // Search for orders
+  begin
+    if tblOrders['CompanyID'] = iID then // Order made by the specific company
+    begin
+      if (tblOrders['Paid'] = False) and not (tblOrders['Status'] = 'Canceled') then // If the order has not been paid and the order has not been cancelled
+      begin
+        bPayFound := True;
+        // Get the item name of the order
+        tblItems.First ;
+        while not tblItems.Eof and (bItemFound = false) do // Loop thru item table to find the item in the order
+        begin
+          if tblItems['itemID'] = tblOrders['ItemID'] then // If a matching order is found
+          begin
+            bItemFound := True ;
+            sItemName := tblItems['Item Name'];
+          end;
+
+          tblItems.Next ;
+        end;
+        lstPayment.Items.Add('OrderID: '+ IntToStr(tblOrders['OrderID'])+ ' --Item: '+ sItemName+ ' --TotalCost: ' + FloatToStrF(CalcOrderPrice(tblOrders['OrderID']), ffCurrency, 10,2 ) + ' --FROM ' + tblOrders['Pickup Country'] + ' -TO- ' + tblOrders['Drop of Country'] ) ;
+      end;
+    end;
+    tblOrders.Next ;
+  end;
+
 tsHome.TabVisible := False;
 tsPayment.TabVisible := True ;
-
-  // Load all payable orders into the list box
-
+redPaymentConfirm.Clear ;
+  if not bPayFound then  //  display a message if no payments to be made were found
+  ShowMessage('Lucky you, all your order are paid, or, unlucky us; youve not made an order yet :)') ;
 end;
 
 procedure TfrmVolitant_Express.btnToPlanesClick(Sender: TObject);
@@ -2740,7 +3003,28 @@ end;
 
 procedure TfrmVolitant_Express.Button1Click(Sender: TObject);
 begin
-iID := 1;
+iID := 3;
+end;
+
+procedure TfrmVolitant_Express.cmbCategoryChange(Sender: TObject);
+begin
+// Load the items into the list box when a category is selected
+  lstSelectTransportItem.Clear ;
+  // Load the items into the list box, based on the category input
+  tblItems.First ;
+  while not tblItems.eof do
+  begin
+    if (cmbCategory.Items[cmbCategory.ItemIndex] = 'All') and (tblItems['Retired'] = False) then // If the user wants to see all of the items from tall of the category
+    begin
+      lstSelectTransportItem.Items.Add(tblItems['Item Name']) ;
+    end
+    else
+    if (tblItems['Category'] = cmbCategory.Items[cmbCategory.ItemIndex]) and (tblItems['Retired'] = False) then // If a category that matches the input is found
+    begin
+      lstSelectTransportItem.Items.Add(tblItems['Item Name']) ;
+    end;
+    tblItems.Next ;
+  end;
 end;
 
 procedure TfrmVolitant_Express.cmbCountryBasedChange(Sender: TObject);
@@ -2760,6 +3044,39 @@ begin
   end
   else
    imgBasedFlag.Picture.LoadFromFile('Flags/Not_Found.jpg') ; // If no valid images was selected
+end;
+
+procedure TfrmVolitant_Express.cmbSelectDropOffCountryChange(Sender: TObject);
+var
+sFileName, sCountryName : string;
+begin
+// Load the flag into the image component for the drop off country
+    if cmbSelectDropOffCountry.ItemIndex >=0 then // Make sure than an option was selected
+  begin
+    sFileName := 'Flags/' + arrCountryCode[cmbSelectDropOffCountry.ItemIndex+1] + '.jpg';  // Create the name of the file to open
+    if FileExists(sFileName) then
+    imgDropOffCountry.Picture.LoadFromFile(sFileName) // Load the image
+    else
+    imgDropOffCountry.Picture.LoadFromFile('Flags/Drop_Off_Country.png') ;    // If, for some reason, The file cannot be found, display not found
+  end
+  else
+  imgDropOffCountry.Picture.LoadFromFile('Flags/Drop_Off_Country.png') ; // If no valid images was selected
+end;
+procedure TfrmVolitant_Express.cmbSelectPickupCountryChange(Sender: TObject);
+var
+sFileName, sCountryName : string;
+begin
+// Load the flag into the image component for the pickup country
+    if cmbSelectPickupCountry.ItemIndex >=0 then // Make sure than an option was selected
+  begin
+    sFileName := 'Flags/' + arrCountryCode[cmbSelectPickupCountry.ItemIndex+1] + '.jpg';  // Create the name of the file to open
+    if FileExists(sFileName) then
+    imgPickupCountry.Picture.LoadFromFile(sFileName) // Load the image
+    else
+    imgPickupCountry.Picture.LoadFromFile('Flags/Pickup_Country.png') ;    // If, for some reason, The file cannot be found, display not found
+  end
+  else
+   imgPickupCountry.Picture.LoadFromFile('Flags/Pickup_Country.png') ; // If no valid images was selected
 end;
 
 procedure TfrmVolitant_Express.cmbSelectTableChange(Sender: TObject);
@@ -3230,13 +3547,21 @@ begin
   Result := 550 ;
 end;
 
+function TfrmVolitant_Express.GetRightPlane(rWeight, rDistance: real): string;
+begin
+// Get the right plane for the job
+
+
+
+end;
+
 procedure TfrmVolitant_Express.imgDynamicOnclick;
 var
   sString : string;
 begin
 // Onclick for the dynamic images. Display something positive stat wise about volitant express
 
-  case RandomRange(1,6)  of      // When an image is clicked, a random message with stats wil be displayed 
+  case RandomRange(1,6)  of      // When an image is clicked, a random message with stats wil be displayed
   1: begin     // Count how many successfull orders has taken place
       qrySQL.SQL.Text := 'Select Count(*) as Result from tblOrders where status = "Delivered"';
       qrySQL.open;
@@ -3305,6 +3630,38 @@ begin
    tblPlanes.Next ;
    end;
 
+end;
+
+procedure TfrmVolitant_Express.lstPaymentClick(Sender: TObject);
+var
+  iOrderID : integer;
+  sLine : string;
+  borderFound : boolean ;
+begin
+// When an item is clicked on to pay the order, then show a messgae of the time range of the order
+     //Validation
+    // Ensure that a valid order to pay is selected
+    if lstPayment.ItemIndex = -1 then
+    begin
+      ShowMessage('Please Select a valid Order to pay') ;
+      exit ;
+    end;
+    // get the order ID
+    slIne := lstPayment.Items[lstPayment.ItemIndex] ;
+    Delete(sLine, 1, Pos(':', sLine) ) ;
+    iOrderID := StrToInt(Copy(sLine, 1 ,Pos(' --Item:', sLIne)-1) )   ;
+      // Search for the ID
+      tblOrders.First ;
+      borderFound := False ;
+      while not tblOrders.Eof and (bOrderFound = False) do
+      begin
+        if tblOrders['OrderID'] = iOrderID then  // If a matching ID is found
+        begin
+          borderFound := True ;
+          ShowMessage('Pickup Date: ' + DateTimeToStr(tblOrders['Pickup Date']) +  #13+ 'Drop Off Date:' + DateTimeToStr(tblOrders['E/D Date'])) ;
+        end;
+        tblOrders.Next ;
+      end;
 end;
 
 procedure TfrmVolitant_Express.lstSelectItemManageClick(Sender: TObject);
@@ -3426,6 +3783,38 @@ begin
   ShowMessage(sInfo) ;
 end;
 
+procedure TfrmVolitant_Express.lstSelectTransportItemClick(Sender: TObject);
+var
+  bItemFound : boolean;
+  sDangerous : string ;
+begin
+// When an item is clicked
+  // validate than an item is selected
+  if lstSelectTransportItem.ItemIndex = -1  then
+  begin
+    ShowMessage('Select valid item to transport!');
+    exit ;
+  end;
+  // Display a showmessage to display more info about item. Find the item selected
+  tblItems.First ;
+  bItemFound := False;
+  while not tblItems.Eof and (bItemFound = False) do
+  begin
+    if tblItems['Item Name'] = lstSelectTransportItem.Items[lstSelectTransportItem.ItemIndex] then  // If a matching item is found
+    begin
+      bItemFound := True;
+      // Get if the item is Dangerous
+      if tblItems['Dangerous'] = True then
+      sDangerous := 'Dangerous: YES'
+      else
+      sDangerous := 'Dangerous: NO';
+      ShowMessage('Category: '+tblItems['Category'] + #13+ 'Cost/kg: ' + FloatToStrF(tblItems['T_Cost/kg'], ffCurrency , 10,2) + #13+ sDangerous + #13+ 'Note: '+ tblItems['Note'] );
+    end;
+    tblItems.Next ;
+  end;
+
+end;
+
 procedure TfrmVolitant_Express.pgcAdminChange(Sender: TObject);
 begin
 // Change things on the tabpages when a change is made
@@ -3437,7 +3826,6 @@ begin
 // Warn that set to delivered / Cancelled can not be undone; Cancelled will refund money. This is on the admin update order page
 if (rgpOrderStatus.Items[rgpOrderStatus.ItemIndex] = 'Delivered') or (rgpOrderStatus.Items[rgpOrderStatus.ItemIndex] = 'Canceled') then
 ShowMessage('WARNING!!'+ #13+ 'If the order is set to Delivered or Canceled, no updates will be posible to the order in the future.'+#13+'A canceled order will refund any paid money');
-
 end;
 
 procedure TfrmVolitant_Express.sedEnterCNameSearchOrderUpdateChange(
