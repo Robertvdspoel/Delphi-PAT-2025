@@ -108,9 +108,9 @@ type
     tsPayment: TTabSheet;
     tsPOrder: TTabSheet;
     tsManageCompany: TTabSheet;
-    tsLog: TTabSheet;
+    tsHistory: TTabSheet;
     btnTOorder: TButton;
-    btnTOLog: TButton;
+    btnTOhistory: TButton;
     btnTOpayment: TButton;
     btnManageCompany: TButton;
     lblGenUsername: TLabel;
@@ -407,7 +407,7 @@ type
     procedure btnTOorderUpdateClick(Sender: TObject);
     procedure btnCompanyOrderOutClick(Sender: TObject);
     procedure btnSendNewsletterClick(Sender: TObject);
-    procedure btnTOLogClick(Sender: TObject);
+    procedure btnTOhistoryClick(Sender: TObject);
     procedure btnTOpaymentClick(Sender: TObject);
     procedure btnManageCompanyClick(Sender: TObject);
     procedure bitbtnCloseProgramClick(Sender: TObject);
@@ -463,7 +463,8 @@ type
     procedure cmbSelectPickupCountryChange(Sender: TObject);
     procedure cmbSelectDropOffCountryChange(Sender: TObject);
     procedure lstPaymentClick(Sender: TObject);
-    procedure BitBtnPayClick(Sender: TObject);    // For the dynamic object
+    procedure BitBtnPayClick(Sender: TObject);
+    procedure btnBackHomeFromPayClick(Sender: TObject);    // For the dynamic object
   private
     { Private declarations }
 
@@ -476,6 +477,7 @@ type
     Function CalcOrderPrice(pOrderID: integer) : real;
     Function GetPlainCruisingSpeed(pPlaneID : integer) : real;
     Function GetRightPlane(rWeight, rDistance : real) : string;
+    Function CalcBaseCost(pGovernment: boolean; pEstablishmentDate : TDate) : real ;
 
 
     Procedure WriteToFormTheme(pFileName : string; pColorValue : integer); // For writing to the files for system themes
@@ -907,10 +909,8 @@ begin
 
                break ;   // exit the loop but not the procedure.Performance
                end;
-
             end;
         end;
-    
     end;
     // Password secure dialogue
     if not (bNumber = true and bCapital = true and bSpecialCharacter = true) then
@@ -946,7 +946,6 @@ var
 begin
 // Update the Company details
   //Validation
-
     sName := edtUpdateCompanyName.Text ;
     sPassword := edtUpdatePassword.Text ;
    sEmail := edtUpdateEmail.Text ;
@@ -988,19 +987,16 @@ begin
       end;
       tblCompany.Next ;
     end;
-
     // CountryBased. Make sure that a country was entered
     if cmbUpdateCountryBased.ItemIndex = -1 then
     begin
       ShowMessage('Please Select/Enter a valid Country Based');
       Exit;
     end;
-
    // Password
      bNumber := False;
      bCapital := false;
      bSpecialCharacter := False;
-
      // Check that the password is in range
       if not ((Length(sPassword) >= 6) and (Length(sPassword) <= 20 )) then
       begin
@@ -1025,7 +1021,6 @@ begin
           ShowMessage('Invalid/Unsupported character in Password'+#13+'(Spaces are not allowed)')  ;
           exit;
         end ;
-
         // Check that password is secure
         if cChar in ['0'..'9'] then
         bNumber := True ;
@@ -1040,7 +1035,6 @@ begin
                  if cChar = c then
                  begin
                  bSpecialCharacter := true ;
-
                  break ;   // exit the loop but not the procedure.Performance
                  end;
               end;
@@ -1320,6 +1314,13 @@ tsGallery.TabVisible := False;
 
 
 tsWelcome.TabVisible := True;
+end;
+
+procedure TfrmVolitant_Express.btnBackHomeFromPayClick(Sender: TObject);
+begin
+// Go to the home page from the payment page
+tsPayment.TabVisible := False;
+tsHome.TabVisible := True ;
 end;
 
 procedure TfrmVolitant_Express.btnChangeFORMthemeClick(Sender: TObject);
@@ -2022,6 +2023,8 @@ begin
 end;
 
 procedure TfrmVolitant_Express.btnOrderToSummaryClick(Sender: TObject);
+var
+  rBaseCost : real;
 begin
 // Go to the order summary tab page
   // Validation
@@ -2055,10 +2058,17 @@ begin
      ShowMessage('Pickup and Drop off Countries may not be the smae place') ;
      exit;
    end;
+  // Ensure date for pickup is atleast a day in the future from current time
+
 
 
 
   // Find a plane for the transporting operation
+
+  // Calculate the Base Cost
+  qrySQL.SQL.Text := 'Select * from tblCompany where CompanyID = ' + IntToStr(iID)  ;  // Get the company details
+  qrySQL.Open ;
+  rBaseCost := CalcBaseCost(qrySQL['Goverment Agency'], qrySQL['Establishment Date']) ;   // Cal the calc base cost function
 
   // Load the summary on the summary page
 
@@ -2477,11 +2487,11 @@ begin
 
 end;
 
-procedure TfrmVolitant_Express.btnTOLogClick(Sender: TObject);
+procedure TfrmVolitant_Express.btnTOhistoryClick(Sender: TObject);
 begin
-// Go to the page to View logs page from the home page
+// Go to the page to order history page from the home page
 tsHome.TabVisible := False;
-tsLog.TabVisible := True ;
+tsHistory.TabVisible := True ;
 end;
 
 procedure TfrmVolitant_Express.btnTOorderClick(Sender: TObject);
@@ -3002,8 +3012,17 @@ begin
 end;
 
 procedure TfrmVolitant_Express.Button1Click(Sender: TObject);
+var
+  rBaseCost : real;
 begin
 iID := 3;
+
+   qrySQL.SQL.Text := 'Select * from tblCompany where CompanyID = ' + IntToStr(iID)  ;  // Get the company details
+  qrySQL.Open ;
+
+  rBaseCost := CalcBaseCost(qrySQL['Goverment Agency'], qrySQL['Establishment Date']) ;
+
+  ShowMessage(FloatToStr(rBaseCost) )  ;
 end;
 
 procedure TfrmVolitant_Express.cmbCategoryChange(Sender: TObject);
@@ -3108,6 +3127,84 @@ begin
   else
   imgUpdateCountryBased.Picture.LoadFromFile('Flags/Not_Found.jpg') ; // If no valid images was selected
 
+end;
+
+function TfrmVolitant_Express.CalcBaseCost(pGovernment: boolean;
+  pEstablishmentDate: TDate): real;
+  var
+    rBaseCost : real;
+    I: Integer;
+    bThirdWorld : boolean;
+    tFile : TextFile ;
+    sLine : string;
+begin
+// Calc the base cost of an order. To a degree, base cost is used to empower economical groth and to support companies, especially in the startup process
+  // the value calculated here is for the company at the time of placing the order, and cannot be changed in the future
+
+  rBaseCost := 7520.49 ; // Set initual value of base cost
+
+  if not pGovernment then // If the company is not a government company at the time of placing the order, lower the bace cost by 10%
+  rBaseCost := rBaseCost * (91/100)
+  else
+  rBaseCost := rBaseCost * (111/100);  // If it is a government agency, up the price a bit
+  // Affected by company Age
+  if YearsBetween(Date, pEstablishmentDate) < 10  then // If the company is younger than 10 years, give it a discount, to empower it to grow
+  rBaseCost := rBaseCost * (92/100);
+  // Affected by country based. A third world country based, will result in a dicount to empower economic growth
+    // Get the country code
+      // Get the country based
+      tblCompany.First ;
+      bThirdWorld := false ;
+      while not tblCompany.Eof  do // Search for the active company
+      begin
+        if tblCompany['CompanyID'] = iID then // If the current active company is found
+        begin
+          // Find the countryu based
+          for I := 1 to 245 do
+          begin
+            if Uppercase(arrCountryName[i]) = Uppercase(tblCompany['Location Based']) then // If a matching county is found
+            begin
+               // Check if that country is listed in the third world country txt file
+               AssignFile(tFile, 'third-world-countries-2025.txt') ;
+               if not FileExists('third-world-countries-2025.txt')  then // If the file is not found, create it and move in with life
+               begin
+               Rewrite(tFile)  ;
+               CloseFile(tFile) ;
+               break;
+               end
+               else
+               begin // If the file exists
+                Reset(tFile) ;
+                  while not Eof(tFile)  do
+                  begin
+                     Readln(tFile, slIne) ;
+                     sLine := Copy(sLine, 1 , Pos(',', sLine)-1 ); // Only keep the counry code
+                     if sLine = arrCountryCode[i] then   // If the country based is found in the txt file
+                     begin
+                       bThirdWorld := True ;
+                       break;
+                     end;
+                  end;
+                CloseFile(tFile) ;
+               end;
+            end;
+            if I > 245 then// If no country matching was found for some reason
+            begin
+               bThirdWorld := True ; // I set it to true, as this accoring has me as making the mistake a large possibility  and I don't want the company to be disadvantaged
+            end;
+          end;
+
+          break; // Exit the while loop
+        end;
+       tblCompany.Next ;
+      end;
+      // Empower the third world country
+      if bThirdWorld  then
+      begin
+        rBaseCost := rBaseCost * (9/10);
+      end;
+
+    Result := RoundTO(rBaseCost, -2) ; // return the base cost value
 end;
 
 function TfrmVolitant_Express.CalcOrderPrice(pOrderID: integer): real;
@@ -3922,10 +4019,8 @@ begin
           Result := False;
         exit; 
       end;
-
       if sEmail[i] = '@' then
       Inc(iATcount)  ;
-      
     end;
 
   // Checks that there is an @ in the email
@@ -3947,7 +4042,6 @@ begin
         iPointPos := I ;
         Break;
       end;
-      
    end;
      
    if bPoint = False then

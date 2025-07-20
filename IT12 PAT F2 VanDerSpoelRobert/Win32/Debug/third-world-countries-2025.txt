@@ -1,0 +1,111 @@
+flagCode,country,Hdi2022
+BZ,Belize,0.7
+VE,Venezuela,0.699
+MA,Morocco,0.698
+BO,Bolivia,0.698
+NR,Nauru,0.696
+GA,Gabon,0.693
+SR,Suriname,0.69
+BT,Bhutan,0.681
+TJ,Tajikistan,0.679
+SV,El Salvador,0.674
+IQ,Iraq,0.673
+BD,Bangladesh,0.67
+NI,Nicaragua,0.669
+CV,Cape Verde,0.661
+TV,Tuvalu,0.653
+GQ,Equatorial Guinea,0.65
+IN,India,0.644
+FM,Micronesia,0.634
+GT,Guatemala,0.629
+KI,Kiribati,0.628
+HN,Honduras,0.624
+LA,Laos,0.62
+VU,Vanuatu,0.614
+ST,Sao Tome and Principe,0.613
+NA,Namibia,0.61
+SZ,Eswatini,0.61
+MM,Myanmar,0.608
+GH,Ghana,0.602
+KE,Kenya,0.601
+NP,Nepal,0.601
+KH,Cambodia,0.6
+AO,Angola,0.591
+CM,Cameroon,0.587
+KM,Comoros,0.586
+ZM,Zambia,0.569
+PG,Papua New Guinea,0.568
+TL,Timor-Leste,0.566
+SB,Solomon Islands,0.562
+SY,Syria,0.557
+HT,Haiti,0.552
+UG,Uganda,0.55
+ZW,Zimbabwe,0.55
+NG,Nigeria,0.548
+RW,Rwanda,0.548
+TG,Togo,0.547
+PK,Pakistan,0.54
+MR,Mauritania,0.54
+CI,Ivory Coast,0.534
+TZ,Tanzania,0.532
+LS,Lesotho,0.521
+SN,Senegal,0.517
+SD,Sudan,0.516
+DJ,Djibouti,0.515
+MW,Malawi,0.508
+BJ,Benin,0.504
+GM,Gambia,0.495
+ER,Eritrea,0.493
+ET,Ethiopia,0.492
+MG,Madagascar,0.487
+LR,Liberia,0.487
+GW,Guinea-Bissau,0.483
+CD,DR Congo,0.481
+GN,Guinea,0.471
+AF,Afghanistan,0.462
+MZ,Mozambique,0.461
+SL,Sierra Leone,0.458
+BF,Burkina Faso,0.438
+YE,Yemen,0.424
+BI,Burundi,0.42
+ML,Mali,0.41
+NE,Niger,0.394
+TD,Chad,0.394
+CF,Central African Republic,0.387
+SS,South Sudan,0.381
+SO,Somalia,0.38
+ZA,South Africa,0.713
+AL,Albania,0.796
+AZ,Azerbaijan,0.745
+BN,Brunei,0.829
+CN,China,0.788
+ID,Indonesia,0.722
+IR,Iran,0.774
+JO,Jordan,0.720
+LB,Lebanon,0.706
+MY,Malaysia,0.803
+MV,Maldives,0.766
+PH,Philippines,0.699
+SA,Saudi Arabia,0.875
+LK,Sri Lanka,0.776
+TH,Thailand,0.800
+TR,Turkey,0.820
+VN,Vietnam,0.703
+AR,Argentina,0.849
+BS,Bahamas,0.812
+BB,Barbados,0.790
+EC,Ecuador,0.777
+DM,Dominica,0.742
+DO,Dominican Republic,0.776
+GY,Guyana,0.736
+PA,Panama,0.805
+TT,Trinidad and Tobago,0.810
+UY,Uruguay,0.809
+DZ,Algeria,0.754
+EG,Egypt,0.707
+TN,Tunisia,0.731
+BA,Bosnia and Herzegovina,0.790
+MK,North Macedonia,0.774
+RS,Serbia,0.802
+MD,Moldova,0.767
+UA,Ukraine,0.779
