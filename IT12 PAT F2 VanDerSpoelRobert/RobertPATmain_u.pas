@@ -593,10 +593,10 @@ begin
      tsLastInfo.TabVisible := False ;
      tsRegConfirm.TabVisible := True;
 
-    // Inisiate the username class
+    // initialise the username class
     objUsername := TUsername.Create(edtCName.Text , cmbCountryBased.Items[cmbCountrybased.ItemIndex],dtpEstablishedDate.Date );
 
-    sUsernameCreated := objUsername.ToString ;
+    sUsernameCreated := objUsername.ToString ; // Call the ToString Function
     edtGUsername.Text := sUsernameCreated ;
     
     // Check to make sure that the username does not exist. (IT can be possible, as you cant register a company twice, however, a company starting with the same word can technically generate twice )
@@ -2024,7 +2024,8 @@ end;
 
 procedure TfrmVolitant_Express.btnOrderToSummaryClick(Sender: TObject);
 var
-  rBaseCost : real;
+  rBaseCost, rLatPickup, rLongPickup, rLatDropOff, rLongDropOff : real;
+  I: Integer;
 begin
 // Go to the order summary tab page
   // Validation
@@ -2058,10 +2059,33 @@ begin
      ShowMessage('Pickup and Drop off Countries may not be the smae place') ;
      exit;
    end;
-  // Ensure date for pickup is atleast a day in the future from current time
+  // Ensure date and time for pickup is atleast a day in the future from current time
+  if  (hoursBetween(Now, (dtpChoosePickupDate.Date + tpChoosePickupTime.Time))  < 24) then
+  begin
+    ShowMessage('Your selected pickup date and time must be atleast 24 hours into the future from the Current Date and time');
+    exit ;
+  end;
+    // Get the coordinates for the countries
+    for I := 1 to iCountryCount do
+    begin
+       if UpperCase(cmbSelectPickupCountry.Items[cmbSelectPickupCountry.ItemIndex]) = UpperCase(arrCountryName[i])   then  // Get the coordinates for the Pickup Country if a matching country is found
+       begin
+          rLatPickup := arrLatitude[i] ;
+          rLongPickup := arrLongitude[i];
+       end
+       else
+       if UpperCase(cmbSelectDropOffCountry.Items[cmbSelectDropOffCountry.ItemIndex]) = UpperCase(arrCountryName[i]) then   // Get the coordinates for the DropOff Country if a matching country is found
+       begin
+          rLatDropOff := arrLatitude[i] ;
+          rLongDropOff := arrLongitude[i];
+       end;
+    end;
+  // Get the distance for the order
+ objDistance := TDistance.Create(rLatPickup, rLatDropOff, rLongPickup, rLongDropOff,cmbSelectPickupCountry.Items[cmbSelectPickupCountry.ItemIndex],cmbSelectDropOffCountry.Items[cmbSelectPickupCountry.ItemIndex]  ) ;// Initialize the class
 
+ objDistance.ToString ;
 
-
+ ShowMessage(FloatToStr(objDistance.GetDistance) )   ;
 
   // Find a plane for the transporting operation
 
@@ -3160,7 +3184,7 @@ begin
         if tblCompany['CompanyID'] = iID then // If the current active company is found
         begin
           // Find the countryu based
-          for I := 1 to 245 do
+          for I := 1 to iCountryCount do
           begin
             if Uppercase(arrCountryName[i]) = Uppercase(tblCompany['Location Based']) then // If a matching county is found
             begin
@@ -3188,7 +3212,7 @@ begin
                 CloseFile(tFile) ;
                end;
             end;
-            if I > 245 then// If no country matching was found for some reason
+            if I >iCountryCount then// If no country matching was found for some reason
             begin
                bThirdWorld := True ; // I set it to true, as this accoring has me as making the mistake a large possibility  and I don't want the company to be disadvantaged
             end;
