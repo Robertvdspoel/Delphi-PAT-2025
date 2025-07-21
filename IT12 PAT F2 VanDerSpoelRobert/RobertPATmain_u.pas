@@ -478,6 +478,7 @@ type
     Function GetPlainCruisingSpeed(pPlaneID : integer) : real;
     Function GetRightPlane(rWeight, rDistance : real) : string;
     Function CalcBaseCost(pGovernment: boolean; pEstablishmentDate : TDate) : real ;
+    Function FindPlane(pOrderWeight, pDistance: real; pPickupDateTime : TDateTime) : integer;
 
 
     Procedure WriteToFormTheme(pFileName : string; pColorValue : integer); // For writing to the files for system themes
@@ -722,7 +723,7 @@ procedure TfrmVolitant_Express.BitBtnPlaceOrderClick(Sender: TObject);
 begin
 // Place an order
 
-
+        // Write to History log the prices of the order at that time
 
 // Return back to the Place an Order page
 BitBtnBackToPlaceOrderPage.Click ;
@@ -2024,8 +2025,9 @@ end;
 
 procedure TfrmVolitant_Express.btnOrderToSummaryClick(Sender: TObject);
 var
-  rBaseCost, rLatPickup, rLongPickup, rLatDropOff, rLongDropOff : real;
-  I: Integer;
+  rBaseCost, rLatPickup, rLongPickup, rLatDropOff, rLongDropOff, rWeight : real;
+  I, iPlaneID: Integer;
+  dtPickupDate : TDateTime ;
 begin
 // Go to the order summary tab page
   // Validation
@@ -2060,7 +2062,8 @@ begin
      exit;
    end;
   // Ensure date and time for pickup is atleast a day in the future from current time
-  if  (hoursBetween(Now, (dtpChoosePickupDate.Date + tpChoosePickupTime.Time))  < 24) then
+  dtPickupDate := dtpChoosePickupDate.Date + tpChoosePickupTime.Time ;
+  if  (hoursBetween(Now, (dtPickupDate))  < 24) then
   begin
     ShowMessage('Your selected pickup date and time must be atleast 24 hours into the future from the Current Date and time');
     exit ;
@@ -2082,13 +2085,30 @@ begin
     end;
   // Get the distance for the order
  objDistance := TDistance.Create(rLatPickup, rLatDropOff, rLongPickup, rLongDropOff,cmbSelectPickupCountry.Items[cmbSelectPickupCountry.ItemIndex],cmbSelectDropOffCountry.Items[cmbSelectPickupCountry.ItemIndex]  ) ;// Initialize the class
-
  objDistance.ToString ;
 
- ShowMessage(FloatToStr(objDistance.GetDistance) )   ;
+ rWeight := sedAddOrderKg.Value + (sedOrderGrams.Value / 100) ;
 
   // Find a plane for the transporting operation
+ iPlaneID := FindPlane(rWeight,objDistance.GetDistance,  dtPickupDate )   ;
 
+ if iPlaneID = 0 then // If no plain that can do the trip is found
+ begin
+  ShowMessage('Unfortunatly, no plain that can transport the order was found for the trip')   ;
+  exit;
+ end;
+
+ if iPlaneID = -1 then   // If no available plain that can do the trip is found
+ begin
+   ShowMessage('No available plain was found that is capable of transporting the order,'+ #13+ 'Choose another Pickup Date to transport the order');
+   exit;
+ end;
+
+    // Get the plane info for the selected plain- agaon :(
+    qrySQL.SQL.Text := 'Select * from tblPlanes where PlaneID = ' + IntToStr(iPlaneID) ;
+    qrySQL.Open ;
+
+ {
   // Calculate the Base Cost
   qrySQL.SQL.Text := 'Select * from tblCompany where CompanyID = ' + IntToStr(iID)  ;  // Get the company details
   qrySQL.Open ;
@@ -2097,7 +2117,7 @@ begin
   // Load the summary on the summary page
 
 tsPlaceOrder.TabVisible := False ;
-tsOrderSummary.TabVisible := true;
+tsOrderSummary.TabVisible := true;        }
 end;
 
 procedure TfrmVolitant_Express.btnPauseVidClick(Sender: TObject);
@@ -3376,6 +3396,67 @@ begin
       Break;
     end;
   end;
+
+end;
+
+function TfrmVolitant_Express.FindPlane(pOrderWeight, pDistance : real; pPickupDateTime : TDateTime): integer;
+var
+  bPlaneFound, bValid : boolean;
+  iRecordNumber, iPlaneCount : integer ;
+  dtDropOffDateTime : TDateTime ;
+  rHoursTripLength : real;
+begin
+// Find the plane to be used in the order
+   bPlaneFound := false;
+  // Run a SQL query to find planes that can do the trip
+  qrySQL.SQL.Text := 'Select * from tblPlanes where [Max Load] >= ' + FloatToStr(pOrderWeight) + ' and [Max Distance] >= ' + FloatToStr(pDistance) + ' Order By [Max Load]' ; // Get all planes that can do this trip and sort them from the smallest size to the largest based on the max load that they can carry
+  qrySQL.Open ;
+
+   if not qrySQL.IsEmpty then  // Checks that the field (Query) does not come up empty
+   begin // If results are returned form the query
+      qrySQL.First ;
+
+      // Calculate the DropOfftime
+      rHoursTripLength := pDistance / qrySQL['Cruising Speed']  ;
+      dtDropOffDateTime := pPickupDateTime + (rHoursTripLength)/ 24 ;   // Also convert it hours to days
+
+      while not qrySQL.eof and (bPlaneFound = false) do   // Go thru the query results to check plane availibily
+      begin
+         tblOrders.First ;
+         bValid := True;
+         iPlaneCount := qrySQL['Count'] ;   // Set the amount of planes that Volitant Express has of that plane type
+         while not tblOrders.Eof and (bValid = true) do
+         begin
+            if tblOrders['PlaneID'] = qrySQL['PlaneID'] then
+            begin
+              if (((HoursBetween(tblOrders['Pickup Date'],  dtDropOffDateTime )) > 24) or ((HoursBetween(pPickupDateTime , tblOrders['E/D Date'])) > 24 )) or (tblOrders['Status'] = 'Canceled') then  // The new orders DropOff dateTime must me more that 24 hours before the Existing orfders Pickup date AND the new orders Pickup date must be more than 24 hours after the existing orders Drop OFf Date and the Existing order must not have been cancelled
+              begin
+                 // Just leave like this, valid plane
+              end
+              else
+              begin // Else, if the New ORders DateTimes does not fit in this range for the current plane, move on to the next plane in the list of the SQL query
+                 bValid := False ;
+              end;
+
+            end;
+
+          tblOrders.Next ;
+         end;
+
+         if bValid = True then // if the active plain in the SQL query has an open slot in that time frame
+         begin
+           bPlaneFound := True ;// Return the planeID to be used in the order
+           Result := qrySQL['PlaneID'] ;
+         end;
+
+        qrySQL.Next ;
+      end;
+
+      if bPlaneFound = False then  // If no available plane is found, return a -1
+      Result := -1;
+   end
+   else
+   Result := 0 ; // Return a 0 of no plain that can do the trip is found
 
 end;
 
