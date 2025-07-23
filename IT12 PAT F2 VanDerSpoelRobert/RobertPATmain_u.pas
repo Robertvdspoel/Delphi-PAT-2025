@@ -13,9 +13,9 @@ uses
   Vcl.ActnMan, Vcl.ActnColorMaps, IdBaseComponent, IdComponent, IdTCPConnection,
   IdTCPClient, IdExplicitTLSClientServerBase, IdMessageClient, IdIMAP4,
   Vcl.DBCtrls, Vcl.CheckLst, Soap.InvokeRegistry, Soap.WSDLIntf,
-  Soap.SOAPPasInv, Soap.SOAPHTTPPasInv, VclTee.TeeGDIPlus, VCLTee.TeEngine,
-  VCLTee.Series, VCLTee.TeeProcs, VCLTee.Chart, DateUtils, math, clsDistance_u, clsUsername_u,
-  Vcl.FileCtrl, Xml.xmldom, Xml.XmlTransform, Vcl.TabNotBk, VCLTee.TeeDraw3D,
+  Soap.SOAPPasInv, Soap.SOAPHTTPPasInv,
+   DateUtils, math, clsDistance_u, clsUsername_u,
+  Vcl.FileCtrl, Xml.xmldom, Xml.XmlTransform, Vcl.TabNotBk,
   Vcl.WinXPickers, System.Sensors, System.Sensors.Components, Vcl.NumberBox,
   Vcl.Outline, Vcl.Samples.DirOutln, Vcl.Imaging.pngimage;
 
@@ -313,10 +313,6 @@ type
     btnToAdminManage: TButton;
     tsAdminManage: TTabSheet;
     lblManageAdmin: TLabel;
-    lblEnterPlaneAmounts: TLabel;
-    sedAddPlaneAmount: TSpinEdit;
-    sedUpdatePlaneCount: TSpinEdit;
-    lblUpdateAmountOfPlane: TLabel;
     lblAdminSelectOrderInfo: TLabel;
     grbUpdatePickupDate: TGroupBox;
     tpUpdatePickupTime: TTimePicker;
@@ -372,6 +368,9 @@ type
     imgPickupCountry: TImage;
     imgDropOffCountry: TImage;
     lblFromTransportCountries: TLabel;
+    tblAdmins: TADOTable;
+    dsrAdmins: TDataSource;
+    chkLoginAsAdmin: TCheckBox;
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnRegisterGOClick(Sender: TObject);
@@ -464,7 +463,8 @@ type
     procedure cmbSelectDropOffCountryChange(Sender: TObject);
     procedure lstPaymentClick(Sender: TObject);
     procedure BitBtnPayClick(Sender: TObject);
-    procedure btnBackHomeFromPayClick(Sender: TObject);    // For the dynamic object
+    procedure btnBackHomeFromPayClick(Sender: TObject);
+    procedure btnToGridClick(Sender: TObject);    // For the dynamic object
   private
     { Private declarations }
 
@@ -569,11 +569,9 @@ begin
       Exit;
      end;
      // Fill the fields on the registration page
-
      pnlConfirmPass.Caption := 'You Password: ' + edtCreatePassword.Text ;
      sedCompanyAgeConfirm.Value := YearsBetween(date, dtpEstablishedDate.Date) ;
-
-     // Richedit
+    // Richedit
      //Government agency
      if chkGovernment.Checked then
      redConfirmRegInfo.Lines.Add('Government Agency: YES')
@@ -619,7 +617,7 @@ begin
       end;
       
     until bUsernameFound = False; // If no duplicate username was found, then no need to check again
-    
+  chkConfirmRegInfo.Checked := False;
 end;
 
 procedure TfrmVolitant_Express.BitBtnNextToLastInfoClick(Sender: TObject);
@@ -813,7 +811,7 @@ begin
    // Company Name
    if (sName = '') or (sName = ' ') then
    begin
-     ShowMessageUser('Please enter your Company Name') ;
+     ShowMessage('Please enter your Company Name') ;
      Exit;
    end;
    // Range Check
@@ -953,7 +951,7 @@ begin
    // Company Name
    if (sName = '') or (sName = ' ') then
    begin
-     ShowMessageUser('Please enter your Company Name') ;
+     ShowMessage('Please enter your Company Name') ;
      Exit;
    end;
    // Range Check
@@ -1237,7 +1235,8 @@ begin
       ShowMessage('No plane name entered or length longer than 40 character') ;
       exit;
    end;
-  // Check that the item name does not already exist
+   {
+  // Check that the plane name does not already exist
   tblPlanes.First ;
   while not tblPlanes.Eof do
   begin
@@ -1247,7 +1246,7 @@ begin
       exit;
     end;
     tblPlanes.Next ;
-  end;
+  end;}
   // Check that a max load was entered
   if sedAddPlaneMLoad.Value = 0 then
   begin
@@ -1281,11 +1280,11 @@ begin
    tblPlanes['FuelCost'] := sedAddFuelRands.Value + sedAddFuelCents.Value / 100;
    tblPlanes['Max Distance'] := sedAddPlaneMDistance.Value ;
    tblPlanes['Retired'] := False ;
-   tblPlanes['Count'] := sedAddPlaneAmount.value;
+  { tblPlanes['Count'] := sedAddPlaneAmount.value; }
   tblPlanes.Post ;
 // Update the list box
    lstManagePlane.Items.Add(IntToStr(tblPlanes['PlaneID']) +'-'+tblPlanes['Plane Name']+' -- '+ FloatToStrF(tblPlanes['FuelCost'], ffCurrency ,10,2)  );
-     ShowMessage('Item successfully added'); // Confirmation
+     ShowMessage('Plane successfully added'); // Confirmation
    // Clear the inputs
    edtAddPlaneName.Clear;
    sedAddPlaneMLoad.Value := 0 ;
@@ -1730,44 +1729,149 @@ end;
 procedure TfrmVolitant_Express.btnLoginBackClick(Sender: TObject);
 begin
 // Go back to the welcome page from the login page
+  // Clear the fields
+  edtUsernameLogin.Clear;
+  edtPasswordLogin.Clear ;
+  chkLoginAsAdmin.Checked := False;
+  // Change the tabsheets
 tsLogin.TabVisible := false;
 tsWelcome.TabVisible := True;
 end;
 
 procedure TfrmVolitant_Express.btnLoginClick(Sender: TObject);
+var
+  bAccountFound : boolean;
 begin
 // Login to the program
 
-  // Perhaps add SQL Injection protection
-
-  qrySQL.SQL.Text := 'Select CompanyID, Suspended from tblCompany where (Username = ' + QuotedStr(edtUsernameLogin.Text) + ') and Password = '+ QuotedStr(edtPasswordLogin.Text) ;  // SQL Query
-
-   qrySQL.Open ;
-
-  if not qrySQL.IsEmpty then  // Checks that the field (Query) does not come up empty
+  if not chkLoginAsAdmin.Checked  then // Check if the user wants to login as a person or an admin
   begin
-   //  qrySQL.First ;
-    if qrySQL['Suspended'] = False then  // if the account is not suspended
+    // This is to login as a user
+    tblCompany.First ;
+    bAccountFound := False;
+    while not tblCompany.Eof and not bAccountFound do
     begin
+      if (tblCompany['CompanyName'] = edtUsernameLogin.Text) and (tblCompany['PAssword'] = edtPasswordLogin.Text) then
+      begin // If a company was found
+         if tblCompany['Suspended'] = False then  // if the account is not suspended
+          begin
+           iID := qrySQL['CompanyID'] ; // Set the ID variable
+           bAccountFound := True;
+           ShowMessage('Logged in succesfully!');
+            // Change the tabsheets
+           tsLogin.TabVisible := False;
+           tsHome.TabVisible := True ;
+          end
+          else
+          begin // If the account is suspended
+            ShowMessage('Account is suspended'+ #13+'Contact admins to resolve your issue'+#13+'Admin email: 10867@hsrandburg.co.za')  ;
+          end;
+      end;
+      tblCompany.Next ;
+    end;
 
-     iID := qrySQL['CompanyID'] ;
-
-     ShowMessage('Logged in succesfully!');
-      // Change the tabsheets
-     tsLogin.TabVisible := False;
-     tsHome.TabVisible := True ;
-    end
-    else
-    begin // If the account is suspended
-      ShowMessage('Account is suspended'+ #13+'Contact admins to resolve your issue'+#13+'Admin email: 10867@hsrandburg.co.za')  ;
+    if not bAccountFound  then
+    begin
+       Showmessage('Invalid Password or username!') ;
+       exit;
     end;
   end
   else
-  begin  // If it was an invalid login
-    Showmessage('Invalid Password or username!') ;
-    Exit;
-  end;
+  begin // This is to login as an admin
+    tblAdmins.First ;
+    bAccountFound := FAlse;
+    while not tblAdmins.Eof and not (bAccountFound) do
+    begin
+      if (tblAdmins['Username'] = edtUsernameLogin.Text) and (tblAdmins['Password'] = edtPasswordLogin.Text) then
+      begin // IF a valid admin login is found
+        bAccountFound := True ;
+        // Change tabsheets
+        tsLogin.TabVisible := FAlse;
+        tsAdmin.TabVisible := True ;
+          // apply account permissions
+            // Apply admin management permission
+            if tblAdmins['Manage_Admin'] then   // If allowed to manage admins
+            begin
+            btnToAdminManage.Enabled := True ;
+            btnToAdminManage.ShowHint := False;
+            end
+            else
+            begin // If not allowed to manage admins
+              btnToAdminManage.Enabled := false ;
+              btnToAdminManage.ShowHint := True;
+              btnToAdminManage.Hint := 'You do not have permission to access this page' ;
+            end;
+            // Apply admin Developer Settings
+            if tblAdmins['Developer'] then  // If the admin is a developer
+            begin
+              btnToCustom.Enabled := True;
+              btnToCompanies.ShowHint := False;
+            end
+            else
+            begin // If the admin account is not a developer account
+              btnToCustom.Enabled := False;
+              btnToCustom.ShowHint := True ;
+              btnToCustom.Hint := 'You do not have permission to access this page' ;
+            end;
+            // Apply admin theme change settigs
+            if tblAdmins['Change_Theme'] then   // If the admin is allowed to change the theme
+            begin
+              btnToTheme.Enabled := True ;
+              btnToTheme.ShowHint := False;
+            end
+            else
+            begin // If the admin is not allowed to change the them
+              btnToTheme.Enabled := False;
+              btnToTheme.ShowHint := True;
+              btnToTheme.Hint := 'You do not have permission to access this page' ;
+            end;
+            // Apply admin item manage permissions
+            if tblAdmins['Item_Manage'] then  // If allowed to manage items
+            begin
+              btnToItems.Enabled := True;
+              btnToItems.ShowHint := false;
+            end
+            else
+            begin // If not allowed to manage items
+              btnToItems.Enabled := False;
+              btnToItems.ShowHint := True;
+              btnToItems.Hint :='You do not have permission to access this page' ;
+            end;
+            // Apply admin plane manage permissions
+            if tblAdmins['Plane_Manage'] then  // If allowed to manage planes
+            begin
+              btnToPlanes.Enabled := True;
+              btnToPlanes.ShowHint := False;
+            end
+            else
+            begin // If not allowed to manage planes
+                btnToPlanes.Enabled := False;
+              btnToPlanes.ShowHint := True;
+                btnToPlanes.Hint := 'You do not have permission to access this page' ;
+            end;
+            // Apply Newsetter send permissions
+            if tblAdmins['Newsletter'] then   // If allowed to send the newsletter
+            begin
+              btnToEmails.Enabled := True ;
+              btnToEmails.ShowHint := False;
+            end
+            else
+            begin   // If not allowed to send emails
+               btnToEmails.Enabled := false ;
+              btnToEmails.ShowHint := True;
+              btnToEmails.Hint := 'You do not have permission to access this page' ;
+            end;
 
+      end;
+      tblAdmins.Next ;
+    end;
+
+    if not bAccountFound then  // If admin login failed
+    begin
+      ShowMessage('Invalid login details to login as an admin') ;
+      exit;
+    end;
+  end;
 end;
 
 procedure TfrmVolitant_Express.btnLoginGOClick(Sender: TObject);
@@ -2083,10 +2187,15 @@ begin
           rLongDropOff := arrLongitude[i];
        end;
     end;
+    // Calculate the Base Cost
+    qrySQL.SQL.Text := 'Select * from tblCompany where CompanyID = ' + IntToStr(iID)  ;  // Get the company details
+    qrySQL.Open ;
+    rBaseCost := CalcBaseCost(qrySQL['Goverment Agency'], qrySQL['Establishment Date']) ;   // Cal the calc base cost function
+
   // Get the distance for the order
  objDistance := TDistance.Create(rLatPickup, rLatDropOff, rLongPickup, rLongDropOff,cmbSelectPickupCountry.Items[cmbSelectPickupCountry.ItemIndex],cmbSelectDropOffCountry.Items[cmbSelectPickupCountry.ItemIndex]  ) ;// Initialize the class
  objDistance.ToString ;
-
+ // Get the weight of the order
  rWeight := sedAddOrderKg.Value + (sedOrderGrams.Value / 100) ;
 
   // Find a plane for the transporting operation
@@ -2104,15 +2213,11 @@ begin
    exit;
  end;
 
-    // Get the plane info for the selected plain- agaon :(
+    // Get the plane info for the selected plain- again :(
     qrySQL.SQL.Text := 'Select * from tblPlanes where PlaneID = ' + IntToStr(iPlaneID) ;
     qrySQL.Open ;
 
  {
-  // Calculate the Base Cost
-  qrySQL.SQL.Text := 'Select * from tblCompany where CompanyID = ' + IntToStr(iID)  ;  // Get the company details
-  qrySQL.Open ;
-  rBaseCost := CalcBaseCost(qrySQL['Goverment Agency'], qrySQL['Establishment Date']) ;   // Cal the calc base cost function
 
   // Load the summary on the summary page
 
@@ -2135,17 +2240,30 @@ end;
 procedure TfrmVolitant_Express.btnRegBackClick(Sender: TObject);
 begin
 // Go back to the Welcome page from the Register page
-
-  // clear all of the fields
-
 tsRegister.TabVisible := False;
 tsWelcome.TabVisible := True ;
+// Clear all of the registration fields
+edtCName.Clear ;
+chkGovernment.Checked := False;
+cmbCountryBased.ItemIndex :=-1;
+edtCreatePassword.Clear ;
+edtConfirmPass.Clear ;
+imgBasedFlag.Visible := False;
+edtRegEmail.Clear ;
+chkNewsLetter.Checked := FAlse;
+dtpEstablishedDate.Date := Today;
+sedRegDefaultHours.Value := 24;
+
+// Set the register page controll to the starting page
+pgcRegister.ActivePage.TabVisible := False;
+tsDetails.TabVisible := True;
 end;
 
 procedure TfrmVolitant_Express.btnRegisterGOClick(Sender: TObject);
 begin
 // Go to the register page
 tsWelcome.TabVisible := false ;
+dtpEstablishedDate.Date := Date;
 tsRegister.TabVisible := True ;
 end;
 
@@ -2175,7 +2293,7 @@ begin
  // Total Items
  pnlTotalItems.Caption := 'Total Items: ' + IntToStr(tblItems.RecordCount) ;
  // Total Planes
- qrySQL.SQL.Text := 'Select SUM(Count) as Result from tblPlanes' ;
+ qrySQL.SQL.Text := 'Select count(*) as Result from tblPlanes' ;
  qrySQL.Open ;
  pnlTotalPlanes.Caption := 'Total Planes: ' + IntToStr(qrySQL['Result']) ;
 
@@ -2471,12 +2589,13 @@ begin
   sCustomPagePass := IntToStr(RandomRange(1000, 10000) )  ;
 
   if sCustomPagePass = InputBox('Enter Password to access Custom SQL page', 'The Custom Passowd is: (For PAT purposes it is given)', sCustomPagePass)  then
-  begin
+  begin  // If the right password was enterd
    pgcAdmin.ActivePage.TabVisible := False;
+    qrySQL.Close ;  // Remove anythign that might be in the DBG grid from another use
    tsCustomAdmin.TabVisible := True;
   end
   else
-  begin
+  begin // If the wrong password was entered
     ShowMessage('You got the Password WRONG') ;
    Exit;
   end;
@@ -2488,6 +2607,13 @@ begin
 // Go to the admin email page from any of the other pages
 pgcAdmin.ActivePage.TabVisible := False;
 tsEmailsAdmin.TabVisible := True;
+end;
+
+procedure TfrmVolitant_Express.btnToGridClick(Sender: TObject);
+begin
+// Go to the admin grid tab page
+
+  qryGrid.Close ; // Remove anythign that might be in the DBG grid from another use
 end;
 
 procedure TfrmVolitant_Express.btnToItemsClick(Sender: TObject);
@@ -2968,6 +3094,7 @@ begin
     end;
       // Get the planeID
     iPlaneID  := StrToInt(Copy(lstManagePlane.Items[lstManagePlane.ItemIndex], 1, Pos('-',lstManagePlane.Items[lstManagePlane.ItemIndex])-1 ) ) ;
+    {
     // Ensure that the amount of plains after the plain count update, is not less than the amount of plains being used in orders currently
     iPlainUseCount := 0 ;
     tblOrders.First ;
@@ -2987,7 +3114,7 @@ begin
       begin
         ShowMessage('Not enough planes left for amount used in active orders'+#13+'Wait untill all orders are handeled before lowering the coount'+#13+ 'Retire plain temporarly to prevent more orders from beign added to plain. Update plain count after all orders using it was handeled and then unretire plain');
         exit; 
-      end;
+      end;       }
     // update the plane
       bFound := false;
       tblPlanes.First ;
@@ -3000,7 +3127,7 @@ begin
           tblPlanes.Edit ;
           tblPlanes['Retired'] := chkRetirePlane.Checked ;
           tblPlanes['FuelCost'] := sedUpdateFuelRands.Value + sedUpdateFuelCents.Value / 100;
-          tblPlanes['Count']:= sedUpdatePlaneCount.Value ;
+         { tblPlanes['Count']:= sedUpdatePlaneCount.Value ; }
           tblPlanes.Post ;
            // Update the listbox
           lstManagePlane.Items[lstManagePlane.ItemIndex] := IntToStr(tblPlanes['PlaneID']) +'-'+tblPlanes['Plane Name']+' -- '+ FloatToStrF(tblPlanes['FuelCost'], ffCurrency ,10,2)  ;
@@ -3013,7 +3140,7 @@ begin
     chkRetirePlane.Checked := False;
     sedUpdateFuelRands.Value := 0;
     sedUpdateFuelCents.Value := 0;
-    sedUpdatePlaneCount.Value := 1 ;
+   { sedUpdatePlaneCount.Value := 1 ;}
     lstManagePlane.ItemIndex := -1;
     // Confirmation if successfull
     ShowMessage('Plane updated successfully') ;
@@ -3096,7 +3223,7 @@ var
   I: Integer;
 begin
 // Display the flag of the selected Based country in the image by the register component
-
+  imgBasedFlag.Visible := True;
   if cmbCountryBased.ItemIndex >=0 then // Make sure than an option was selected
   begin
     sFileName := 'Flags/' + arrCountryCode[cmbCountryBased.ItemIndex+1] + '.jpg';  // Create the name of the file to open
@@ -3409,7 +3536,7 @@ begin
 // Find the plane to be used in the order
    bPlaneFound := false;
   // Run a SQL query to find planes that can do the trip
-  qrySQL.SQL.Text := 'Select * from tblPlanes where [Max Load] >= ' + FloatToStr(pOrderWeight) + ' and [Max Distance] >= ' + FloatToStr(pDistance) + ' Order By [Max Load]' ; // Get all planes that can do this trip and sort them from the smallest size to the largest based on the max load that they can carry
+  qrySQL.SQL.Text := 'Select * from tblPlanes where [Max Load] >= ' + FloatToStr(pOrderWeight) + ' and [Max Distance] >= ' + FloatToStr(pDistance) + ' and Retired = False'+' Order By [Max Load]' ; // Get all planes that can do this trip and sort them from the smallest size to the largest based on the max load that they can carry. The plane must also not be retired
   qrySQL.Open ;
 
    if not qrySQL.IsEmpty then  // Checks that the field (Query) does not come up empty
@@ -3424,7 +3551,7 @@ begin
       begin
          tblOrders.First ;
          bValid := True;
-         iPlaneCount := qrySQL['Count'] ;   // Set the amount of planes that Volitant Express has of that plane type
+        { iPlaneCount := qrySQL['Count'] ;   // Set the amount of planes that Volitant Express has of that plane type}
          while not tblOrders.Eof and (bValid = true) do
          begin
             if tblOrders['PlaneID'] = qrySQL['PlaneID'] then
@@ -3596,18 +3723,12 @@ chkSuspendAccount.Enabled := False;
 
   conDB.Connected := False ;
   conDB.LoginPrompt := False ;
-
   conDB.ConnectionString := 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=Volitant_Express_db.mdb;Mode=ReadWrite;Persist Security Info=False' ;
-
   conDB.Open;
-
-
   // SQL Query connection
 
   qrySQL.Connection := conDB ;
-
   dsrSQL.DataSet := qrySQL ;
-
   dbgSQL_admin.DataSource := dsrSQL ;
 
   // Grid Query Connection
@@ -3617,45 +3738,30 @@ chkSuspendAccount.Enabled := False;
   dbgGridDisplay.DataSource := dsrGrid ; // Link to the dbg grid
 
   // tblCompany    DO this for every table
-
   tblCompany.Connection := conDB ;
   tblCompany.TableName := 'tblCompany';
   tblCompany.Active := True;
-
   dsrCompany.DataSet := tblCompany ;
-
- // dbgtest.datasource := dsrCompany ;
-
  //tblOrders
-
   tblOrders.Connection := conDB ;
   tblOrders.TableName := 'tblOrders';
   tblOrders.Active := True;
-
   dsrOrders.DataSet := tblOrders ;
-
-//  dbgtest.datasource := dsrOrders  ;
-
   // tblItems
-
   tblItems.Connection := conDB ;
   tblItems.TableName := 'tblItems';
   tblItems.Active := True;
-
   dsrItems.DataSet := tblItems ;
-
-//  dbgtest.datasource := dsrItems  ;
-
   // tblPlanes
-
   tblPlanes.Connection := conDB ;
   tblPlanes.TableName := 'tblPlanes';
   tblPlanes.Active := True;
-
   dsrPlanes.DataSet := tblPlanes ;
-
-//dbgtest.datasource := dsrPlanes  ;
-
+  // tblAdmins
+  tblAdmins.Connection := conDB ;
+  tblAdmins.TableName := 'tblAdmins';
+  tblAdmins.Active := True;
+  dsrAdmins.DataSet := tblPlanes ;
 end;
 
 procedure TfrmVolitant_Express.FormCreate(Sender: TObject);
@@ -3827,7 +3933,7 @@ begin
         sedUpdateFuelRands.Value := Trunc(tblPlanes['FuelCost']) ; // Set the Rands
         sedUpdateFuelCents.Value := Round(Frac(tblPlanes['FuelCost'])* 100 ) ; // Set the cents
         chkRetirePlane.Checked := tblPlanes['Retired'] ; // If the plane is retired or not
-        sedUpdatePlaneCount.Value := tblPlanes['Count'] ;
+       { sedUpdatePlaneCount.Value := tblPlanes['Count'] ; }
       end;
    tblPlanes.Next ;
    end;
