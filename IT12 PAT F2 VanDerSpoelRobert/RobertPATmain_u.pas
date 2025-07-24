@@ -17,7 +17,8 @@ uses
    DateUtils, math, clsDistance_u, clsUsername_u,
   Vcl.FileCtrl, Xml.xmldom, Xml.XmlTransform, Vcl.TabNotBk,
   Vcl.WinXPickers, System.Sensors, System.Sensors.Components, Vcl.NumberBox,
-  Vcl.Outline, Vcl.Samples.DirOutln, Vcl.Imaging.pngimage, printers;
+  Vcl.Outline, Vcl.Samples.DirOutln, Vcl.Imaging.pngimage, printers,
+  System.Notification, VclTee.TeeGDIPlus, VCLTee.TeeProcs, VCLTee.TeeDraw3D;
 
 type
   TfrmVolitant_Express = class(TForm)
@@ -374,6 +375,8 @@ type
     redOrderSummary: TRichEdit;
     pdPrint: TPrintDialog;
     BitBtnPrintOrderSlip: TBitBtn;
+    chkUserDeleteAcoount: TCheckBox;
+    BitBtnManageCompanyHelp: TBitBtn;
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnRegisterGOClick(Sender: TObject);
@@ -469,7 +472,8 @@ type
     procedure btnBackHomeFromPayClick(Sender: TObject);
     procedure btnToGridClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
-    procedure BitBtnPrintOrderSlipClick(Sender: TObject);    // For the dynamic object
+    procedure BitBtnPrintOrderSlipClick(Sender: TObject);
+    procedure chkUserDeleteAcoountClick(Sender: TObject);    // For the dynamic object
   private
     { Private declarations }
 
@@ -964,11 +968,30 @@ end;
 procedure TfrmVolitant_Express.BitBtnUpdateCompanyInfoClick(Sender: TObject);
 var
   sName, sPassword, sEmail: string ;
-  I: Integer;
+  I, iRandom: Integer;
   cChar, c : char;
   bErrorCharacter, bNumber, bCapital, bSpecialCharacter : boolean ;
 begin
 // Update the Company details
+  if chkUserDeleteAcoount.Checked  then
+  begin // Check if the User has selected to detete their account
+      // Ask for confirmation
+    iRandom := RandomRange(100, 1000);
+    if Inputbox('Enter code to confirm deletion', 'Code: '+ IntToStr(iRandom), '' ) = IntToStr(iRandom)  then // Confirm that you want to delete the account by typing over the given code
+    begin
+      if DeleteAccount(sedEnterCompanyID.Value) then  // If the Deletion was a success
+      begin
+         ShowMessage('Account of your Company deleted successfully.'+#13+ 'You will now be logged out. Goodbye') ;
+         // Take user of deleted account to the welcome page
+         tsManageCompany.TabVisible := False;
+         tsWelcome.TabVisible := True;
+         Exit;
+      end;
+    end
+    else
+    ShowMessage('Deletion of account was cancelled')  ;
+  end;
+
   //Validation
     sName := edtUpdateCompanyName.Text ;
     sPassword := edtUpdatePassword.Text ;
@@ -1490,7 +1513,7 @@ procedure TfrmVolitant_Express.btnDeleteCompanyAdminClick(Sender: TObject);
 var
   iRandom : integer ;
 begin
-// Delete the account of the company
+// Delete the account of the company by an admin
   // Ask for confirmation
   iRandom := RandomRange(100, 1000);
   if Inputbox('Enter code to confirm deletion', 'Code: '+ IntToStr(iRandom), '' ) = IntToStr(iRandom)  then // Confirm that you want to delete the account by typing over the given code
@@ -3225,7 +3248,7 @@ var
   rBaseCost : real;
    sPrevent_Copy : string;
 begin
-iID := 3;
+iID := 7;
 
    qrySQL.SQL.Text := 'Select * from tblCompany where CompanyID = ' + IntToStr(iID)  ;  // Get the company details
   qrySQL.Open ;
@@ -3238,6 +3261,13 @@ iID := 3;
        redOrderSummary.Lines.Add(Prevent_Duplication )
 
 
+end;
+
+procedure TfrmVolitant_Express.chkUserDeleteAcoountClick(Sender: TObject);
+begin
+// If delete account checkbox is clicked by a user
+  if chkUserDeleteAcoount.Checked then
+  ShowMessage('Press the Update Account button to finalize Deletion of your account.');
 end;
 
 procedure TfrmVolitant_Express.cmbCategoryChange(Sender: TObject);
@@ -4186,7 +4216,7 @@ Const ROWS = 11;     // Must be odd
 var
   I, k, X, Y: Integer;
   sString : string;
-  arrPrevent : array[1..ROWS , 1..COLLUMS] of char;
+  arrPrevent : array[1..ROWS , 1..COLLUMS] of char;     // 2D array
   bRight, bTriange : boolean;
 begin
 // Creates a string to add to a richedit for example to help make it more difficult to fakely duplicate
