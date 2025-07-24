@@ -17,7 +17,7 @@ uses
    DateUtils, math, clsDistance_u, clsUsername_u,
   Vcl.FileCtrl, Xml.xmldom, Xml.XmlTransform, Vcl.TabNotBk,
   Vcl.WinXPickers, System.Sensors, System.Sensors.Components, Vcl.NumberBox,
-  Vcl.Outline, Vcl.Samples.DirOutln, Vcl.Imaging.pngimage;
+  Vcl.Outline, Vcl.Samples.DirOutln, Vcl.Imaging.pngimage, printers;
 
 type
   TfrmVolitant_Express = class(TForm)
@@ -371,6 +371,9 @@ type
     tblAdmins: TADOTable;
     dsrAdmins: TDataSource;
     chkLoginAsAdmin: TCheckBox;
+    redOrderSummary: TRichEdit;
+    pdPrint: TPrintDialog;
+    BitBtnPrintOrderSlip: TBitBtn;
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnRegisterGOClick(Sender: TObject);
@@ -464,49 +467,46 @@ type
     procedure lstPaymentClick(Sender: TObject);
     procedure BitBtnPayClick(Sender: TObject);
     procedure btnBackHomeFromPayClick(Sender: TObject);
-    procedure btnToGridClick(Sender: TObject);    // For the dynamic object
+    procedure btnToGridClick(Sender: TObject);
+    procedure FormResize(Sender: TObject);
+    procedure BitBtnPrintOrderSlipClick(Sender: TObject);    // For the dynamic object
   private
     { Private declarations }
 
     // Class declaration
     objDistance : TDistance ;
     objUsername : TUsername ;
-
+    //Functions
     Function ValidateEmail(pEmail: string): Boolean;
     Function DeleteAccount(pID : integer): boolean;
     Function CalcOrderPrice(pOrderID: integer) : real;
     Function GetPlainCruisingSpeed(pPlaneID : integer) : real;
-    Function GetRightPlane(rWeight, rDistance : real) : string;
     Function CalcBaseCost(pGovernment: boolean; pEstablishmentDate : TDate) : real ;
     Function FindPlane(pOrderWeight, pDistance: real; pPickupDateTime : TDateTime) : integer;
-
-
+    Function Prevent_Duplication(): string;
+    // Procedures
     Procedure WriteToFormTheme(pFileName : string; pColorValue : integer); // For writing to the files for system themes
     Procedure SetOrderStatusItemIndex(pStatus : string);
     Procedure SendEmail(pEmailAddress, pMessage: string) ;
 
   public
     { Public declarations }
-
-
   // Array declaration
-
     arrCountryName,  arrCountryCode : array[1..245] of string;
     arrLatitude, arrLongitude : array[1..245] of real ;
-
     arrSpecialCharacters : array[1..32] of char;
 
   // Variable declararion
-  iID : integer ;
-  iCountryCount,  iSpecialCharacterCount : integer ;
-  bTimer : boolean;
+    iID : integer ;
+    iCountryCount,  iSpecialCharacterCount : integer ;
+    bTimer : boolean;
 
-    // For the gallery
-   iImageCount : integer;
-  arrFileNames : array[1..1000] of string;
+      // For the gallery
+     iImageCount : integer;
+    arrFileNames : array[1..1000] of string;
 
-  // ItemUpdate ID
-  iItemUpdateID : integer ;
+    // ItemUpdate ID
+    iItemUpdateID : integer ;
 
   end;
 
@@ -721,10 +721,35 @@ procedure TfrmVolitant_Express.BitBtnPlaceOrderClick(Sender: TObject);
 begin
 // Place an order
 
-        // Write to History log the prices of the order at that time
+   if MessageDlg('I hereby confirm that my order is correct and ready to be submitted' , TMsgDlgType.mtConfirmation, [mbYes, mbNo], 0) = mrYes  then
+   begin  // If user confirms
 
-// Return back to the Place an Order page
-BitBtnBackToPlaceOrderPage.Click ;
+
+
+    // Add order ID to the richedit after appending to the database
+
+            // Write to History log the prices of the order at that time
+
+      // Add some sort of a method that prevents the order slip from being easily duplicated
+       redOrderSummary.Lines.Add(#13+#13+Prevent_Duplication );
+        // Enable print button
+        BitBtnPrintOrderSlip.Enabled := True ;
+        // After order is completed, clear the input fields on order placement page
+   end
+   else
+   begin // If the now button is pressed
+    ShowMessage('The Order has not been placed');
+   end;
+end;
+
+procedure TfrmVolitant_Express.BitBtnPrintOrderSlipClick(Sender: TObject);
+begin
+  // Print the Orders slip
+  if pdPrint.Execute  then
+        begin
+            redOrderSummary.Print('Order Slip');
+        end;
+
 end;
 
 procedure TfrmVolitant_Express.BitBtnRegisterClick(Sender: TObject);
@@ -1751,11 +1776,11 @@ begin
     bAccountFound := False;
     while not tblCompany.Eof and not bAccountFound do
     begin
-      if (tblCompany['CompanyName'] = edtUsernameLogin.Text) and (tblCompany['PAssword'] = edtPasswordLogin.Text) then
+      if (tblCompany['Username'] = edtUsernameLogin.Text) and (tblCompany['PAssword'] = edtPasswordLogin.Text) then
       begin // If a company was found
          if tblCompany['Suspended'] = False then  // if the account is not suspended
           begin
-           iID := qrySQL['CompanyID'] ; // Set the ID variable
+           iID := tblCompany['CompanyID'] ; // Set the ID variable
            bAccountFound := True;
            ShowMessage('Logged in succesfully!');
             // Change the tabsheets
@@ -1790,7 +1815,7 @@ begin
         tsAdmin.TabVisible := True ;
           // apply account permissions
             // Apply admin management permission
-            if tblAdmins['Manage_Admin'] then   // If allowed to manage admins
+            if tblAdmins['Manage_Admins'] then   // If allowed to manage admins
             begin
             btnToAdminManage.Enabled := True ;
             btnToAdminManage.ShowHint := False;
@@ -1798,20 +1823,18 @@ begin
             else
             begin // If not allowed to manage admins
               btnToAdminManage.Enabled := false ;
-              btnToAdminManage.ShowHint := True;
-              btnToAdminManage.Hint := 'You do not have permission to access this page' ;
+            {  btnToAdminManage.ShowHint := True;
+              btnToAdminManage.Hint := 'You do not have permission to access this page' ; }
             end;
             // Apply admin Developer Settings
             if tblAdmins['Developer'] then  // If the admin is a developer
             begin
               btnToCustom.Enabled := True;
-              btnToCompanies.ShowHint := False;
+              btnToCustom.ShowHint := False;
             end
             else
             begin // If the admin account is not a developer account
               btnToCustom.Enabled := False;
-              btnToCustom.ShowHint := True ;
-              btnToCustom.Hint := 'You do not have permission to access this page' ;
             end;
             // Apply admin theme change settigs
             if tblAdmins['Change_Theme'] then   // If the admin is allowed to change the theme
@@ -1822,8 +1845,6 @@ begin
             else
             begin // If the admin is not allowed to change the them
               btnToTheme.Enabled := False;
-              btnToTheme.ShowHint := True;
-              btnToTheme.Hint := 'You do not have permission to access this page' ;
             end;
             // Apply admin item manage permissions
             if tblAdmins['Item_Manage'] then  // If allowed to manage items
@@ -1834,8 +1855,6 @@ begin
             else
             begin // If not allowed to manage items
               btnToItems.Enabled := False;
-              btnToItems.ShowHint := True;
-              btnToItems.Hint :='You do not have permission to access this page' ;
             end;
             // Apply admin plane manage permissions
             if tblAdmins['Plane_Manage'] then  // If allowed to manage planes
@@ -1846,8 +1865,6 @@ begin
             else
             begin // If not allowed to manage planes
                 btnToPlanes.Enabled := False;
-              btnToPlanes.ShowHint := True;
-                btnToPlanes.Hint := 'You do not have permission to access this page' ;
             end;
             // Apply Newsetter send permissions
             if tblAdmins['Newsletter'] then   // If allowed to send the newsletter
@@ -1858,8 +1875,6 @@ begin
             else
             begin   // If not allowed to send emails
                btnToEmails.Enabled := false ;
-              btnToEmails.ShowHint := True;
-              btnToEmails.Hint := 'You do not have permission to access this page' ;
             end;
 
       end;
@@ -2129,9 +2144,10 @@ end;
 
 procedure TfrmVolitant_Express.btnOrderToSummaryClick(Sender: TObject);
 var
-  rBaseCost, rLatPickup, rLongPickup, rLatDropOff, rLongDropOff, rWeight : real;
+  rBaseCost, rLatPickup, rLongPickup, rLatDropOff, rLongDropOff, rWeight,   rHoursTripLength, rTotalCost : real;
   I, iPlaneID: Integer;
-  dtPickupDate : TDateTime ;
+  dtPickupDate, dtDropOffDate : TDateTime ;
+  sTrip: string;
 begin
 // Go to the order summary tab page
   // Validation
@@ -2193,8 +2209,8 @@ begin
     rBaseCost := CalcBaseCost(qrySQL['Goverment Agency'], qrySQL['Establishment Date']) ;   // Cal the calc base cost function
 
   // Get the distance for the order
- objDistance := TDistance.Create(rLatPickup, rLatDropOff, rLongPickup, rLongDropOff,cmbSelectPickupCountry.Items[cmbSelectPickupCountry.ItemIndex],cmbSelectDropOffCountry.Items[cmbSelectPickupCountry.ItemIndex]  ) ;// Initialize the class
- objDistance.ToString ;
+ objDistance := TDistance.Create(rLatPickup, rLatDropOff, rLongPickup, rLongDropOff,cmbSelectPickupCountry.Items[cmbSelectPickupCountry.ItemIndex],cmbSelectDropOffCountry.Items[cmbSelectDropOFFCountry.ItemIndex]  ) ;// Initialize the class
+ sTrip :=objDistance.ToString ;
  // Get the weight of the order
  rWeight := sedAddOrderKg.Value + (sedOrderGrams.Value / 100) ;
 
@@ -2203,26 +2219,48 @@ begin
 
  if iPlaneID = 0 then // If no plain that can do the trip is found
  begin
-  ShowMessage('Unfortunatly, no plain that can transport the order was found for the trip')   ;
+  ShowMessage('Unfortunatly, no plane that can transport the order was found for the trip')   ;
   exit;
  end;
 
  if iPlaneID = -1 then   // If no available plain that can do the trip is found
  begin
-   ShowMessage('No available plain was found that is capable of transporting the order,'+ #13+ 'Choose another Pickup Date to transport the order');
+   ShowMessage('No available plane was found that is capable of transporting the order,'+ #13+ 'Choose another Pickup Date to transport the order');
    exit;
  end;
 
     // Get the plane info for the selected plain- again :(
     qrySQL.SQL.Text := 'Select * from tblPlanes where PlaneID = ' + IntToStr(iPlaneID) ;
     qrySQL.Open ;
+    // Get the dropOff DateTime
+    rHoursTripLength := objDistance.GetDistance / qrySQL['Cruising Speed'];
+    dtDropOffDate := dtPickupDate + (rHoursTripLength / 24) ;
+    // Calc the total cost of the order
+    rTotalCost := rBaseCost ;   // Set the total cost to the base cost of the order
+    rTotalCost := rTotalCost + qrySQL['FuelCost'] * rHoursTripLength ; // Add the fuel cost price to the total price
+    // Get the item transport cost per kg
+    qryGrid.SQL.Text := 'Select * from tblItems where [Item Name] = ' + QuotedStr(lstSelectTransportItem.Items[lstSelectTransportItem.ItemIndex]);
+    qryGrid.Open ;
+    rTotalCost := rTotalCost + rWeight *  qryGrid['T_Cost/kg']  ;
+    // Write to the summary page
+    redOrderSummary.Clear ;
+    redOrderSummary.SelAttributes.Size := 22;
+     redOrderSummary.SelAttributes.Color := clPurple ;
+      redOrderSummary.Lines.Add('Order Summary') ;
+      redOrderSummary.Lines.Add('');
+      redOrderSummary.Lines.Add('CompanyID: '+ IntToStr(iID) ) ;
+       redOrderSummary.Lines.Add('Item: ' + lstSelectTransportItem.Items[lstSelectTransportItem.ItemIndex] + ' -From the Category ' + qryGrid['Category']) ;
+       redOrderSummary.Lines.Add('Weight : ' + FloatToStrf(rWeight, ffFixed , 10,2) + ' kg') ;
+         redOrderSummary.Lines.Add('Plane: '+ qrySQL['Plane Name'])  ;
+          redOrderSummary.Lines.Add('Pickup Date/Time: '+ DateTimeToStr(dtPickupDate) )  ;
+           redOrderSummary.Lines.Add('DropOff Date/Time: '+ DateTimeToStr(dtDropOffDate) );
+           redOrderSummary.Lines.Add(sTrip) ;
+           redOrderSummary.SelAttributes.Color := clRed ;
+       redOrderSummary.Lines.Add('Total Cost: '+ FloatToStrF(rTotalCost, ffCurrency , 10,2) );
 
- {
-
-  // Load the summary on the summary page
-
+// Change Tab sheets to the summary page
 tsPlaceOrder.TabVisible := False ;
-tsOrderSummary.TabVisible := true;        }
+tsOrderSummary.TabVisible := true;
 end;
 
 procedure TfrmVolitant_Express.btnPauseVidClick(Sender: TObject);
@@ -3185,6 +3223,7 @@ end;
 procedure TfrmVolitant_Express.Button1Click(Sender: TObject);
 var
   rBaseCost : real;
+   sPrevent_Copy : string;
 begin
 iID := 3;
 
@@ -3193,7 +3232,12 @@ iID := 3;
 
   rBaseCost := CalcBaseCost(qrySQL['Goverment Agency'], qrySQL['Establishment Date']) ;
 
-  ShowMessage(FloatToStr(rBaseCost) )  ;
+ // ShowMessage(FloatToStr(rBaseCost) )  ;
+
+ sPrevent_Copy := Prevent_Duplication ;
+       redOrderSummary.Lines.Add(Prevent_Duplication )
+
+
 end;
 
 procedure TfrmVolitant_Express.cmbCategoryChange(Sender: TObject);
@@ -3765,10 +3809,16 @@ chkSuspendAccount.Enabled := False;
 end;
 
 procedure TfrmVolitant_Express.FormCreate(Sender: TObject);
+CONST Width_Devide = 5.22;
+       Height_Devide = 6.51;
 var
   tFile : textfile;
   sColor : string ;
 begin
+  // Set the program to open  on the middle of the screen. depending on screen resolution
+  frmVolitant_Express.Left := Round(Screen.Width /2) - Round(frmVolitant_Express.Width / 2) ;
+  frmVolitant_Express.Top :=  Round(Screen.HEight / 2) - Round(frmVolitant_Express.Height / 2)  ;
+
 // Set up the tab sheets
 {
 tsRegister.TabVisible := False;
@@ -3834,6 +3884,13 @@ tsGallery.TabVisible := False;
 
 end;
 
+procedure TfrmVolitant_Express.FormResize(Sender: TObject);
+begin
+// Set the height and width of the program whenever a change is being tried to made to it. this prevents the program from being resized
+frmVolitant_Express.Height :=  687;
+frmVolitant_Express.Width :=       1250;
+end;
+
 function TfrmVolitant_Express.GetPlainCruisingSpeed(pPlaneID: integer): real;
 var
   bPlaneFound : boolean ;
@@ -3855,13 +3912,7 @@ begin
   Result := 550 ;
 end;
 
-function TfrmVolitant_Express.GetRightPlane(rWeight, rDistance: real): string;
-begin
-// Get the right plane for the job
 
-
-
-end;
 
 procedure TfrmVolitant_Express.imgDynamicOnclick;
 var
@@ -4127,6 +4178,72 @@ procedure TfrmVolitant_Express.pgcAdminChange(Sender: TObject);
 begin
 // Change things on the tabpages when a change is made
 redCompanyOut.Clear ;
+end;
+
+function TfrmVolitant_Express.Prevent_Duplication: string;
+Const ROWS = 11;     // Must be odd
+      COLLUMS = 41;  // Must be odd. Ceil(Collums/2) number must be >= Rows
+var
+  I, k, X, Y: Integer;
+  sString : string;
+  arrPrevent : array[1..ROWS , 1..COLLUMS] of char;
+  bRight, bTriange : boolean;
+begin
+// Creates a string to add to a richedit for example to help make it more difficult to fakely duplicate
+  sString := '' ;
+  bRight := True ;
+  X:= Ceil(COLLUMS / 2);
+  Y := Ceil(COLLUMS / 2);
+  if X >= ROWS then // Ensure that Rows to Collums ratio if fine for triange generation
+  bTriange := True
+  else
+  bTriange  := False ;
+
+    // Add the snakes code
+  for I := 1 to ROWS do  // Repeat this process 7 times
+  begin
+     for k := 1 to COLLUMS do
+     begin
+        if Odd(I)  then
+        begin // Run this code if the row number is odd
+              arrPrevent[I, K] := '=';
+        end
+        else
+        begin      // Run code if line number is even
+          arrPrevent[i, k] := inttostr(RandomRange(1, 10) )[1];
+        end;
+     end;
+     // add the triangle only of Rows to Collums ratio is fine
+     if bTriange then
+     begin
+     arrPrevent[I, X]  := '%'  ;
+      arrPrevent[I, Y]  :=  '%' ;
+      X:= X - 1;
+      Y := Y +1  ;
+     end;
+      if not Odd(i) then  // Only run this on even lines
+          if bRight = True then   // Add line on the right side
+           begin
+             bRight := False ;
+              arrPrevent[I, COLLUMS] := '|';
+           end
+           else if bRight = False then
+           begin // add line on the left side
+              bRight := True;
+             arrPrevent[I, 1] := '|';
+           end;
+  end;
+    // Create string for output
+  for I := 1 to Rows do
+  begin
+    for k := 1 to COLLUMS  do
+    begin
+      sString := sString + arrPrevent[I, K] ;
+    end;
+
+    sString := sString + #13;
+  end;
+  Result := sString ;
 end;
 
 procedure TfrmVolitant_Express.rgpOrderStatusClick(Sender: TObject);
