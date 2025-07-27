@@ -1,0 +1,83 @@
+unit clsDistance_u;
+// Calculate the distance between the 2 coordinates around the globe
+interface
+type
+  TDistance = class(TObject)
+     private
+  fLatitudeStart, fLongitudeStart, fLatitudeEnd, fLongitudeEnd, fDistance : real;
+  fPickupCountry, fDropOfCountry: string;
+
+  Function RealCoordinates : string;
+  Function CalculateDistance : real;
+  Const Radius = 6378.14;
+
+     public
+    
+     Constructor Create(pLat1, pLat2, pLong1, pLong2: real; pPickupCountry, pDropOfCountry: string);
+     Function GetDistance : real ;
+     Function ToString: string;
+
+     end;
+
+implementation
+uses SysUtils, math;
+
+{ TDistance }
+
+function TDistance.CalculateDistance: real;
+var
+  X : real;
+begin
+// Calcuate the distance between the 2 countries
+  // Calculate the distance using the harversine formula
+  X := Power( Sin((fLatitudeEnd - fLatitudeStart)/2) , 2) + Cos(fLatitudeStart) * Cos(fLatitudeEnd) * Power(Sin((fLongitudeEnd - fLongitudeStart)/2) ) ;
+//fDistance := 2 * Radius * ArcSin(Sqrt((1-Cos(fLatitudeEnd-fLatitudeStart) + Cos(fLatitudeStart )* Cos(fLatitudeEnd ) * (1-Cos(fLongitudeEnd - fLongitudeStart) )  )/2) )     ; // This formulate seems to cause rounding errors, so I decided to use a more broken up appoach
+end;
+
+constructor TDistance.Create(pLat1, pLat2, pLong1, pLong2: real; pPickupCountry,
+  pDropOfCountry: string);
+begin
+  // Constructor Create
+    // The first countries coordinates
+  fLatitudeStart := pLat1 ;
+  fLongitudeStart := pLong1 ;
+    // the Second countries coordinates
+    fLatitudeEnd := plat2;
+    fLongitudeEnd := pLong2 ;
+    // Set the Countiries names
+    fPickupCountry := pPickupCountry ;
+    fDropOfCountry := pDropOfCountry ;
+end;
+
+function TDistance.GetDistance: real;
+begin
+// Return only the distance from the calculations
+CalculateDistance;
+Result := fDistance ;
+end;
+
+function TDistance.RealCoordinates: string;
+var
+  sDegreeCoordinates : string; 
+begin
+// Return the coordinates that was in Radients as Degrees, as on the map
+
+  sDegreeCoordinates := '('+FloatToStrf(fLatitudeStart * (180/pi), ffFixed , 10,2) + ' , '+ FloatToStrf(fLongitudeStart  * (180/pi), ffFixed , 10,2) +')';
+  sDegreeCoordinates := sDegreeCoordinates + ' TO '+ '('+FloatToStrf(fLatitudeEnd * (180/pi), ffFixed, 10,2) + ' , '+ FloatToStrf(fLongitudeEnd  * (180/pi), ffFixed, 10,2) +')'; 
+  Result := sDegreeCoordinates ; // Rerurn the coordinates in degrees 
+end;
+
+function TDistance.ToString: string;
+var
+  sString : string ;
+begin
+  // ToString Function
+  CalculateDistance;
+  sString := 'The Distance of your Travels: ' + FloatToStrf(fDistance, ffFixed, 10, 2)+' km'+ #13 ;
+  sString := sString +'Trip: '+ fPickupCountry + ' TO ' + fDropOfCountry + #13;
+  sString := sString + 'Coordinates: ' + #13 + RealCoordinates ;
+  
+  Result := sString ;
+end;
+
+end.

@@ -181,9 +181,6 @@ Coordinates=535,484,122,58
 [pgcMain]
 Coordinates=315,1006,63,36
 
-[btnTOLog]
-Coordinates=667,484,71,58
-
 [edtUsernameLogin]
 Coordinates=588,756,123,58
 
@@ -523,9 +520,6 @@ Coordinates=1619,484,67,58
 [grbManagePlanes]
 Coordinates=815,348,119,58
 
-[tsLog]
-Coordinates=1464,892,46,36
-
 [btnToItems]
 Coordinates=1227,280,79,58
 
@@ -824,4 +818,10 @@ Coordinates=409,10,101,124
 
 [edtEnterSearchCompany]
 Coordinates=120,144,162,58
+
+[btnTOhistory]
+Coordinates=667,484,71,58
+
+[tsHistory]
+Coordinates=1464,892,46,36
 

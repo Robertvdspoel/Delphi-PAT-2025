@@ -9,7 +9,7 @@ type
 
   Function RealCoordinates : string;
   Function CalculateDistance : real;
-  Const Radius = 6378.14;
+  Const Radius = 6371;
 
      public
     
@@ -25,10 +25,16 @@ uses SysUtils, math;
 { TDistance }
 
 function TDistance.CalculateDistance: real;
+var
+  X, Y, d : real;
 begin
 // Calcuate the distance between the 2 countries
-                // Calculate the distance using the harversine formula
-fDistance := 2 * Radius * ArcSin(Sqrt((1-Cos(fLatitudeEnd-fLatitudeStart) + Cos(fLatitudeStart )* Cos(fLatitudeEnd ) * (1-Cos(fLongitudeEnd - fLongitudeStart) )  )/2) ) 
+  // Calculate the distance using the harversine formula
+//fDistance := 2 * Radius * ArcSin(Sqrt((1-Cos(fLatitudeEnd-fLatitudeStart) + Cos(fLatitudeStart )* Cos(fLatitudeEnd ) * (1-Cos(fLongitudeEnd - fLongitudeStart) )  )/2) )     ; // This formulate seems to cause rounding errors, so I decided to use a more broken up appoach
+ X := Power( Sin((fLatitudeEnd - fLatitudeStart)/2) , 2) + Cos(fLatitudeStart) * Cos(fLatitudeEnd) * Power(Sin((fLongitudeEnd - fLongitudeStart)/2),2 ) ;
+ Y := 2 * ArcTan2(Sqrt(X), Sqrt(1-X)  ) ;
+ D := Radius * y ; // Multipluc by the radius of earth
+ fDistance := D;
 end;
 
 constructor TDistance.Create(pLat1, pLat2, pLong1, pLong2: real; pPickupCountry,
@@ -49,6 +55,7 @@ end;
 function TDistance.GetDistance: real;
 begin
 // Return only the distance from the calculations
+CalculateDistance;
 Result := fDistance ;
 end;
 
@@ -68,7 +75,7 @@ var
   sString : string ;
 begin
   // ToString Function
-
+  CalculateDistance;
   sString := 'The Distance of your Travels: ' + FloatToStrf(fDistance, ffFixed, 10, 2)+' km'+ #13 ;
   sString := sString +'Trip: '+ fPickupCountry + ' TO ' + fDropOfCountry + #13;
   sString := sString + 'Coordinates: ' + #13 + RealCoordinates ;
