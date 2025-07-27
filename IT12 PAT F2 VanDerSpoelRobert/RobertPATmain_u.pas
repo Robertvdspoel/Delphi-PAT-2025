@@ -485,6 +485,8 @@ type
     procedure btnLoginMouseLeave(Sender: TObject);
     procedure btnUpdateLoginLabelThemeClick(Sender: TObject);
     procedure btnUpdateOrderLabelThemeClick(Sender: TObject);
+    procedure btnToCompaniesClick(Sender: TObject);
+    procedure btnToAdminManageClick(Sender: TObject);
   private
     { Private declarations }
 
@@ -1516,7 +1518,6 @@ sSQL := edtCustomSQL.Text;
        ShowMessage('Custom SQL statement is to long');
        exit;
   end;
-
   try   // Try, incase an invalid SQL statemnet is entered
     qrySQL.SQL.Text := sSQL;
     qrySQL.Open;
@@ -2366,7 +2367,7 @@ end;
 
 procedure TfrmVolitant_Express.btnRegRestartClick(Sender: TObject);
 begin
-// Restarts the regestration from the begining, does not clear any fields
+// Restarts the Regestration from the begining, does not clear any fields
 chkConfirmRegInfo.Checked := False;
 tsRegConfirm.TabVisible := False;
 tsDetails.TabVisible := True ;
@@ -2377,9 +2378,10 @@ const RevenueGoal = 1000000000;
 const OrdersGoal = 100;
 var
   iNum, iYearlyOrdersGoal : integer ;
-  sString : string;
+  sString, sFileName, sLine : string;
   rRevenue, rHours, rYearlyRevenueGoal : real;
   bFound : boolean;
+  tFile : textFile ;
 begin
 // Reloads the page; updating the info
 
@@ -2403,7 +2405,7 @@ begin
  sString := qrySQL['Result'];
   lblTopPlain.Caption := 'Top Plain: ' + sString ;
 
-  //  Top Item  
+  //  Top Item
   qrySQL.SQL.Text := 'Select TOP 1 [Item Name] As Result from tblItems, tblOrders where tblOrders.ItemID = tblItems.itemID Group By tblItems.[Item Name] ORDER BY Count(*) DESC'; 
   qrySQL.Open ;
   lblTopItem.Caption := 'Top Item: ' + qrySQL['Result'];
@@ -2432,40 +2434,68 @@ begin
         if (YearOF(tblOrders['Pickup Date']) = YearOf(Date))  then // inc the orders that occured this year specificaly counter
         Inc(iYearlyOrdersGoal) ;
 
-         tblItems.First ;
-        bFound := False;
-        while not tblItems.eof and (bFound = false) do // Loop thru items table to get the price for an item per kg
-        begin
-
-          if tblItems['ItemID'] = tblOrders['ItemID'] then
-          begin
-          bFound := true;
-            rRevenue := rRevenue + tblItems['T_Cost/kg'] * tblOrders['Weight'] ;
-
-             if (YearOF(tblOrders['Pickup Date']) = YearOf(Date))  then  // increase the revenue that was made this year only
-             rYearlyRevenueGoal := rYearlyRevenueGoal +  tblItems['T_Cost/kg'] * tblOrders['Weight'] ;
-          end;
-
-          tblItems.Next ;
-        end;
-        bFound := False;
-        // Loop thru plane table to get feul price
-
-        tblPlanes.First;
-        while not tblPlanes.Eof and (bFound = false) do
-        begin
-           if tblPlanes['PlaneID'] = tblOrders['PlaneID'] then
-           begin
-              bFound := True;
-              // Calculate the hours that the flight will last
-              rHours  := (tblOrders['E/D Date'] - tblOrders['Pickup Date']) * 24 ; // Get the difference in time and convert it to hours
-              rRevenue := rRevenue + tblPlanes['FuelCost']  * rHours  ; // times by the hours of the flight
-
+        // Get the price of the Item/kg and FuelCost/hour from the txt file log
+        sFileName := 'History_Log/' + inttostr(tblOrders['OrderID']) + '.txt'   ;
+        if not FileExists(sFileName)  then
+        begin // If the file containing the prices does not exist
+          // Create the file
+          AssignFile(tFile, sFileName) ;
+          Rewrite(tFile);
+        //  Append(tFile);
+          // Get the item Price/kg for transport
+             tblItems.First ;
+            bFound := False;
+            while not tblItems.eof and (bFound = false) do // Loop thru items table to get the price for an item per kg
+            begin
+              if tblItems['ItemID'] = tblOrders['ItemID'] then
+              begin
+              bFound := true;
+                rRevenue := rRevenue + tblItems['T_Cost/kg'] * tblOrders['Weight'] ;
                  if (YearOF(tblOrders['Pickup Date']) = YearOf(Date))  then  // increase the revenue that was made this year only
-             rYearlyRevenueGoal := rYearlyRevenueGoal +  tblPlanes['FuelCost']  * rHours  ;
-           end;
+                 rYearlyRevenueGoal := rYearlyRevenueGoal +  tblItems['T_Cost/kg'] * tblOrders['Weight'] ;
 
-          tblPlanes.Next ;
+                 Writeln(tFile, FloatToStr(tblItems['T_Cost/kg']) ); // Write the current price of the item/kg to the txt file
+              end;
+              tblItems.Next ;
+            end;
+            // Get the FuelCost/hour for the plane being used
+            bFound := False ;
+            tblPlanes.First;
+            while not tblPlanes.Eof and (bFound = false) do
+            begin
+               if tblPlanes['PlaneID'] = tblOrders['PlaneID'] then
+               begin
+                  bFound := True;
+                  // Calculate the hours that the flight will last
+                  rHours  := (tblOrders['E/D Date'] - tblOrders['Pickup Date']) * 24 ; // Get the difference in time and convert it to hours
+                  rRevenue := rRevenue + tblPlanes['FuelCost']  * rHours  ; // times by the hours of the flight
+                     if (YearOF(tblOrders['Pickup Date']) = YearOf(Date))  then  // increase the revenue that was made this year only
+                 rYearlyRevenueGoal := rYearlyRevenueGoal +  tblPlanes['FuelCost']  * rHours  ;
+
+                  Writeln(tFile, FloatToStr(tblPlanes['FuelCost'])  )  ; // Write the current FuelCost/hour of flight of the plane to the txt file
+               end;
+              tblPlanes.Next ;
+            end;
+            CloseFile(tFile) ;
+        end
+        else
+        begin // If the file containing the Orders prices was found
+           AssignFile(tFile, sFileName);
+           Reset(tFile);
+           // Get the item price at the time of placing the order
+             Readln(tFile, sLine)  ;
+             rRevenue := rRevenue + StrToFloat(sLine)  * tblOrders['Weight'] ;
+                   if (YearOF(tblOrders['Pickup Date']) = YearOf(Date))  then  // increase the revenue that was made this year only
+                   rYearlyRevenueGoal := rYearlyRevenueGoal +   StrToFloat(sLine) * tblOrders['Weight'] ;
+           // Get the price of the Fuel/hour of when the order was places
+              Readln(tFile, Sline) ;
+                // Calculate the hours that the flight will last
+              rHours  := (tblOrders['E/D Date'] - tblOrders['Pickup Date']) * 24 ; // Get the difference in time and convert it to hours
+              rRevenue := rRevenue + StrToFloat(sLine)   * rHours  ; // times by the hours of the flight
+                 if (YearOF(tblOrders['Pickup Date']) = YearOf(Date))  then  // increase the revenue that was made this year only
+             rYearlyRevenueGoal := rYearlyRevenueGoal +  StrToFloat(sLine)   * rHours  ;
+
+           CloseFile(tFile);
         end;
 
       end;
@@ -2483,9 +2513,7 @@ begin
   // For revenue goal
   PBrevenue.Min := 0;
   PBrevenue.Max := 100;
-
 PBrevenue.Position := Floor(rYearlyRevenueGoal / RevenueGoal* 100 ) ;
-
   // For the order goal
   PBOrders.Min := 0 ;
   PBOrders.Max := 100;
@@ -2677,26 +2705,28 @@ begin
 // Send the newsletter
 end;
 
+procedure TfrmVolitant_Express.btnToAdminManageClick(Sender: TObject);
+begin
+// Go to the manage admins page from any of the other admin pages
+pgcAdmin.ActivePage.TabVisible := False;
+tsAdminManage.TabVisible := True;
+end;
+
+procedure TfrmVolitant_Express.btnToCompaniesClick(Sender: TObject);
+begin
+// Go to the company admin manage page from any of the other admin pages
+pgcAdmin.ActivePage.TabVisible := False;
+tsCompaniesAdmin.TabVisible := True;
+end;
+
 procedure TfrmVolitant_Express.btnToCustomClick(Sender: TObject);
 var
   sCustomPagePass : string;
 begin
 // Go to the custom SQL page, ask for a special password to gain access to this part of the website
-
-  sCustomPagePass := IntToStr(RandomRange(1000, 10000) )  ;
-
-  if sCustomPagePass = InputBox('Enter Password to access Custom SQL page', 'The Custom Passowd is: (For PAT purposes it is given)', sCustomPagePass)  then
-  begin  // If the right password was enterd
    pgcAdmin.ActivePage.TabVisible := False;
     qrySQL.Close ;  // Remove anythign that might be in the DBG grid from another use
    tsCustomAdmin.TabVisible := True;
-  end
-  else
-  begin // If the wrong password was entered
-    ShowMessage('You got the Password WRONG') ;
-   Exit;
-  end;
-
 end;
 
 procedure TfrmVolitant_Express.btnToEmailsClick(Sender: TObject);
@@ -2709,7 +2739,8 @@ end;
 procedure TfrmVolitant_Express.btnToGridClick(Sender: TObject);
 begin
 // Go to the admin grid tab page
-
+  pgcAdmin.ActivePage.TabVisible := False;
+  tsGrid.TabVisible := True;
   qryGrid.Close ; // Remove anythign that might be in the DBG grid from another use
 end;
 
@@ -2851,7 +2882,8 @@ end;
 procedure TfrmVolitant_Express.btnToOrdersClick(Sender: TObject);
 begin
 // Go the the orders admin page from any other of the admin pages
-
+ pgcAdmin.ActivePage.TabVisible := FAlse;
+ tsOrdersAdmin.TabVisible := true ;
  redOrderOut.Font.Size := 9;
 end;
 
@@ -2938,8 +2970,12 @@ end;
 procedure TfrmVolitant_Express.btnToThemeClick(Sender: TObject);
 begin
 // go the the theme change admin page from any other of the admin pages
-
+   pgcAdmin.ActivePage.TabVisible := False;
+   tsThemeAdmin.TabVisible := True;
   // Set the color themes of all the components
+  clbWelcomeLabelTheme.Selected := lblWelcome.Font.Color ;
+  clbLoginLabel.Selected := lblLogin.Font.Color ;
+  clbUpdateOrdersLabelTheme.Selected := lblOrder.Font.Color ;
 end;
 
 procedure TfrmVolitant_Express.btnUpdateItemClick(Sender: TObject);
@@ -3984,7 +4020,6 @@ tsGallery.TabVisible := False;
       lblOrder.Font.Color := StrToInt(sColor);
       CloseFile(tFile);
     end;
-
 end;
 
 procedure TfrmVolitant_Express.FormResize(Sender: TObject);
@@ -4529,7 +4564,6 @@ begin
   Rewrite(tFile) ;
 
   Writeln(tFile, pColorValue) ;
-
   CloseFile(tFile) ;
 end;
 
