@@ -18,7 +18,7 @@ uses
   Vcl.FileCtrl, Xml.xmldom, Xml.XmlTransform, Vcl.TabNotBk,
   Vcl.WinXPickers, System.Sensors, System.Sensors.Components, Vcl.NumberBox,
   Vcl.Outline, Vcl.Samples.DirOutln, Vcl.Imaging.pngimage, printers,
-  System.Notification, VclTee.TeeGDIPlus, VCLTee.TeeProcs, VCLTee.TeeDraw3D;
+  System.Notification;
 
 type
   TfrmVolitant_Express = class(TForm)
@@ -377,6 +377,13 @@ type
     BitBtnPrintOrderSlip: TBitBtn;
     chkUserDeleteAcoount: TCheckBox;
     BitBtnManageCompanyHelp: TBitBtn;
+    lblAdmin: TLabel;
+    grbLoginTheme: TGroupBox;
+    clbLoginLabel: TColorListBox;
+    btnUpdateLoginLabelTheme: TButton;
+    grbUpdateORdersLabelTheme: TGroupBox;
+    clbUpdateOrdersLabelTheme: TColorListBox;
+    btnUpdateOrderLabelTheme: TButton;
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnRegisterGOClick(Sender: TObject);
@@ -473,7 +480,11 @@ type
     procedure btnToGridClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure BitBtnPrintOrderSlipClick(Sender: TObject);
-    procedure chkUserDeleteAcoountClick(Sender: TObject);    // For the dynamic object
+    procedure chkUserDeleteAcoountClick(Sender: TObject);
+    procedure btnLoginMouseEnter(Sender: TObject);
+    procedure btnLoginMouseLeave(Sender: TObject);
+    procedure btnUpdateLoginLabelThemeClick(Sender: TObject);
+    procedure btnUpdateOrderLabelThemeClick(Sender: TObject);
   private
     { Private declarations }
 
@@ -739,6 +750,13 @@ begin
         // Enable print button
         BitBtnPrintOrderSlip.Enabled := True ;
         // After order is completed, clear the input fields on order placement page
+
+
+        // Disable Place order button
+
+        // Go to the pay for order page and select the new order to be paid
+          // Ask if user wants to go to the payment page
+          // Make a button visible to go to the payment page
    end
    else
    begin // If the now button is pressed
@@ -753,7 +771,6 @@ begin
         begin
             redOrderSummary.Print('Order Slip');
         end;
-
 end;
 
 procedure TfrmVolitant_Express.BitBtnRegisterClick(Sender: TObject);
@@ -908,7 +925,7 @@ begin
           if  (cChar = c) or (cChar in ['A'..'Z']) or (cChar in ['a'..'z']) or (cChar in ['0'..'9']) then
           begin
           bErrorCharacter := False ;
-          break;     // exit the loop but not the procedure. Performance
+        //  break;     // exit the loop but not the procedure. Performance
           end
 
       end;
@@ -918,7 +935,6 @@ begin
         ShowMessage('Invalid/Unsupported character in Password'+#13+'(Spaces are not allowed)')  ;
         exit;
       end ;
-    
 
       // Check that password is secure
       if cChar in ['0'..'9'] then
@@ -934,8 +950,7 @@ begin
                if cChar = c then
                begin
                bSpecialCharacter := true ;
-
-               break ;   // exit the loop but not the procedure.Performance
+           //    break ;   // exit the loop but not the procedure.Performance
                end;
             end;
         end;
@@ -989,7 +1004,10 @@ begin
       end;
     end
     else
+    begin   //Show this if account deletion is cancelled
     ShowMessage('Deletion of account was cancelled')  ;
+    Exit;
+    end;
   end;
 
   //Validation
@@ -1059,7 +1077,7 @@ begin
             if  (cChar = c) or (cChar in ['A'..'Z']) or (cChar in ['a'..'z']) or (cChar in ['0'..'9']) then
             begin
             bErrorCharacter := False ;
-            break;     // exit the loop but not the procedure. Performance
+      //      break;     // exit the loop but not the procedure. Performance
             end
 
         end;
@@ -1082,7 +1100,7 @@ begin
                  if cChar = c then
                  begin
                  bSpecialCharacter := true ;
-                 break ;   // exit the loop but not the procedure.Performance
+              //   break ;   // exit the loop but not the procedure.Performance
                  end;
               end;
           end;
@@ -1654,7 +1672,6 @@ begin
 // go to the gallery tab sheet
 tsWelcome.TabVisible := False;
 tsGallery.TabVisible := true;
-
 end;
 
 procedure TfrmVolitant_Express.btnHomeThemeDefaultClick(Sender: TObject);
@@ -1836,6 +1853,8 @@ begin
         // Change tabsheets
         tsLogin.TabVisible := FAlse;
         tsAdmin.TabVisible := True ;
+        // Set the admin name feature
+        lblAdmin.Caption := 'Welcome, ADMIN named '+ tblAdmins['Username'] ;
           // apply account permissions
             // Apply admin management permission
             if tblAdmins['Manage_Admins'] then   // If allowed to manage admins
@@ -1899,7 +1918,6 @@ begin
             begin   // If not allowed to send emails
                btnToEmails.Enabled := false ;
             end;
-
       end;
       tblAdmins.Next ;
     end;
@@ -1917,6 +1935,24 @@ begin
 // Go to the Login page
 tsWelcome.TabVisible :=  false ;
 tsLogin.TabVisible := True;
+end;
+
+procedure TfrmVolitant_Express.btnLoginMouseEnter(Sender: TObject);
+begin
+// When the mouse goes over the login button
+  btnLogin.Width := 640;
+  btnLogin.Height := 100;
+    btnLogin.Left := 303-14;
+  btnLogin.Top := 432-9;
+end;
+
+procedure TfrmVolitant_Express.btnLoginMouseLeave(Sender: TObject);
+begin
+// Set the login buttons size back to the default when the mouse leaves
+ btnLogin.Width := 612;
+  btnLogin.Height := 73;
+  btnLogin.Left := 303;
+  btnLogin.Top := 432;
 end;
 
 procedure TfrmVolitant_Express.btnManageCompanyClick(Sender: TObject);
@@ -1952,7 +1988,7 @@ tsHome.TabVisible := False;
           if cmbUpdateCountryBased.items[i] =  tblCompany['Location Based'] then // if a matching item is found
           begin
             cmbUpdateCountryBased.ItemIndex := i;
-            Break; // End the loop once a matching record is found to save performance
+     //       Break; // End the loop once a matching record is found to save performance
           end;
         end;
       sedUpdateDefaultHours.Value := tblCompany['Defualt Hours'];
@@ -2902,6 +2938,8 @@ end;
 procedure TfrmVolitant_Express.btnToThemeClick(Sender: TObject);
 begin
 // go the the theme change admin page from any other of the admin pages
+
+  // Set the color themes of all the components
 end;
 
 procedure TfrmVolitant_Express.btnUpdateItemClick(Sender: TObject);
@@ -2969,6 +3007,22 @@ begin
   lstSelectItemManage.ItemIndex := -1;
 
   ShowMessage('Item updated successfully') ;
+end;
+
+procedure TfrmVolitant_Express.btnUpdateLoginLabelThemeClick(Sender: TObject);
+begin
+// Update the Login lable color theme
+  lblLogin.font.Color := clbLoginLabel.Selected;
+  WriteToFormTheme('Themes/Login_label_theme.txt', clbLoginLabel.Selected) ;
+  ShowMessage('Login label theme updated');
+end;
+
+procedure TfrmVolitant_Express.btnUpdateOrderLabelThemeClick(Sender: TObject);
+begin
+// Update the ORders lable color theme
+  lblOrder.font.Color := clbUpdateOrdersLabelTheme.Selected;
+  WriteToFormTheme('Themes/Order_label_theme.txt', clbUpdateOrdersLabelTheme.Selected) ;
+  ShowMessage('Orders label theme updated');
 end;
 
 procedure TfrmVolitant_Express.btnUpdateOrderStatusClick(Sender: TObject);
@@ -3379,7 +3433,7 @@ function TfrmVolitant_Express.CalcBaseCost(pGovernment: boolean;
   var
     rBaseCost : real;
     I: Integer;
-    bThirdWorld : boolean;
+    bThirdWorld, bCompanyFound, bCountryFound : boolean;
     tFile : TextFile ;
     sLine : string;
 begin
@@ -3400,7 +3454,9 @@ begin
       // Get the country based
       tblCompany.First ;
       bThirdWorld := false ;
-      while not tblCompany.Eof  do // Search for the active company
+      bCountryFound := False;
+      bCompanyFound := FAlse;
+      while not tblCompany.Eof and  (bCompanyFound =  False)  do // Search for the active company
       begin
         if tblCompany['CompanyID'] = iID then // If the current active company is found
         begin
@@ -3410,12 +3466,13 @@ begin
             if Uppercase(arrCountryName[i]) = Uppercase(tblCompany['Location Based']) then // If a matching county is found
             begin
                // Check if that country is listed in the third world country txt file
+               bCountryFound := True;
                AssignFile(tFile, 'third-world-countries-2025.txt') ;
                if not FileExists('third-world-countries-2025.txt')  then // If the file is not found, create it and move in with life
                begin
                Rewrite(tFile)  ;
                CloseFile(tFile) ;
-               break;
+           //    break;
                end
                else
                begin // If the file exists
@@ -3427,19 +3484,19 @@ begin
                      if sLine = arrCountryCode[i] then   // If the country based is found in the txt file
                      begin
                        bThirdWorld := True ;
-                       break;
+                    //   break;
                      end;
                   end;
                 CloseFile(tFile) ;
                end;
             end;
-            if I >iCountryCount then// If no country matching was found for some reason
+            if not bCountryFound  then// If no country matching was found for some reason
             begin
                bThirdWorld := True ; // I set it to true, as this accoring has me as making the mistake a large possibility  and I don't want the company to be disadvantaged
             end;
           end;
-
-          break; // Exit the while loop
+          bCompanyFound := True ;
+          //break; // Exit the while loop
         end;
        tblCompany.Next ;
       end;
@@ -3594,10 +3651,9 @@ begin
     begin
       lstSelectItemManage.ItemIndex := i ;  // Set the index
        lstSelectItemManageClick(lstSelectItemManage);   // Call the lst box click
-      Break;
+     //break;
     end;
   end;
-
 end;
 
 function TfrmVolitant_Express.FindPlane(pOrderWeight, pDistance : real; pPickupDateTime : TDateTime): integer;
@@ -3910,7 +3966,24 @@ tsGallery.TabVisible := False;
       grbHome.Color := StrToInt(sColor);  // Set the color of the group box
       CloseFile(tFile);    // Close the file
     end;
-
+    // Set the color of the Login label
+    if FileExists('Themes/Login_label_theme.txt')  then
+    begin
+      AssignFile(tFile, 'Themes/Login_label_theme.txt');
+      Reset(tFile) ;
+      Readln(tFile, sColor) ;
+      lblLogin.Font.Color := StrToInt(sColor);
+      CloseFile(tFile);
+    end;
+    // Set the color theme of the Orders Label
+    if FileExists('Themes/Order_label_theme.txt')  then
+    begin
+      AssignFile(tFile, 'Themes/Order_label_theme.txt');
+      Reset(tFile) ;
+      Readln(tFile, sColor);
+      lblOrder.Font.Color := StrToInt(sColor);
+      CloseFile(tFile);
+    end;
 
 end;
 
@@ -4076,7 +4149,7 @@ begin
     if sItemName = tblItems['Item Name'] then
     begin
       bFound := True;
-      iItemUpdateID :=tblItems.RecNo ; // Get the record of the item selected
+      iItemUpdateID := tblItems['ItemID'] ; // Get the record of the item selected
       // Update the components for the update of the ITEM
 
       redUpdateItem.Lines.Add(tblItems['Note']);
@@ -4398,7 +4471,7 @@ begin
       begin
         bPoint := True ;
         iPointPos := I ;
-        Break;
+     //   Break;
       end;
    end;
      

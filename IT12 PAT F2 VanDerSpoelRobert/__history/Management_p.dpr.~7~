@@ -1,0 +1,16 @@
+program Management_p;
+
+uses
+  Vcl.Forms,
+  RobertPATmain_u in 'RobertPATmain_u.pas' {c},
+  clsDistance_u in 'clsDistance_u.pas',
+  clsUsername_u in 'clsUsername_u.pas';
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(Tc, c);
+  Application.Run;
+end.
