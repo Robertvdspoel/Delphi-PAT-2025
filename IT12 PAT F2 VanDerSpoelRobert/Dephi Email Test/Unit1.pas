@@ -159,8 +159,9 @@ var
   HTMLTextPart: TIdText;
 begin
   try
+  {
     GSSL_DLL_libcrypto := ExtractFilePath(ParamStr(0)) + 'libcrypto-1_1.dll';
-    GSSL_DLL_libssl := ExtractFilePath(ParamStr(0)) + 'libssl-1_1.dll';
+    GSSL_DLL_libssl := ExtractFilePath(ParamStr(0)) + 'libssl-1_1.dll';   }
 
     // Set up SMTP
     IdSMTP1.IOHandler := IdSSLIOHandlerSocketOpenSSL1;

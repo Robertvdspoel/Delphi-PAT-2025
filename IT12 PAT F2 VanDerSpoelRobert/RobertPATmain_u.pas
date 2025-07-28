@@ -18,7 +18,8 @@ uses
   Vcl.FileCtrl, Xml.xmldom, Xml.XmlTransform, Vcl.TabNotBk,
   Vcl.WinXPickers, System.Sensors, System.Sensors.Components, Vcl.NumberBox,
   Vcl.Outline, Vcl.Samples.DirOutln, Vcl.Imaging.pngimage, printers,
-  System.Notification;
+  System.Notification, IdSMTPBase, IdSMTP, IdIOHandler, IdIOHandlerSocket,
+  IdIOHandlerStack, IdSSL, IdSSLOpenSSL, IdMessage;
 
 type
   TfrmVolitant_Express = class(TForm)
@@ -384,6 +385,35 @@ type
     grbUpdateORdersLabelTheme: TGroupBox;
     clbUpdateOrdersLabelTheme: TColorListBox;
     btnUpdateOrderLabelTheme: TButton;
+    dbgAdmins: TDBGrid;
+    grbSelectAdminPermissions: TGroupBox;
+    lblSelectAdminAccount: TLabel;
+    grbAdminAccountManage: TGroupBox;
+    chkAdminChangeTheme: TCheckBox;
+    chkAdminDeveloper: TCheckBox;
+    chkAdminManageAdmins: TCheckBox;
+    chkAdminNewsletter: TCheckBox;
+    chkAdminManagePlanes: TCheckBox;
+    chkAdminItemManage: TCheckBox;
+    BitBtUpdateADmin: TBitBtn;
+    lblAdminUsername: TLabel;
+    lblAdminPassword: TLabel;
+    edtAdminUsername: TEdit;
+    edtAdminPassword: TEdit;
+    chkAddAdminAccount: TCheckBox;
+    btnGroupOrdersByStatus: TButton;
+    Button2: TButton;
+    btnSortCompanyTable: TButton;
+    btnTopPickupC: TButton;
+    btnPopularDropOffCounries: TButton;
+    btnAverageFuelCost: TButton;
+    btnRetiredItemsCount: TButton;
+    bttCompaniesUnpaidOrders: TButton;
+    lblSearchByOrderID: TLabel;
+    sedSearchByOrderID: TSpinEdit;
+    IdSMTP1: TIdSMTP;
+    IdMessage1: TIdMessage;
+    IdSSLIOHandlerSocketOpenSSL1: TIdSSLIOHandlerSocketOpenSSL;
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnRegisterGOClick(Sender: TObject);
@@ -487,6 +517,18 @@ type
     procedure btnUpdateOrderLabelThemeClick(Sender: TObject);
     procedure btnToCompaniesClick(Sender: TObject);
     procedure btnToAdminManageClick(Sender: TObject);
+    procedure BitBtUpdateADminClick(Sender: TObject);
+    procedure chkAddAdminAccountClick(Sender: TObject);
+    procedure dbgAdminsCellClick(Column: TColumn);
+    procedure btnGroupOrdersByStatusClick(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure btnSortCompanyTableClick(Sender: TObject);
+    procedure btnTopPickupCClick(Sender: TObject);
+    procedure btnPopularDropOffCounriesClick(Sender: TObject);
+    procedure btnAverageFuelCostClick(Sender: TObject);
+    procedure btnRetiredItemsCountClick(Sender: TObject);
+    procedure bttCompaniesUnpaidOrdersClick(Sender: TObject);
+    procedure sedSearchByOrderIDChange(Sender: TObject);
   private
     { Private declarations }
 
@@ -540,6 +582,7 @@ begin
 // Clear the inputs for earching for a Company using their name or ID
 edtCompanyNameSearchOrders.Clear;
 sedEnterCNameSearchOrderUpdate.Value := 0 ;
+sedSearchByOrderID.Value := 0 ;
 end;
 
 procedure TfrmVolitant_Express.bitbtnCloseProgramClick(Sender: TObject);
@@ -723,7 +766,7 @@ begin
                 // Send email pop
                   // Get email addres
                   qrySQL.SQL.Text := 'Select Email from tblCompany where CompanyID =' + IntToStr(iID)  ;
-                  qrySQL.Open ;
+                   qrySQL.Open ;
                   SendEmail(qrySQL['Email'], sPaymentConfirmation) ;
               ShowMessage('Transportation payment made successfully for order '+ IntToStr(iOrderID) );
             end
@@ -1147,6 +1190,12 @@ begin
      end;
 end;
 
+procedure TfrmVolitant_Express.BitBtUpdateADminClick(Sender: TObject);
+begin
+// Update/ Add the admin account to the database
+ShowMessage(tblAdmins['Username'])
+end;
+
 procedure TfrmVolitant_Express.btnAboutUsClick(Sender: TObject);
 begin
 // Gives some background information about the company
@@ -1362,6 +1411,13 @@ begin
    sedAddFuelCents.Value := 0 ;
 end;
 
+procedure TfrmVolitant_Express.btnAverageFuelCostClick(Sender: TObject);
+begin
+// Get the average costs for plane fuel per hour
+qryGrid.SQL.Text := 'Select FORMAT(AVG(FuelCost), "Currency") as [Average Fuel Cost Per Hour Of Flight] from tblPlanes'  ;
+qryGrid.Open ;
+end;
+
 procedure TfrmVolitant_Express.btnBackFromGalleryClick(Sender: TObject);
 var
   I : integer;
@@ -1410,6 +1466,31 @@ begin
 // Go back to the company info reg page from the contact info page
 tsContact.TabVisible := false;
 tsDetails.TabVisible := True ;
+end;
+
+procedure TfrmVolitant_Express.bttCompaniesUnpaidOrdersClick(Sender: TObject);
+var
+  sUnpaid: string ;
+begin
+// Get the amount of orders unpaid by each company, based on the admin input for the amount of orders unpia 
+  // Get the amount of orders to show of companies that are unpaid
+  sUnpaid := InputBox('Enter the amount of orders a company has not paid to display the company', 'Number should be 0 or larger:', '2') ;
+  // Validate that a valid number was entered
+  try
+    if not StrToInt(sUnpaid)>= 0  then // Try to convert to integer number and check that number is larger than 0
+    begin // If number is not larger than 0
+      ShowMessage('Please enter an integer number 0 or larger')   ;
+      exit;
+    end;
+    except
+    begin      // If invalid number was entered
+      ShowMessage('Please enter a valid number');
+      exit;
+    end;
+  end;
+  // Two tables
+qryGrid.SQL.Text := 'Select tblCompany.CompanyID, CompanyName, Count(*) as [Order Unpaid] from tblOrders, tblCompany where tblCompany.CompanyID = tblOrders.CompanyID and not Status = "Canceled" and Paid =False Group By tblCompany.CompanyID, CompanyName Having Count(*) >=' + sUnpaid ;
+qryGrid.Open ;
 end;
 
 procedure TfrmVolitant_Express.btnCompanyOrderOutClick(Sender: TObject);
@@ -1555,6 +1636,13 @@ begin
 frmVolitant_Express.color :=clBtnFace ;
 WriteToFormTheme('Themes/formtheme.txt', clBtnFace) ;
 ShowMessage('Default Form theme restored') ;
+end;
+
+procedure TfrmVolitant_Express.btnRetiredItemsCountClick(Sender: TObject);
+begin
+// Get the ammount of items that has been retired
+qryGrid.SQL.Text := 'Select ABS(SUM(Retired)) as [Total Retired ITems] from tblItems';
+qryGrid.Open ;
 end;
 
 procedure TfrmVolitant_Express.btnRetireItemClick(Sender: TObject);
@@ -2335,6 +2423,13 @@ begin
 mpIntroVideo.Resume ;
 end;
 
+procedure TfrmVolitant_Express.btnPopularDropOffCounriesClick(Sender: TObject);
+begin
+// Get the DropOff Counties that are used more than once, and which orders are not cancelled and have been paid
+qryGrid.SQL.Text :='Select [Drop of Country], Count(*) as [Times Dropped Off] from tblOrders where not (Status = "Canceled") and (Paid = True) Group By [Drop of Country] Having Count(*) > 1';
+qryGrid.Open ;
+end;
+
 procedure TfrmVolitant_Express.btnRegBackClick(Sender: TObject);
 begin
 // Go back to the Welcome page from the Register page
@@ -2621,7 +2716,13 @@ bNothing := True;     // If none of the below conditions are met, display all ed
       ShowMessage('No matching Company found based on the input provided') ;
       exit;
     end;
+  end
+  else
+  if sedSearchByOrderID.Value > 0 then // If an OrderID was entered
+  begin
+  
   end;
+  
 
   // find matching orders on the company
     tblOrders.First ;
@@ -2700,15 +2801,37 @@ begin
 
 end;
 
+procedure TfrmVolitant_Express.btnTopPickupCClick(Sender: TObject);
+begin
+// Get the Pickup Counties that are used more than once, and which orders are not cancelled and have been paid
+qryGrid.SQL.Text :='Select [Pickup Country], Count(*) as [Times Picked Up] from tblOrders where not (Status = "Canceled") and (Paid = True) Group By [Pickup Country] Having Count(*) > 1';
+qryGrid.Open ;
+end;
+
 procedure TfrmVolitant_Express.btnSendNewsletterClick(Sender: TObject);
 begin
 // Send the newsletter
+end;
+
+procedure TfrmVolitant_Express.btnSortCompanyTableClick(Sender: TObject);
+begin
+// Sort the company table by name
+tblCompany.Sort := 'CompanyName' ;
+end;
+
+procedure TfrmVolitant_Express.btnGroupOrdersByStatusClick(Sender: TObject);
+begin
+// Show all of the orders in the database and group them accrding to status
+qryGrid.SQL.Text := 'Select OrderID, Status from tblOrders Group By Status, OrderID Order By Status DESC'  ;
+qryGrid.Open ;
 end;
 
 procedure TfrmVolitant_Express.btnToAdminManageClick(Sender: TObject);
 begin
 // Go to the manage admins page from any of the other admin pages
 pgcAdmin.ActivePage.TabVisible := False;
+tblAdmins.First ;// Go to the first admin account in the tabel
+dbgAdminsCellClick(dbgAdmins.Columns[0]) ;
 tsAdminManage.TabVisible := True;
 end;
 
@@ -3348,9 +3471,12 @@ iID := 7;
  // ShowMessage(FloatToStr(rBaseCost) )  ;
 
  sPrevent_Copy := Prevent_Duplication ;
-       redOrderSummary.Lines.Add(Prevent_Duplication )
+       redOrderSummary.Lines.Add(Prevent_Duplication );
+end;
 
-
+procedure TfrmVolitant_Express.Button2Click(Sender: TObject);
+begin
+SendEmail('robertvdspoel2007@gmail.com', 'Toets van Delpi email sending') ;
 end;
 
 procedure TfrmVolitant_Express.chkUserDeleteAcoountClick(Sender: TObject);
@@ -3443,6 +3569,11 @@ begin
   2: dbgDifferentTables.DataSource := dsrCompany ;
   3: dbgDifferentTables.DataSource := dsrItems ;
   end;
+  if dbgDifferentTables.DataSource = dsrCompany then    // Set the button to sort the company table by name
+  btnSortCompanyTable.Enabled := True
+  else
+  btnSortCompanyTable.Enabled := False;
+
 end;
 
 procedure TfrmVolitant_Express.cmbUpdateCountryBasedChange(Sender: TObject);
@@ -3625,6 +3756,26 @@ begin
    ShowMessage('Theme of Home group box and label Updated')
 end;
 
+procedure TfrmVolitant_Express.chkAddAdminAccountClick(Sender: TObject);
+begin
+// Change the Captions and prepare and admin to be added if the Caption = a certain thing
+end;
+
+procedure TfrmVolitant_Express.dbgAdminsCellClick(Column: TColumn);
+begin
+// Load the admin account details when a cell is clicked
+  // Load the username and password
+  edtAdminUsername.Text := tblAdmins['Username'];
+  edtAdminPassword.Text := tblAdmins['Password'];
+  // Load the permissions of the selected record
+  chkAdminChangeTheme.Checked := tblAdmins['Change_Theme'];
+  chkAdminDeveloper.Checked := tblAdmins['Developer'] ;
+  chkAdminManageAdmins.Checked := tblAdmins['Manage_Admins'];
+  chkAdminNewsletter.Checked := tblAdmins['Newsletter']  ;
+  chkAdminManagePlanes.Checked := tblAdmins['Plane_Manage'] ;
+  chkAdminItemManage.Checked := tblAdmins['Item_Manage']  ;
+end;
+
 procedure TfrmVolitant_Express.dbgDifferentTablesCellClick(Column: TColumn);
 begin
 // If the active table is tblOrders: when a record is clicked on: Retrieve all the foreign data from the other tables and dispay info about that record in a showmessage
@@ -3633,7 +3784,13 @@ end;
 function TfrmVolitant_Express.DeleteAccount(pID: integer): boolean;
 begin   // Return if the deletetion was successfull
 // Delete a company account
-
+  if sedEnterCompanyID.Value = 54 then // Prevent delete accont holding from beign deleted
+    begin
+      ShowMessage('Deletion Holding Account cannot be deleted');
+      Result := False;
+      exit; 
+    end;
+    
   //Check that a company is deletable, by checking if there are any active/ unpaid orders
   tblOrders.First ;
   while not tblOrders.eof do
@@ -3672,8 +3829,9 @@ end;
 
 procedure TfrmVolitant_Express.edtCompanyNameSearchOrdersClick(Sender: TObject);
 begin
-//Clear the spin edit used for searching for a company, as spinedit will be prioritized above Company name, thus should be cleared to prvent it
+//Clear the spin edit used for searching for a company and orderID, as spinedit will be prioritized above Company name, thus should be cleared to prvent it
  sedEnterCNameSearchOrderUpdate.Value := 0 ;
+ sedSearchByOrderID.Value := 0 ;
 end;
 
 procedure TfrmVolitant_Express.edtSearchForItemChange(Sender: TObject);
@@ -3883,8 +4041,6 @@ chkSuspendAccount.Enabled := False;
   bTimer := true ;
   end;
 
-    
-
 // Database Connection
 
   conDB.Connected := False ;
@@ -3892,13 +4048,11 @@ chkSuspendAccount.Enabled := False;
   conDB.ConnectionString := 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=Volitant_Express_db.mdb;Mode=ReadWrite;Persist Security Info=False' ;
   conDB.Open;
   // SQL Query connection
-
   qrySQL.Connection := conDB ;
   dsrSQL.DataSet := qrySQL ;
   dbgSQL_admin.DataSource := dsrSQL ;
 
   // Grid Query Connection
-
   qryGrid.Connection := conDB ;
   dsrGrid.DataSet := qryGrid;
   dbgGridDisplay.DataSource := dsrGrid ; // Link to the dbg grid
@@ -3927,7 +4081,8 @@ chkSuspendAccount.Enabled := False;
   tblAdmins.Connection := conDB ;
   tblAdmins.TableName := 'tblAdmins';
   tblAdmins.Active := True;
-  dsrAdmins.DataSet := tblPlanes ;
+  dsrAdmins.DataSet := tblAdmins ;
+  dbgAdmins.DataSource := dsrAdmins ; // Set the admins dbgGrid to display the admins table
 end;
 
 procedure TfrmVolitant_Express.FormCreate(Sender: TObject);
@@ -4394,8 +4549,9 @@ end;
 procedure TfrmVolitant_Express.sedEnterCNameSearchOrderUpdateChange(
   Sender: TObject);
 begin
-// Clear the edt for searching for a company, as ID will be valued above C Name
+// Clear the edt and sed for searching for a company or OrderID, as ID will be valued above C Name
 edtCompanyNameSearchOrders.Clear;
+sedSearchByOrderID.Value := 0 ;
 end;
 
 procedure TfrmVolitant_Express.sedEnterCompanyIDChange(Sender: TObject);
@@ -4407,11 +4563,69 @@ begin
   btnLoadCompany.Enabled := True;
 end;
 
-procedure TfrmVolitant_Express.SendEmail(pEmailAddress, pMessage: string);
+procedure TfrmVolitant_Express.sedSearchByOrderIDChange(Sender: TObject);
 begin
-// Send the email
+// Clear the Company name edit and the companyID search spinedit to used OrderID to search for order with that ID
+edtCompanyNameSearchOrders.Clear ;
+sedEnterCNameSearchOrderUpdate.Value := 0 ;
+end;
 
-  ShowMessage('');
+procedure TfrmVolitant_Express.SendEmail(pEmailAddress, pMessage: string);
+var // Setup a few variables 
+ SMTP: TIdSMTP;
+  Msg: TIdMessage;
+  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  sMyEMailAddress : string ;
+begin
+// Send the email to a single user function
+    // Create objects to send email
+    SMTP := TIdSMTP.Create(nil);
+    Msg := TIdMessage.Create(nil);
+    SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+  sMyEMailAddress := 'vrobert997@yahoo.com';
+
+    if not IdSSLOpenSSL.LoadOpenSSLLibrary then
+    raise Exception.Create('Failed to load OpenSSL library. DLLs missing or incompatible.');
+  try
+    // Setup SSL
+    SSL.SSLOptions.Method := sslvTLSv1_2;
+    SSL.SSLOptions.Mode := sslmUnassigned;
+    SSL.SSLOptions.VerifyMode := [];
+    SSL.SSLOptions.VerifyDepth := 0;
+
+    // Assign SSL handler to SMTP, basically, i log into yahoo's email service
+    SMTP.IOHandler := SSL;
+    SMTP.UseTLS := utUseImplicitTLS; // For port 465
+    SMTP.Host := 'smtp.mail.yahoo.com';
+    SMTP.Port := 465;
+    SMTP.Username := sMyEMailAddress; // The email address the emails will be send from
+    SMTP.Password := 'jenanqebkhkwpqi';    // Yahoo app-specific password
+
+    // Create the email to be send to the user
+    Msg.Clear;
+    Msg.From.Address := sMyEMailAddress; // This is the email address that the user will see the email coming from
+    Msg.Recipients.EmailAddresses := pEmailAddress ; // This is the users accounts email address
+    Msg.Subject := 'EMAIL From VOLITANT EXPRESS';
+    Msg.Body.Text := pMessage;
+
+    // Send it, this will attempt to actually send the email to the users email address
+    SMTP.Connect;
+    try
+      SMTP.Send(Msg);
+    finally
+      SMTP.Disconnect;
+    end;
+    // Confirmation message that email was send successfully, if it was :)
+    ShowMessage('Email sent successfully!');
+  except
+    on E: Exception do
+      ShowMessage('Failed to send email: ' + E.Message);
+  end;
+
+// Close the objects used to send the emails. Whe use free as when we create the objects, they are assighend to  "nil", meaning that they have no owner
+  SSL.Free;
+  SMTP.Free;
+  Msg.Free;
 end;
 
 procedure TfrmVolitant_Express.SetOrderStatusItemIndex(pStatus: string);
@@ -4545,7 +4759,7 @@ begin
           begin
             ShowMessage('Enter a valid email. There must be things between the dot and the @');
               Result := False;
-            exit; 
+            exit;
           end;
           
         end;
