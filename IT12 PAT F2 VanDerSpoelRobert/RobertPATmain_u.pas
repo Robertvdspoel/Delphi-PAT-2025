@@ -19,7 +19,7 @@ uses
   Vcl.WinXPickers, System.Sensors, System.Sensors.Components, Vcl.NumberBox,
   Vcl.Outline, Vcl.Samples.DirOutln, Vcl.Imaging.pngimage, printers,
   System.Notification, IdSMTPBase, IdSMTP, IdIOHandler, IdIOHandlerSocket,
-  IdIOHandlerStack, IdSSL, IdSSLOpenSSL, IdMessage;
+  IdIOHandlerStack, IdSSL, IdSSLOpenSSL, IdMessage, IdAttachment;
 
 type
   TfrmVolitant_Express = class(TForm)
@@ -411,9 +411,6 @@ type
     bttCompaniesUnpaidOrders: TButton;
     lblSearchByOrderID: TLabel;
     sedSearchByOrderID: TSpinEdit;
-    IdSMTP1: TIdSMTP;
-    IdMessage1: TIdMessage;
-    IdSSLIOHandlerSocketOpenSSL1: TIdSSLIOHandlerSocketOpenSSL;
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnRegisterGOClick(Sender: TObject);
@@ -1191,9 +1188,96 @@ begin
 end;
 
 procedure TfrmVolitant_Express.BitBtUpdateADminClick(Sender: TObject);
+var
+  sAdminUsername, sAdminPassword : string ;
+  I, iRecNo, iADminID: Integer;
+  bADminUsernameFound : boolean;
 begin
 // Update/ Add the admin account to the database
-ShowMessage(tblAdmins['Username'])
+  sAdminUsername := edtAdminUsername.Text ;
+  sAdminPassword := edtAdminPassword.Text ;
+  // VAlidation
+    // Ensure that a valid username was entered
+    // Check that the Username has a right length
+    if (Length(sAdminUsername) < 2) or (Length(sAdminUsername) > 20 )  then
+    begin
+      ShowMessage('Admin username should be between 2 and 20 characters in length') ;
+      exit;
+    end;
+      // Ensure that no spaces are existent in username
+    for I := 1 to Length(sAdminUsername)  do
+    begin
+       if sAdminUsername[i] = ' ' then
+       begin
+         ShowMessage('Username may not contain any spaces');
+         Exit;
+       end;
+    end;
+    // Ensure that admin username is not present in db
+    bADminUsernameFound := False;
+    iRecNo := tblAdmins.RecNo ;
+    iADminID := tblAdmins['ADminID'];
+    tblAdmins.First ;
+    while not tblAdmins.Eof and not bADminUsernameFound do
+    begin
+       if (UpperCase(tblAdmins['Username']) =UpperCase(sAdminUsername) ) and not (iADminID = tblAdmins['ADminID'])  then
+       begin
+         bADminUsernameFound := True;
+       end;
+
+      tblAdmins.Next ;
+    end;
+    tblAdmins.RecNo := iRecNo ; // Set the active record that the user selected before the looping
+    if bADminUsernameFound = True then  // If an existing matching u_name was found
+    begin
+      ShowMessage('Admin Username already exists');
+      exit;
+    end;
+    // validdate the password
+   // Check that the Username has a right length
+    if (Length(sAdminPassword) < 5) or (Length(sAdminPassword) > 20 )  then
+    begin
+      ShowMessage('Adin Password should be between 5 and 20 characters in length') ;
+      exit;
+    end;
+      // Ensure that no spaces are existent in password
+    for I := 1 to Length(sAdminPAssword)  do
+    begin
+       if sAdminPassword[i] = ' ' then
+       begin
+         ShowMessage('Password may not contain any spaces');
+         Exit;
+       end;
+    end;
+
+  if not chkAddAdminAccount.Checked  then  // If you want to update the selectd Admin account
+  begin
+    tblAdmins.Edit ;  // Update the admin account
+    tblAdmins['Username']  := sAdminUsername ;
+    tblAdmins['Password'] := sAdminPassword;
+    tblAdmins['Manage_Admins'] := chkAdminManageAdmins.Checked ;
+    tblAdmins['Developer'] := chkAdminDeveloper.Checked ;
+    tblAdmins['Change_Theme'] := chkAdminChangeTheme.Checked ;
+    tblAdmins['Item_Manage'] := chkAdminItemManage.Checked ;
+    tblAdmins['Plane_Manage'] := chkAdminManagePlanes.Checked ;
+    tblAdmins['NewsLetter'] := chkAdminNewsletter.Checked  ;
+    tblAdmins.Post ;
+    ShowMessage('Admin account updated successfully');
+  end
+  else
+  begin // If you want to add a new admin account
+    tblAdmins.Append ;
+        tblAdmins['Username']  := sAdminUsername ;
+    tblAdmins['Password'] := sAdminPassword;
+    tblAdmins['Manage_Admins'] := chkAdminManageAdmins.Checked ;
+    tblAdmins['Developer'] := chkAdminDeveloper.Checked ;
+    tblAdmins['Change_Theme'] := chkAdminChangeTheme.Checked ;
+    tblAdmins['Item_Manage'] := chkAdminItemManage.Checked ;
+    tblAdmins['Plane_Manage'] := chkAdminManagePlanes.Checked ;
+    tblAdmins['NewsLetter'] := chkAdminNewsletter.Checked  ;
+    tblAdmins.Post ;
+   ShowMessage('Admin account added successfully');
+  end;
 end;
 
 procedure TfrmVolitant_Express.btnAboutUsClick(Sender: TObject);
@@ -1472,7 +1556,7 @@ procedure TfrmVolitant_Express.bttCompaniesUnpaidOrdersClick(Sender: TObject);
 var
   sUnpaid: string ;
 begin
-// Get the amount of orders unpaid by each company, based on the admin input for the amount of orders unpia 
+// Get the amount of orders unpaid by each company, based on the admin input for the amount of orders unpia
   // Get the amount of orders to show of companies that are unpaid
   sUnpaid := InputBox('Enter the amount of orders a company has not paid to display the company', 'Number should be 0 or larger:', '2') ;
   // Validate that a valid number was entered
@@ -2303,7 +2387,7 @@ begin
     if lstSelectTransportItem.ItemIndex = -1 then
     begin
       ShowMessage('Please select a valid Item!');
-      exit
+      exit ;
     end;
    // Ensure that a weight larger than 1 kg has been entered
    if not (sedAddOrderKg.Value >= 1) then
@@ -2679,7 +2763,7 @@ end;
 
 procedure TfrmVolitant_Express.btnSearchForOrdersClick(Sender: TObject);
 var
-  bNothing, bID, bName, bCompFound, bOrdersFound : boolean ;
+  bNothing, bID, bName, bCompFound, bOrdersFound, bOrderID, bOrderIDFound : boolean ;
   sNameSearch : string ;
   iIDsearch, iRecordNumKeep : integer ;
 begin
@@ -2720,14 +2804,15 @@ bNothing := True;     // If none of the below conditions are met, display all ed
   else
   if sedSearchByOrderID.Value > 0 then // If an OrderID was entered
   begin
-  
+    bNothing := FAlse;
+    bOrderID := True ;
   end;
-  
 
   // find matching orders on the company
     tblOrders.First ;
+    bOrderIDFound := False;
     bOrdersFound := False ;
-    while not tblOrders.Eof  do    // exlude orders that has been CANCELLED OR DELIVERED
+    while not tblOrders.Eof and not bOrderIDFound   do    // exlude orders that has been CANCELLED OR DELIVERED
     begin
        // To do if Nothing was entered- Show all orders that can be edded
        if (bNothing = True) and (tblOrders['Status'] <> 'Delivered') and (tblOrders['Status'] <> 'Canceled'){(tblOrders['Status'] in ['Delivered', 'Canceled'])} then  // Turns out ID is only usable for Ordinal types
@@ -2737,14 +2822,22 @@ bNothing := True;     // If none of the below conditions are met, display all ed
          lstSelectOrderAdmin.Items.Add(IntToStr(tblOrders['OrderID']) +'--'+ tblOrders['Pickup Country'] + ' -TO- ' + tblOrders['Drop of Country'] + ' -- '+ tblOrders['Status']+ ' - ' +FloatToStrF(CalcOrderPrice(tblOrders['OrderID']), ffCurrency , 10,2 ) )  ;   // Add item to the lst box
          tblOrders.RecNo := iRecordNumKeep ;// Set pointer where be were before calling the function
        end
-       else  // If something was entered
+       else  // If something was entered, which is not an orderID
        if ((bID = True) or (bName = True)) and (tblOrders['CompanyID'] = iIDsearch)and not (tblOrders['Status'] = 'Delivered') and not (tblOrders['Status'] = 'Canceled') then  // If a companyID was entered or after the CompanyID was located from the database based on the Name entered
        begin
           bOrdersFound := True;
           iRecordNumKeep := tblOrders.RecNo ;// I must store the record, as I loop thru the db in the function, in order keep going from where I was in the process
         lstSelectOrderAdmin.Items.Add(IntToStr(tblOrders['OrderID']) +'--'+ tblOrders['Pickup Country'] + ' -TO- ' + tblOrders['Drop of Country'] + ' -- '+ tblOrders['Status']+ ' - ' +FloatToStrF(CalcOrderPrice(tblOrders['OrderID']), ffCurrency , 10,2 ) )  ;   // Add item to the lst box
          tblOrders.RecNo := iRecordNumKeep ;// Set pointer where be were before calling the function
+       end
+       else  // If an OrderID was enetered
+       if (bOrderID= True) and (tblOrders['Status'] <> 'Delivered') and (tblOrders['Status'] <> 'Canceled') and (tblOrders['OrderID'] = sedSearchByOrderID.Value)  then
+       begin
+         bOrderIDFound := True;
+         bOrdersFound := True ;
+          lstSelectOrderAdmin.Items.Add(IntToStr(tblOrders['OrderID']) +'--'+ tblOrders['Pickup Country'] + ' -TO- ' + tblOrders['Drop of Country'] + ' -- '+ tblOrders['Status']+ ' - ' +FloatToStrF(CalcOrderPrice(tblOrders['OrderID']), ffCurrency , 10,2 ) )  ;   // Add item to the lst box
        end;
+
       tblOrders.Next ;
     end;
 
@@ -2809,8 +2902,40 @@ qryGrid.Open ;
 end;
 
 procedure TfrmVolitant_Express.btnSendNewsletterClick(Sender: TObject);
+var
+  sEmails : string ;
 begin
 // Send the newsletter
+  // Ensure that something was entered in the richedit (validation)
+  if Length(memNewsLetterMessage.Text) < 10  then
+  begin
+    ShowMessage('Newsletters must be a min of 10 characters in length');
+    exit;
+  end;
+
+  sEmails := '' ;
+  tblCompany.First ;
+  while not tblCompany.Eof  do
+  begin
+    if tblCompany['Newsletter'] = True then // If the company opted in to recieve the newsletter
+    begin
+       if not (sEmails = '') then
+       begin
+         sEmails := sEmails + ', ' + tblCompany['Email'] ;
+       end
+       else
+       sEmails := sEmails + tblCompany['Email'] ;
+    end;
+  tblCompany.Next ;
+  end;
+  // Send the email
+  if not (sEmails = '') then
+  SendEmail(sEmails , memNewsLetterMessage.Text)
+  else
+  begin
+    ShowMessage('No account found to send newsletter to.' + #13+ 'Thus newsletter was not send') ;
+  end;
+
 end;
 
 procedure TfrmVolitant_Express.btnSortCompanyTableClick(Sender: TObject);
@@ -2892,7 +3017,6 @@ begin
   tblItems.Next ;
  end;
  iItemUpdateID := 0 ;
-
 
    // clear update inputs
   edtSearchForItem.Clear ;
@@ -2978,12 +3102,6 @@ begin
     end;
     sedAddOrderKg.MaxValue := iHeighest -1; // Minus one to account for cents and stuff
 
-    // Get the distance for the order
-
-
-
-
-
   //  Set pickup date time compoemts to default hours from now
     // Get the defualt hours if the company
     iDefaultHours := 0 ;
@@ -2994,8 +3112,6 @@ begin
     // Update the Date  and time in the componets
     dtpChoosePickupDate.Date := Trunc(dtSetDefaultDateTimeOfPickup)  ;// Set the date and convert default hours part to days
     tpChoosePickupTime.Time := Frac(dtSetDefaultDateTimeOfPickup) ;
-
-
 
 tsHome.TabVisible := False;
 tsPOrder.TabVisible := True ;
@@ -3337,7 +3453,6 @@ begin
       rgpOrderStatus.ItemIndex := -1;
       dpUpdatePickupDate.Date := Today ;
       tpUpdatePickupTime.Time := Time;
-
 
       ShowMessage('Order Updated Successfully!');
     end;
@@ -3694,7 +3809,7 @@ begin
       if tblOrders['OrderID'] = pOrderID  then   // Find a matching order
       begin
          bOrderFound := True ;
-         // Calculate Revenue
+         // Calculate order Cost
         rRevenueCalc := rRevenueCalc+ tblOrders['Base Cost'] ;// Set the base cost
           // Check that the file containing the prises of the order exists and contains valid info
           AssignFile(tFile, 'History_Log/'+ inttostr(tblOrders['OrderID'])+'.txt');
@@ -3759,6 +3874,26 @@ end;
 procedure TfrmVolitant_Express.chkAddAdminAccountClick(Sender: TObject);
 begin
 // Change the Captions and prepare and admin to be added if the Caption = a certain thing
+  if chkAddAdminAccount.Checked then // If you want to add an admin account
+  begin
+    // Set all the permissions to false
+       chkAdminChangeTheme.Checked := False;
+    chkAdminDeveloper.Checked := False ;
+    chkAdminManageAdmins.Checked := False;
+    chkAdminNewsletter.Checked := false ;
+    chkAdminManagePlanes.Checked := False ;
+    chkAdminItemManage.Checked := False  ;
+    // Clear the admin credential fields
+    edtAdminUsername.Clear ;
+    edtAdminPassword.Clear ;
+     BitBtUpdateADmin.Caption := 'Add ADminAccount' ;
+  end
+  else
+  begin // If you just want to update the admin account
+     dbgAdminsCellClick(dbgAdmins.Columns[0]) ;
+     BitBtUpdateADmin.Caption := 'Update ADminAccount' ;
+  end;
+
 end;
 
 procedure TfrmVolitant_Express.dbgAdminsCellClick(Column: TColumn);
@@ -3774,6 +3909,7 @@ begin
   chkAdminNewsletter.Checked := tblAdmins['Newsletter']  ;
   chkAdminManagePlanes.Checked := tblAdmins['Plane_Manage'] ;
   chkAdminItemManage.Checked := tblAdmins['Item_Manage']  ;
+  chkAddAdminAccount.Checked := False ;
 end;
 
 procedure TfrmVolitant_Express.dbgDifferentTablesCellClick(Column: TColumn);
@@ -4103,14 +4239,16 @@ tsLogin.TabVisible := False;
 tsIntroVideo.TabVisible := False;
 tsGallery.TabVisible := False;
 }
-      {                              // Dont add the sum page to list, will cause errors due to activepage.tabvisible
+ {                              // Dont add the sum page to list, will cause errors due to activepage.tabvisible
   tsItemsAdmin.TabVisible := False;
   tsPlanesAdmin.TabVisible := False;
   tsOrdersAdmin.TabVisible := False;
   tsCompaniesAdmin.TabVisible := False;
   tsEmailsAdmin.TabVisible := False;
   tsCustomAdmin.TabVisible := False;
-               }
+  tsThemeAdmin.TabVisible := False;
+  tsGrid.TabVisible := False;
+  tsAdminManage.TabVisible := False;    }
 
   tsContact.TabVisible := False;
   tsLastInfo.TabVisible := False;
@@ -4204,8 +4342,6 @@ begin
   if not bPlaneFound then
   Result := 550 ;
 end;
-
-
 
 procedure TfrmVolitant_Express.imgDynamicOnclick;
 var
@@ -4577,8 +4713,13 @@ var // Setup a few variables
   SSL: TIdSSLIOHandlerSocketOpenSSL;
   sMyEMailAddress : string ;
 begin
-// Send the email to a single user function
-    // Create objects to send email
+// Send the email to a single Procedure
+  // Due to an unexpected surgery for an infection in mouth, I was not able to complete the email project part. So i simplified it to the idea
+
+  ShowMessage('Email send successfully to: '+ pEmailAddress + #13+ 'Message:' + #13+ pMessage) ;
+
+   { // Create objects to send email
+
     SMTP := TIdSMTP.Create(nil);
     Msg := TIdMessage.Create(nil);
     SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
@@ -4625,7 +4766,7 @@ begin
 // Close the objects used to send the emails. Whe use free as when we create the objects, they are assighend to  "nil", meaning that they have no owner
   SSL.Free;
   SMTP.Free;
-  Msg.Free;
+  Msg.Free;    }
 end;
 
 procedure TfrmVolitant_Express.SetOrderStatusItemIndex(pStatus: string);
