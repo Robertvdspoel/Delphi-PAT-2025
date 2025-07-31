@@ -316,11 +316,6 @@ type
     tsAdminManage: TTabSheet;
     lblManageAdmin: TLabel;
     lblAdminSelectOrderInfo: TLabel;
-    grbUpdatePickupDate: TGroupBox;
-    tpUpdatePickupTime: TTimePicker;
-    lblUpdatePickupDate: TLabel;
-    lblUpdatePickupTime: TLabel;
-    dpUpdatePickupDate: TDatePicker;
     btnOrderToSummary: TButton;
     BitBtnPlaceOrder: TBitBtn;
     BitBtnBackToPlaceOrderPage: TBitBtn;
@@ -411,6 +406,17 @@ type
     bttCompaniesUnpaidOrders: TButton;
     lblSearchByOrderID: TLabel;
     sedSearchByOrderID: TSpinEdit;
+    BitBtnOrderHelp: TBitBtn;
+    lblOrderHistory: TLabel;
+    BitBtnBackHomeFromOrderHistory: TBitBtn;
+    lstOrderHistory: TListBox;
+    btnUpdateOrderHistory: TButton;
+    btnPrintPaymentConfirmation: TButton;
+    BitBtnOrderHistoryHelp: TBitBtn;
+    lblOrderHistoryHeadings: TLabel;
+    lblManageItemHeading: TLabel;
+    lblPlaneSelectFormat: TLabel;
+    lblPaymentSelectFormat: TLabel;
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnRegisterGOClick(Sender: TObject);
@@ -518,7 +524,6 @@ type
     procedure chkAddAdminAccountClick(Sender: TObject);
     procedure dbgAdminsCellClick(Column: TColumn);
     procedure btnGroupOrdersByStatusClick(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
     procedure btnSortCompanyTableClick(Sender: TObject);
     procedure btnTopPickupCClick(Sender: TObject);
     procedure btnPopularDropOffCounriesClick(Sender: TObject);
@@ -526,6 +531,18 @@ type
     procedure btnRetiredItemsCountClick(Sender: TObject);
     procedure bttCompaniesUnpaidOrdersClick(Sender: TObject);
     procedure sedSearchByOrderIDChange(Sender: TObject);
+    procedure BitBtnBackHomeFromOrderHistoryClick(Sender: TObject);
+    procedure btnUpdateOrderHistoryClick(Sender: TObject);
+    procedure btnPrintPaymentConfirmationClick(Sender: TObject);
+    procedure BitBtnOrderHistoryHelpClick(Sender: TObject);
+    procedure lstOrderHistoryClick(Sender: TObject);
+    procedure bitbtnAdminHelpClick(Sender: TObject);
+    procedure bitbtnLoginHelpClick(Sender: TObject);
+    procedure bitbtnRegHelpClick(Sender: TObject);
+    procedure bitBtnHomeHelpClick(Sender: TObject);
+    procedure BitBtnPaymentHelpClick(Sender: TObject);
+    procedure BitBtnOrderHelpClick(Sender: TObject);
+    procedure BitBtnManageCompanyHelpClick(Sender: TObject);
   private
     { Private declarations }
 
@@ -540,6 +557,7 @@ type
     Function CalcBaseCost(pGovernment: boolean; pEstablishmentDate : TDate) : real ;
     Function FindPlane(pOrderWeight, pDistance: real; pPickupDateTime : TDateTime) : integer;
     Function Prevent_Duplication(): string;
+    Function WeatherCosts() : real;
     // Procedures
     Procedure WriteToFormTheme(pFileName : string; pColorValue : integer); // For writing to the files for system themes
     Procedure SetOrderStatusItemIndex(pStatus : string);
@@ -554,16 +572,17 @@ type
 
   // Variable declararion
     iID : integer ;
-    iCountryCount,  iSpecialCharacterCount : integer ;
+    iCountryCount,  iSpecialCharacterCount, iDynamicRandom : integer ;
     bTimer : boolean;
-
       // For the gallery
      iImageCount : integer;
     arrFileNames : array[1..1000] of string;
-
     // ItemUpdate ID
     iItemUpdateID : integer ;
-
+    // For order Placement
+    iPlaneID, iItemID : integer ;
+    rBaseCost, rWeight, rItemCostNow, rFuelCostNow : real;
+    dtPickupDate, dtDropOffDate : TDateTime ;
   end;
 
 var
@@ -587,18 +606,65 @@ begin
 // Closes/ ends the program
 end;
 
+procedure TfrmVolitant_Express.bitBtnHomeHelpClick(Sender: TObject);
+begin
+// Home page help
+ShowMessage('-The Home page is like your hub for centralizing going to other pages.'+ #13+'-Press on any one of the buttons to go to the page listed on them:'+#13+ '-Place Order = To place an order'+ #13+'-Manage Payments = To pay your orders'+ #13+'-Order History+Management = To see your previously placed orders or to cancel some of your orders'+#13+'-Manage Company Info = Update the details stored about your company');
+end;
+
+procedure TfrmVolitant_Express.bitbtnLoginHelpClick(Sender: TObject);
+begin
+// Login page help message
+ShowMessage('Enter your login details. '+#13+'Your username is the created username from when you registered.'+#13+'Select "Login as Admin" to login as admin'+ #13+ 'Contact: 10867@hsrandburg.co.za');
+end;
+
+procedure TfrmVolitant_Express.bitbtnAdminHelpClick(Sender: TObject);
+begin
+// Admin help messages
+ShowMessage('-Click on button on left pane of page to go to your desired admin page'+#13+'-Disabled buttons are admin pages that you don''t have permission to.'+#13+'-Remember the admin training (That you definitely had) to use all the parts of the admin pages ;)');
+end;
+
+procedure TfrmVolitant_Express.BitBtnBackHomeFromOrderHistoryClick(
+  Sender: TObject);
+begin
+// Go back to the Home page from the order history page
+tsHistory.TabVisible := False;
+tsHome.TabVisible := True ;
+end;
+
 procedure TfrmVolitant_Express.BitBtnBackHomeFromOrdersClick(Sender: TObject);
 begin
 // Go back to the home page from the place an order page
-tsPOrder.TabVisible := False ;
-tsHome.TabVisible := True ;
+    // Warn user about going back
+  if BitBtnPrintOrderSlip.Enabled = True then
+  begin
+     if MessageDlg('Going back to the HOME after Placing the order will clear the details on the Current page and prevent any printing from hapening.' + #13+ 'Are you sure that you would like to continue?' , TMsgDlgType.mtConfirmation, [mbYes, mbNo], 0) = mrNo  then
+     begin
+          ShowMessage('You will be kept on the current page') ;
+          exit;
+     end;
+  end;
+        tsPOrder.TabVisible := False ;
+       BitBtnPrintOrderSlip.Enabled := False;
+       tsPlaceOrder.TabVisible := True;
+        tsHome.TabVisible := True ;
 end;
 
 procedure TfrmVolitant_Express.BitBtnBackToPlaceOrderPageClick(Sender: TObject);
 begin
 // Go back to the place an order page
-tsOrderSummary.TabVisible := False ;
-tsPlaceOrder.TabVisible := true;
+  // Warn user about going back
+  if BitBtnPrintOrderSlip.Enabled = True then
+  begin
+     if MessageDlg('Going back to the previous page after Placing the order will clear the details on the Current page and prevent any printing from hapening.' + #13+ 'Are you sure that you would like to continue?' , TMsgDlgType.mtConfirmation, [mbYes, mbNo], 0) = mrNo  then
+     begin
+        ShowMessage('You will be kept on the current page') ;
+        exit;
+     end;
+  end;
+        tsOrderSummary.TabVisible := False ;
+       BitBtnPrintOrderSlip.Enabled := False;
+        tsPlaceOrder.TabVisible := True ;
 end;
 
 procedure TfrmVolitant_Express.BitBtnBackTOWelcomeFromVidClick(Sender: TObject);
@@ -609,6 +675,12 @@ mpIntroVideo.Stop;     // Stop the video
 // Change pages
 tsIntroVideo.TabVisible := false;
 tsWelcome.TabVisible:= True ;
+end;
+
+procedure TfrmVolitant_Express.BitBtnManageCompanyHelpClick(Sender: TObject);
+begin
+// Manage Company by user help page
+ShowMessage('-All of your current company details will be entered in the components'+#13+'-Enter/ Replace the current prefrences/ info with the new ones'+#13+'* You can only delete your account in certain curcumstances, such as having no active/ unpaid orders'+#13+'-Press the "Update Company Info" button to finalize the update of your account'+#13+ '** Deletion of account cannot be undone') ;
 end;
 
 procedure TfrmVolitant_Express.BitBtnNextToConfirmClick(Sender: TObject);
@@ -694,6 +766,20 @@ begin
 
 end;
 
+procedure TfrmVolitant_Express.BitBtnOrderHelpClick(Sender: TObject);
+begin
+// Place order help
+ShowMessage('-Enter all the details on the firt page that you see.'+#13+'-After entering all the info, press the "Go To Order Summary" button'+#13+'-On the second  page (The Order Confirmation page) check that all details are correct.'+#13+'-Press the place order button and clik "Yes" on the dialogue that pops up'+#13+'-Feel free to print the order slip AFTER placing the order'+#13+'-Go to the payment page to pay for the order and prepare it for transport'+#13+'* To "Delay" an order, you must cancel it and then add a new order'+#13+'*The plane finding algorithem gets the plane that can transport your order AND is available- thus play around on shorter and smaller transporting jobs if'+' the price for the plane seems hight as we might only have a large and expensive plain available at that time, but we might have a smaller and cheaper plane available at another time slot');
+end;
+
+procedure TfrmVolitant_Express.BitBtnOrderHistoryHelpClick(Sender: TObject);
+begin
+// Order history help button
+ShowMessage('-Select an order from the list to get more info about the order'+#13+'-If the order is in the "Waiting for Pickup" phase, it can be canceled.'+#13+'*Canceled order cannot be undone'+#13+'*To "Delay" and order, you must Cancel it and then place a new order. Canceled order''s will be refunded fully');
+
+// Add to change the pickup, cancel the order and place a new order
+end;
+
 procedure TfrmVolitant_Express.BitBtnPayClick(Sender: TObject);
 var
   sLine, sCardNumber, sPaymentConfirmation : string ;
@@ -703,6 +789,7 @@ var
 begin
 // Pay the order
   redPaymentConfirm.Clear ;
+  btnPrintPaymentConfirmation.Enabled := False ;
   //Validation
     // Ensure that a valid order to pay is selected
     if lstPayment.ItemIndex = -1 then
@@ -764,8 +851,8 @@ begin
                   // Get email addres
                   qrySQL.SQL.Text := 'Select Email from tblCompany where CompanyID =' + IntToStr(iID)  ;
                    qrySQL.Open ;
-                  SendEmail(qrySQL['Email'], sPaymentConfirmation) ;
-              ShowMessage('Transportation payment made successfully for order '+ IntToStr(iOrderID) );
+                   btnPrintPaymentConfirmation.Enabled := True ;
+                  SendEmail(qrySQL['Email'], sPaymentConfirmation) ; // Email confirmation
             end
             else
             ShowMessage('Transport payment cancelled.') ;
@@ -774,31 +861,62 @@ begin
       end;
 end;
 
+procedure TfrmVolitant_Express.BitBtnPaymentHelpClick(Sender: TObject);
+begin
+// Payment page help
+ShowMessage('-Select order from the list to pay. Newest orders will be to the botom of the list'+#13+'-Click the "Pay Selected Order" Button to start the payment'+#13+'-Enter your 16 digit card number'+#13+'-Press the "YES" button to confirm that you would like to continue with the payment'+#13+'-Feel free to print the payment slip at the botton of the page');
+end;
+
 procedure TfrmVolitant_Express.BitBtnPlaceOrderClick(Sender: TObject);
+var
+  tFile : textFile;
 begin
 // Place an order
-
    if MessageDlg('I hereby confirm that my order is correct and ready to be submitted' , TMsgDlgType.mtConfirmation, [mbYes, mbNo], 0) = mrYes  then
    begin  // If user confirms
-
-
-
+    // Write new order to the db
+      tblOrders.Append ;
+        tblOrders['CompanyID'] := iID;
+        tblOrders['ItemID'] := iItemID ;
+        tblOrders['Weight'] :=  rWeight;
+        tblOrders['Order Date'] := Today;
+        tblOrders['Base Cost'] := rBaseCost;
+        tblOrders['Pickup Country'] := cmbSelectPickupCountry.Items[cmbSelectPickupCountry.ItemIndex] ;
+        tblOrders['Drop of Country'] := cmbSelectDropOffCountry.Items[cmbSelectDropOffCountry.ItemIndex];
+        tblOrders['Pickup Date']  := dtPickupDate;
+        tblOrders['E/D Date'] :=  dtDropOffDate ;
+        tblOrders['Status'] := 'Waiting for Pickup' ;
+        tblOrders['PlaneID'] := iPlaneID;
+        tblOrders['Distance'] := RoundTo(objDistance.GetDistance, -2) ;
+        tblOrders['Paid'] := False;
+      tblOrders.Post ;
     // Add order ID to the richedit after appending to the database
-
-            // Write to History log the prices of the order at that time
-
+      redOrderSummary.SelAttributes.Color := clPurple ;
+      redOrderSummary.Lines.Add('Your Order ID: ' + IntToStr(tblOrders['OrderID']) ) ;
+      // Write to History log the prices of the order at that time
+        AssignFile(tFile, 'History_Log'+inttostr(tblOrders['OrderID']) + '.txt');
+        Rewrite(tFile) ;
+        Writeln(tFile, FloatToStr(rItemCostNow) ) ;
+        Writeln(tFile, FloatToStr(rFuelCostNow) ) ;
+        CloseFile(tFile)  ;
       // Add some sort of a method that prevents the order slip from being easily duplicated
        redOrderSummary.Lines.Add(#13+#13+Prevent_Duplication );
         // Enable print button
         BitBtnPrintOrderSlip.Enabled := True ;
         // After order is completed, clear the input fields on order placement page
-
-
+        cmbCategory.ItemIndex := 0 ;
+        cmbCategoryChange(cmbCategory) ;
+        sedAddOrderKg.Value := 1;
+        sedOrderGrams.Value := 0;
+        cmbSelectPickupCountry.ItemIndex := -1;
+        cmbSelectDropOffCountry.ItemIndex := -1;
+       cmbSelectPickupCountryChange(cmbSelectPickupCountry);
+       cmbSelectDropOffCountryChange(cmbSelectDropOffCountry) ;
         // Disable Place order button
-
-        // Go to the pay for order page and select the new order to be paid
-          // Ask if user wants to go to the payment page
-          // Make a button visible to go to the payment page
+        BitBtnPlaceOrder.Enabled := False;
+        // Informative messages for the user
+       ShowMessage('The order has been places successfully.'+ #13+ 'Feel free to print the order''s slip' + #13+ 'Please ensure that order packaging is compact so that it will fit into the plane') ;
+       ShowMessage('Please go to the Manage Payments Page FROM THE HOME PAGE to pay for the order. It should be the last order tp pay on the list.' +#13+ '* Unpaid orders will not be processed' );
    end
    else
    begin // If the now button is pressed
@@ -811,8 +929,14 @@ begin
   // Print the Orders slip
   if pdPrint.Execute  then
         begin
-            redOrderSummary.Print('Order Slip');
+          redOrderSummary.Print('Order Slip');
         end;
+end;
+
+procedure TfrmVolitant_Express.bitbtnRegHelpClick(Sender: TObject);
+begin
+// Register page help button
+ShowMessage('-Fill in the fields and go thru the entire process by clickign next.'+#13+'-Default hours is the amount of hours automatically added to the current date to get your default pickup date'+ #13+ '-Please take note of your generated username on the last page'+ #13+'-Press the small box on the confirmation page to confirm that all your enterd data is true and accurate'+#13+'-Contact: 10867@hsrandburg.co.za' );
 end;
 
 procedure TfrmVolitant_Express.BitBtnRegisterClick(Sender: TObject);
@@ -823,14 +947,12 @@ var
   iDefaultHours : integer ;
 begin
 // register the company
-
   //Confirmation
   if chkConfirmRegInfo.Checked = false then
   begin
     ShowMessage('You need to confirm that the provided info is true!');
     Exit;
   end;
-
 
   // Read values into variables
   sCName := edtCName.Text ;
@@ -869,9 +991,8 @@ begin
   tblCompany['Newsletter'] := bNewsLetter ;
   tblCompany['Establishment Date'] := dDateEnstablished ;
   tblCompany['Defualt Hours'] := iDefaultHours ;
-
   tblCompany.Post ;
-
+  iID := tblCompany['CompanyID'] ;
 // Go to the Home page
 tsRegister.TabVisible := false;
 tsHome.TabVisible := True ;
@@ -1281,9 +1402,14 @@ begin
 end;
 
 procedure TfrmVolitant_Express.btnAboutUsClick(Sender: TObject);
+var
+  sString : string;
 begin
-// Gives some background information about the company
-// showmess
+// Gives some background information about the company- About us message
+  sString := 'Volitant Express- Fast transport around the world'+#13 ;
+  sString := sString + 'It all started in 2025 when Robert van der Spoel had the idea to build a fast paced transporting system for orders around the world. The program was then transformed into the program that We use today.' +#13;
+  sString := sString + 'Ship your order from anywhere in the word' + #13+ 'Contact: 10867@hsrandburg.co.za';
+  ShowMessage(sString);
 end;
 
 procedure TfrmVolitant_Express.btnAddCategotyClick(Sender: TObject);
@@ -1753,7 +1879,7 @@ end;
 
 procedure TfrmVolitant_Express.btnGalleryClick(Sender:  TObject);   // Dynamic Component
 const imgWidth = 480;
-const imgHeight = 250;
+      imgHeight = 250;
 var
   i, iLeft, iTop, iPerLineCount  : integer;
   bOne : boolean;
@@ -1869,7 +1995,6 @@ begin
 // go to anotherr tab sheet
 tsWelcome.TabVisible := False;
 tsIntroVideo.TabVisible := true ;
-
   mpIntroVideo.FileName := 'Program Media\Intro Video_5.wmv';  // Set the video file path
   mpIntroVideo.Display := pnlVideo;  // Assign the panel as the display window
   mpIntroVideo.Open;  // Open the video file
@@ -2376,9 +2501,8 @@ end;
 
 procedure TfrmVolitant_Express.btnOrderToSummaryClick(Sender: TObject);
 var
-  rBaseCost, rLatPickup, rLongPickup, rLatDropOff, rLongDropOff, rWeight,   rHoursTripLength, rTotalCost : real;
-  I, iPlaneID: Integer;
-  dtPickupDate, dtDropOffDate : TDateTime ;
+ rLatPickup, rLongPickup, rLatDropOff, rLongDropOff, rHoursTripLength, rTotalCost : real;
+  I: Integer;
   sTrip: string;
 begin
 // Go to the order summary tab page
@@ -2419,6 +2543,12 @@ begin
   begin
     ShowMessage('Your selected pickup date and time must be atleast 24 hours into the future from the Current Date and time');
     exit ;
+  end;
+  // Ensure that order date and time is not in the past
+  if dtPickupDate <= Now  then
+  begin
+    ShowMessage('Order''s pickup date must be in the furure') ;
+    exit;
   end;
     // Get the coordinates for the countries
     for I := 1 to iCountryCount do
@@ -2464,18 +2594,22 @@ begin
     // Get the plane info for the selected plain- again :(
     qrySQL.SQL.Text := 'Select * from tblPlanes where PlaneID = ' + IntToStr(iPlaneID) ;
     qrySQL.Open ;
+    rFuelCostNow := qrySQL['FuelCost'] ;
     // Get the dropOff DateTime
     rHoursTripLength := objDistance.GetDistance / qrySQL['Cruising Speed'];
     dtDropOffDate := dtPickupDate + (rHoursTripLength / 24) ;
     // Calc the total cost of the order
     rTotalCost := rBaseCost ;   // Set the total cost to the base cost of the order
-    rTotalCost := rTotalCost + qrySQL['FuelCost'] * rHoursTripLength ; // Add the fuel cost price to the total price
+    rTotalCost := rTotalCost + rFuelCostNow * rHoursTripLength ; // Add the fuel cost price to the total price
     // Get the item transport cost per kg
     qryGrid.SQL.Text := 'Select * from tblItems where [Item Name] = ' + QuotedStr(lstSelectTransportItem.Items[lstSelectTransportItem.ItemIndex]);
     qryGrid.Open ;
-    rTotalCost := rTotalCost + rWeight *  qryGrid['T_Cost/kg']  ;
+    iItemID := qryGrid['ItemID'] ;
+    rItemCostNow := qryGrid['T_Cost/kg'] ;
+    rTotalCost := rTotalCost + rWeight *  rItemCostNow  ;
     // Write to the summary page
     redOrderSummary.Clear ;
+    BitBtnPrintOrderSlip.Enabled := False;
     redOrderSummary.SelAttributes.Size := 22;
      redOrderSummary.SelAttributes.Color := clPurple ;
       redOrderSummary.Lines.Add('Order Summary') ;
@@ -2489,8 +2623,9 @@ begin
            redOrderSummary.Lines.Add(sTrip) ;
            redOrderSummary.SelAttributes.Color := clRed ;
        redOrderSummary.Lines.Add('Total Cost: '+ FloatToStrF(rTotalCost, ffCurrency , 10,2) );
-
 // Change Tab sheets to the summary page
+  BitBtnPrintOrderSlip.Enabled := False;
+     BitBtnPlaceOrder.Enabled := True ;
 tsPlaceOrder.TabVisible := False ;
 tsOrderSummary.TabVisible := true;
 end;
@@ -2512,6 +2647,14 @@ begin
 // Get the DropOff Counties that are used more than once, and which orders are not cancelled and have been paid
 qryGrid.SQL.Text :='Select [Drop of Country], Count(*) as [Times Dropped Off] from tblOrders where not (Status = "Canceled") and (Paid = True) Group By [Drop of Country] Having Count(*) > 1';
 qryGrid.Open ;
+end;
+
+procedure TfrmVolitant_Express.btnPrintPaymentConfirmationClick(
+  Sender: TObject);
+begin
+// Print the payment confirmation slips as payment confirmation
+  if pdPrint.Execute()  then
+  redPaymentConfirm.Print('Payment Confirmation');
 end;
 
 procedure TfrmVolitant_Express.btnRegBackClick(Sender: TObject);
@@ -3033,10 +3176,29 @@ begin
 end;
 
 procedure TfrmVolitant_Express.btnTOhistoryClick(Sender: TObject);
+var
+  sPaid : string;
 begin
 // Go to the page to order history page from the home page
 tsHome.TabVisible := False;
 tsHistory.TabVisible := True ;
+  lstOrderHistory.Clear ;
+  // Load the companies previous orders
+  tblOrders.First ;
+  while not tblOrders.eof do
+  begin
+    if tblOrders['CompanyID'] = iID then  // Check for orders under the companmy
+    begin
+      // Set the payment part of the string
+      if tblOrders['Paid'] then
+      sPaid := 'Paid : YES'
+      else
+      sPaid := 'Paid : NO' ;
+
+      lstOrderHistory.Items.Add(IntToStr(tblOrders['OrderID']) +'--'+ tblOrders['Status'] + ' -- ' +sPaid ) ;
+    end;
+  tblOrders.Next ;
+  end;
 end;
 
 procedure TfrmVolitant_Express.btnTOorderClick(Sender: TObject);
@@ -3177,6 +3339,7 @@ begin
 
 tsHome.TabVisible := False;
 tsPayment.TabVisible := True ;
+btnPrintPaymentConfirmation.Enabled := False ;
 redPaymentConfirm.Clear ;
   if not bPayFound then  //  display a message if no payments to be made were found
   ShowMessage('Lucky you, all your order are paid, or, unlucky us; youve not made an order yet :)') ;
@@ -3292,6 +3455,66 @@ begin
   ShowMessage('Login label theme updated');
 end;
 
+procedure TfrmVolitant_Express.btnUpdateOrderHistoryClick(Sender: TObject);
+var
+  bOrderFound : boolean;
+  sRefund : string;
+begin
+// Update the selected order as a user
+  // Validation
+    // Check that a valid order has been selected
+     if lstOrderHistory.ItemIndex = -1 then
+    begin
+      ShowMessage('Please select a valid order')  ;
+      exit;
+    end;
+      tblOrders.First ;
+  bOrderFound := False;
+  while not tblOrders.Eof and not (bOrderFound) do    // Search for a matching order
+  begin
+    if tblOrders['OrderID']= strtoint(Copy(lstOrderHistory.Items[lstOrderHistory.ItemIndex], 1, Pos('--', lstOrderHistory.Items[lstOrderHistory.ItemIndex])-1))  then
+    begin   // If a matching order was found
+      bOrderFound := True ;
+
+          if (tblOrders['Status'] = 'Waiting for Pickup') then // If you can change the status of the order
+          begin
+            if MessageDlg('Are you sure you would like to cancel your order with Id ' + IntToStr(tblOrders['OrderID']) + #13+ 'Order Cancelation cannot be undone.' ,TMsgDlgType.mtConfirmation, [mbYes, mbNo], 0) =mrYes    then
+            begin // If user confirms
+              // Get the refund messages
+              if tblOrders['Paid'] = True then
+              sRefund := 'Any money you paid has been refunded'
+              else
+              sRefund := '' ;
+              // Update the order in the db
+              tblOrders.Edit ;
+                tblOrders['Status'] := 'Canceled'  ;
+                tblOrders['Paid'] := False;
+              tblOrders.Post ;
+              lstOrderHistory.Items[lstOrderHistory.ItemIndex] := IntToStr(tblOrders['OrderID']) +'--'+ tblOrders['Status'] + ' -- ' + 'Paid : NO' ;
+              ShowMessage('Order Canceled successfully'+ #13+ sRefund ); // Confirmation
+            end
+            else
+            begin // If user cancels
+              ShowMessage('Order Cancellation Cancelled');
+              exit ;
+            end;
+          end
+          else
+           if not (tblOrders['Status'] = 'Canceled') then // Only if the order is not already cancelled
+          begin // If you cant change the status of your order
+             ShowMessage('You can''t change the status for your selected order')  ;
+             exit;
+          end
+          else
+          begin  // If the status is already set to "Canceled"
+            ShowMessage('Canceled order stayed the same');
+            exit;
+          end;
+    end;
+    tblOrders.Next ;
+  end;
+end;
+
 procedure TfrmVolitant_Express.btnUpdateOrderLabelThemeClick(Sender: TObject);
 begin
 // Update the ORders lable color theme
@@ -3323,14 +3546,14 @@ begin
       ShowMessage('Ensure that a status has been selected') ;
       exit ;
     end;
-    // Ensure that updated date is in the future, exepst if order is being changed to Canceled
+    // Ensure that updated date is in the future, only neccesaty when status = 'Waiting for Pickup'
       sUpdatedStatus := rgpOrderStatus.Items[rgpOrderStatus.ItemIndex] ; // Get the New status
-    dtPickup := dpUpdatePickupDate.Date + tpUpdatePickupTime.Time ; // Create the time variable
-    if not (dtPickup > Now) and not (sUpdatedStatus = 'Canceled') then
+  {  dtPickup := dpUpdatePickupDate.Date + tpUpdatePickupTime.Time ; // Create the time variable
+    if not (dtPickup > Now) and (sUpdatedStatus = 'Waiting for Pickup') then
     begin
       ShowMessage('Updated Date and Time must be in the future') ;
       exit;
-    end;
+    end;     }
   // Get the order ID
   iOrderID := strtoint(Copy(lstSelectOrderAdmin.Items[lstSelectOrderAdmin.ItemIndex], 1, Pos('--', lstSelectOrderAdmin.Items[lstSelectOrderAdmin.ItemIndex])-1));
   bOrderFound := False ;
@@ -3370,24 +3593,24 @@ begin
             SetOrderStatusItemIndex(tblOrders['Status']); // Set the order status radio group tp the right itemIndex
           exit;
         end;
-        // Ensure that if a new time is entered, that it is more than a day away from the current date and time
-        if not (tblOrders['Pickup Date'] = dtPickup) then
+       { // Ensure that if a new time is entered, that it is more than a day away from the current date and time
+        if not (tblOrders['Pickup Date'] = dtPickup)  then
         begin
-          if ((dtPickup - Now) <= 1) {and not (sUpdatedStatus = 'Canceled')} then
+          if ((dtPickup - Now) <= 1)  then
           begin
             ShowMessage('New date should be more than a day away from the current date');
               SetOrderStatusItemIndex(tblOrders['Status']); // Set the order status radio group tp the right itemIndex
             exit;
           end;
-        end;
-       // Ensure that the status is not changed to Waiting for Pickup unless from Delayed
-       if (sUpdatedStatus = 'Waiting for Pickup') and not (tblOrders['Status'] = 'Delayed') and not (tblOrders['Status'] = 'Waiting for Pickup') then
+        end;  }
+       // Ensure that the status is not changed to Waiting for Pickup from another status
+       if (sUpdatedStatus = 'Waiting for Pickup')  and not (tblOrders['Status'] = 'Waiting for Pickup') then
        begin
-         ShowMessage('You can''t give an order a ''Waiting for Pickup'' status if it is in any other status than the ''Delayed'' status');
+         ShowMessage('You can''t give an order a ''Waiting for Pickup'' status from any other status status');
            SetOrderStatusItemIndex(tblOrders['Status']); // Set the order status radio group tp the right itemIndex
          exit;
        end;
-      // Ensure that account is not suspended- suspended account will not be allowed to have orders changed from waiting to pickup or Delayed to In Transit
+      // Ensure that account is not suspended- suspended account will not be allowed to have orders changed from waiting to pickup  to In Transit
       bCompanyFound := False;
       tblCompany.First ;
       while not tblCompany.Eof and (bCompanyFound = False) do // Search for the company of the order
@@ -3396,10 +3619,10 @@ begin
         begin
           bCompanyFound := True;
            sEmail := tblCompany['Email'] ;// Get the companies email
-            // If an in transit order is changed to delayed, ensure that a new date in the furure, at least a week away is selected
+        {    // If an in transit order is changed to delayed, ensure that a new date in the furure, at least a week away is selected
            if (sUpdatedStatus = 'Delayed') and (tblOrders['Status'] = 'In Transit') then
            begin
-             // Ensure that a new date for the order is selected, more than 7 days away  \
+             // Ensure that a new date for the order is selected, more than 7 days away
               if ((dtPickup - Now) <= 7) then
               begin
                 ShowMessage('New date for the order should be more than a week away from the current date');
@@ -3407,13 +3630,12 @@ begin
                 exit;
               end;
              SendEmail(tblCompany['Email'], 'Order with ID ' + IntToStr(iOrderID) + 'has been delayed while in transit.'+#13+' A new PICKUP DATE has been set to '+DateTimeToStr(dtPickup) +#13+'. Login to manage the order and put it in the ''Waiting for delivery stage''' );
-           end;
-
+           end;   }
           if tblCompany['suspended'] = True then   // if the company is suspended
           begin
             if (tblOrders['Status'] = 'Waiting for Pickup') and (sUpdatedStatus = 'In Transit') then  // A suspended companies many not put orders into transit
             begin
-                ShowMessage('Suspended account order may not be put into transit'+ #13+'Recommended: Change order to Delayed');
+                ShowMessage('Suspended account order may not be put into transit'+ #13+'Recommended: Cancel Order');
                   SetOrderStatusItemIndex(tblOrders['Status']); // Set the order status radio group tp the right itemIndex
                 exit;
             end;
@@ -3427,7 +3649,6 @@ begin
         dtEDDropoff := dtPickup + rTripLength ;
         // Write the updated order to the db
         tblOrders.Edit;
-
           // Refund the money of the order if the user has paid for it in the past
          if (sUpdatedStatus = 'Canceled') and not (tblOrders['Status'] = 'Canceled') and (tblOrders['Paid'] = True) then
          begin
@@ -3435,8 +3656,8 @@ begin
           ShowMessage('Company has been refunded for the Now Canceled order');
           SendEmail(sEmail, 'Your order with ID '+ IntToStr(tblOrders['OrderID']) + ' has been canceled. The money you paid has been refunded' ) ;
          end;
-         tblOrders['Pickup Date'] := dtPickup ;
-        tblOrders['E/D Date'] := dtEDDropoff ;
+        { tblOrders['Pickup Date'] := dtPickup ;
+         tblOrders['E/D Date'] := dtEDDropoff ;  }
         tblOrders['Status'] := sUpdatedStatus ;
 
         tblOrders.Post ;
@@ -3451,9 +3672,9 @@ begin
       end;
       // Clear compoents
       rgpOrderStatus.ItemIndex := -1;
-      dpUpdatePickupDate.Date := Today ;
-      tpUpdatePickupTime.Time := Time;
-
+     { dpUpdatePickupDate.Date := Today ;
+      tpUpdatePickupTime.Time := Time;   }
+     lstSelectOrderAdmin.ItemIndex := -1 ;
       ShowMessage('Order Updated Successfully!');
     end;
       tblOrders.next;
@@ -3587,11 +3808,6 @@ iID := 7;
 
  sPrevent_Copy := Prevent_Duplication ;
        redOrderSummary.Lines.Add(Prevent_Duplication );
-end;
-
-procedure TfrmVolitant_Express.Button2Click(Sender: TObject);
-begin
-SendEmail('robertvdspoel2007@gmail.com', 'Toets van Delpi email sending') ;
 end;
 
 procedure TfrmVolitant_Express.chkUserDeleteAcoountClick(Sender: TObject);
@@ -3787,7 +4003,7 @@ begin
       begin
         rBaseCost := rBaseCost * (9/10);
       end;
-
+      rBaseCost := rBaseCost + WeatherCosts ; // Add extra costs due to weather conditions
     Result := RoundTO(rBaseCost, -2) ; // return the base cost value
 end;
 
@@ -4056,15 +4272,21 @@ var
   rKeep : real;
 begin
 // Form Acticvate
-iCountryCount := 0 ;
-iID := 0 ;
+  // Set the variables
+  iCountryCount := 0 ;
+  iID := 0 ;
+  iPlaneID := 0;
+  iPlaneID := 0;
+  rBaseCost := 1;
+  rWeight := 1;
+  rItemCostNow := 1;
+  rFuelCostNow := 1;
+  iDynamicRandom := 0;
 // Set the admin company controll buttons
 btnDeleteCompanyAdmin.Enabled := False;
 chkSuspendAccount.Enabled := False;
  btnUpdateSuspension.Enabled := False;
-
 // array population
-
     // Populate the arrays containing the countries info
     if not FileExists('Country_Coordinates.txt')  then
     begin
@@ -4100,7 +4322,6 @@ chkSuspendAccount.Enabled := False;
 
       CloseFile(tFile) ;
     end;
-
     // Sort the country arrays alpabetically from A to Z
     for I := 1 to iCountryCount -1 do
       for k := I+1 to iCountryCount do
@@ -4151,7 +4372,6 @@ chkSuspendAccount.Enabled := False;
 
            Readln(tFile, arrSpecialCharacters[iSpecialCharacterCount] ) ;
         end;
-       
         CloseFile(tFile) ;
       end;
 
@@ -4187,12 +4407,10 @@ chkSuspendAccount.Enabled := False;
   qrySQL.Connection := conDB ;
   dsrSQL.DataSet := qrySQL ;
   dbgSQL_admin.DataSource := dsrSQL ;
-
   // Grid Query Connection
   qryGrid.Connection := conDB ;
   dsrGrid.DataSet := qryGrid;
   dbgGridDisplay.DataSource := dsrGrid ; // Link to the dbg grid
-
   // tblCompany    DO this for every table
   tblCompany.Connection := conDB ;
   tblCompany.TableName := 'tblCompany';
@@ -4231,15 +4449,20 @@ begin
   // Set the program to open  on the middle of the screen. depending on screen resolution
   frmVolitant_Express.Left := Round(Screen.Width /2) - Round(frmVolitant_Express.Width / 2) ;
   frmVolitant_Express.Top :=  Round(Screen.HEight / 2) - Round(frmVolitant_Express.Height / 2)  ;
-
+  Application.Title := 'Volitant Express';   // Change the title that will be used in say showmessages
 // Set up the tab sheets
 {
 tsRegister.TabVisible := False;
 tsLogin.TabVisible := False;
 tsIntroVideo.TabVisible := False;
 tsGallery.TabVisible := False;
-}
- {                              // Dont add the sum page to list, will cause errors due to activepage.tabvisible
+tsAdmin.TabVisible := False;
+tsHome.TabVisible := False;
+tsPayment.TabVisible := False;
+tsPOrder.TabVisible := False;
+tsManageCompany.TabVisible := False;
+tsHistory.TabVisible := False;
+                               // Dont add the sum page to list, will cause errors due to activepage.tabvisible
   tsItemsAdmin.TabVisible := False;
   tsPlanesAdmin.TabVisible := False;
   tsOrdersAdmin.TabVisible := False;
@@ -4257,7 +4480,6 @@ tsGallery.TabVisible := False;
   // Set sonme starting variablles
   bTimer := False;
   iImageCount := 0;
-
   // Set the programs color themes
     // Set the forms color
     if FileExists('Themes/formtheme.txt')  then  // Only load if the file exists else just leave as normal
@@ -4313,6 +4535,40 @@ tsGallery.TabVisible := False;
       lblOrder.Font.Color := StrToInt(sColor);
       CloseFile(tFile);
     end;
+    // Add programs tabstops
+      //Group Boxes
+      grbChooseItems.TabOrder := 0;
+      grbChooseOrderWeight.TabOrder := 1;
+      grbSelectOrderCountries.TabOrder := 2;
+      grbChoosePickupTime.TabOrder := 3;
+      btnOrderToSummary.TabOrder := 4;
+      // Register page
+        // Company details
+        edtCName.TabOrder := 0;
+        chkGovernment.TabOrder := 1;
+        cmbCountryBased.TabOrder := 2;
+        edtCreatePassword.TabOrder := 3;
+        edtConfirmPass.TabOrder := 4;
+        BitBtnTOcInfo.TabOrder := 5;
+        // Contact info
+        edtRegEmail.TabOrder := 0;
+        chkNewsLetter.TabOrder := 1;
+        // Last info
+        dtpEstablishedDate.TabOrder := 0;
+        sedRegDefaultHours.TabOrder := 1;
+    // Place order
+      // Choose items
+      cmbCategory.TabOrder := 0;
+      lstSelectTransportItem.TabOrder := 1;
+      // Order Weight
+      sedAddOrderKg.TabOrder := 0;
+      sedOrderGrams.TabOrder := 1;
+      // Order Countries
+      cmbSelectPickupCountry.TabOrder := 0;
+      cmbSelectDropOffCountry.TabOrder := 1;
+      // Pickup time
+      dtpChoosePickupDate.TabOrder := 0;
+      tpChoosePickupTime.TabOrder := 1;
 end;
 
 procedure TfrmVolitant_Express.FormResize(Sender: TObject);
@@ -4346,10 +4602,16 @@ end;
 procedure TfrmVolitant_Express.imgDynamicOnclick;
 var
   sString : string;
+  iGen : integer;
 begin
 // Onclick for the dynamic images. Display something positive stat wise about volitant express
+  // Check that the same messages does not display 2 times in a row
+    repeat
+       igen :=   RandomRange(1,6) ;
+    until not (iGen = iDynamicRandom);
+    iDynamicRandom := iGen;
 
-  case RandomRange(1,6)  of      // When an image is clicked, a random message with stats wil be displayed
+  case iGen of      // When an image is clicked, a random message with stats wil be displayed
   1: begin     // Count how many successfull orders has taken place
       qrySQL.SQL.Text := 'Select Count(*) as Result from tblOrders where status = "Delivered"';
       qrySQL.open;
@@ -4418,6 +4680,74 @@ begin
    tblPlanes.Next ;
    end;
 
+end;
+
+procedure TfrmVolitant_Express.lstOrderHistoryClick(Sender: TObject);
+var
+  I: Integer;
+  bOrderFound, bItemFound, bPlaneFound : boolean;
+  sInfo : string ;
+begin
+// Onlick for orders history by user
+  // validation
+  // Ensure than an order was selected
+  if lstOrderHistory.ItemIndex = -1 then
+  begin
+    ShowMessage('Please select a valid order')  ;
+    exit;
+  end;
+
+  // When clicking on an order in the lst box= Show a message that gives more info about the order
+  tblOrders.First ;
+  bOrderFound := False;
+  while not tblOrders.Eof and not (bOrderFound) do
+  begin
+    if tblOrders['OrderID']= strtoint(Copy(lstOrderHistory.Items[lstOrderHistory.ItemIndex], 1, Pos('--', lstOrderHistory.Items[lstOrderHistory.ItemIndex])-1))  then
+    begin
+      bOrderFound := True ;
+        sInfo := 'Order Info:' +#13+
+        'Weight: ' + FloatToStr(tblOrders['Weight']) + ' kg' + #13+
+                'Order Placed Date: ' + DateToStr(tblOrders['Order Date']) + #13+
+                'Pickup Country: ' + tblOrders['Pickup Country'] + #13+
+                'Drop of Country: ' + tblOrders['Drop of Country'] + #13+
+                'Pickup Date: ' + DateTimeToStr(tblOrders['Pickup Date']) +#13+
+                'Estimated Drop of Date: ' + DateTimeToStr(tblOrders['E/D Date'])+ #13+
+                'Distance: ' + FloatToStr(tblOrders['Distance']) + ' km' + #13;
+          // Get if the order has been paid
+          if tblOrders['Paid'] then
+          sInfo := sInfo + 'Paid: YES'  + #13
+          else
+          sInfo := sInfo + 'PAID: NO' +#13;
+          // Get the item being used in the order
+          bItemFound := False;
+          tblItems.First ;
+          while not tblItems.eof and (bItemFound = FAlse)do    // Search for a matching item
+          begin
+            if tblItems['ItemID'] = tblOrders['ItemID'] then  // if a matching item was found
+            begin
+              bItemFound := True ;
+              sInfo := sInfo + 'Item: ' + tblItems['Item Name'] + #13;
+            end;
+            tblItems.Next ;
+          end;
+          // Get the plane being used in the order
+          bPlaneFound := False;
+          tblPlanes.First ;
+          while not tblPlanes.Eof and (bPlaneFound = False) do    // Search for a matching plane
+          begin
+            if tblPlanes['PlaneID'] = tblOrders['PlaneID'] then     // If a matching plane was found
+            begin
+              bPlaneFound := True ;
+              sInfo := sInfo + 'Plane: '+ tblPlanes['Plane Name']+ #13;
+            end;
+            tblPlanes.Next ;
+          end;
+          sInfo := sInfo + 'Total Cost: '+ FloatToStrF(CalcOrderPrice(tblOrders['OrderID']), ffCurrency , 10,2 );       // Display the orders total price
+       
+    end;
+    tblOrders.Next ;
+  end;
+  ShowMessage(sInfo) ;
 end;
 
 procedure TfrmVolitant_Express.lstPaymentClick(Sender: TObject);
@@ -4519,16 +4849,16 @@ begin
     begin
       bOrderFound := True ;
         // Load the current status of the order into radiogroup where it can be changed
-        for I := 0 to 4 do
+        for I := 0 to rgpOrderStatus.Items.Count -1 do
         begin
-          if rgpOrderStatus.Items[i] = tblOrders['Status']  then  // If the status that matches was found
+          if Uppercase(rgpOrderStatus.Items[i]) = Uppercase(tblOrders['Status'])  then  // If the status that matches was found
           rgpOrderStatus.ItemIndex := I;
         end;
         // Load the componets to update the date info
-        dpUpdatePickupDate.Date := DateOf(tblOrders['Pickup Date']);
-        tpUpdatePickupTime.Time := TimeOf(tblOrders['Pickup Date']) ;
+      {  dpUpdatePickupDate.Date := DateOf(tblOrders['Pickup Date']);
+        tpUpdatePickupTime.Time := TimeOf(tblOrders['Pickup Date']) ; }
         // Show more info of the order
-        sInfo := 'Order Info:' +#13+
+        sInfo := 'Order Info:' +#13+ 'Company ID : ' + IntToStr(tblOrders['CompanyID']) +#13+
         'Weight: ' + FloatToStr(tblOrders['Weight']) + ' kg' + #13+
                 'Order Placed Date: ' + DateToStr(tblOrders['Order Date']) + #13+
                 'Pickup Country: ' + tblOrders['Pickup Country'] + #13+
@@ -4565,6 +4895,7 @@ begin
             end;
             tblPlanes.Next ;
           end;
+          sInfo := sInfo + 'Total Cost: '+ FloatToStrF(CalcOrderPrice(tblOrders['OrderID']), ffCurrency , 10,2 );       // Display the orders total price
     end;
     tblOrders.Next ;
   end;
@@ -4906,6 +5237,13 @@ begin
         end;
    end;
     Result := True;
+end;
+
+function TfrmVolitant_Express.WeatherCosts: real;
+begin
+// Calc a + price based on the weather conditions in the flight
+  // Get theoretical weahter data- this is something that my PAT can't do
+  Result := RandomRange(100, 5000)/ RandomRange(3, 14); // this is simply done for the idea of weathe affecting the trip's price- this will be added to the base cost
 end;
 
 procedure TfrmVolitant_Express.WriteToFormTheme(pFileName: string;
