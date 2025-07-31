@@ -339,7 +339,6 @@ type
     chkUpdateGovernment: TCheckBox;
     chkUpdateNewsletter: TCheckBox;
     imgUpdateCountryBased: TImage;
-    Button1: TButton;
     lblSearchOrderByCID: TLabel;
     lblEnterOrderDetails: TLabel;
     grbSelectOrderCountries: TGroupBox;
@@ -397,7 +396,6 @@ type
     edtAdminPassword: TEdit;
     chkAddAdminAccount: TCheckBox;
     btnGroupOrdersByStatus: TButton;
-    Button2: TButton;
     btnSortCompanyTable: TButton;
     btnTopPickupC: TButton;
     btnPopularDropOffCounries: TButton;
@@ -502,7 +500,7 @@ type
     procedure BitBtnToHomeFromManageCompanyClick(Sender: TObject);
     procedure BitBtnUpdateCompanyInfoClick(Sender: TObject);
     procedure cmbUpdateCountryBasedChange(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
+    procedure btnTestClick(Sender: TObject);
     procedure lstSelectTransportItemClick(Sender: TObject);
     procedure cmbCategoryChange(Sender: TObject);
     procedure cmbSelectPickupCountryChange(Sender: TObject);
@@ -644,10 +642,20 @@ begin
           exit;
      end;
   end;
+      // Chanhe the tab sheets
         tsPOrder.TabVisible := False ;
        BitBtnPrintOrderSlip.Enabled := False;
        tsPlaceOrder.TabVisible := True;
         tsHome.TabVisible := True ;
+        // Clear the fiels
+             cmbCategory.ItemIndex := 0 ;
+        cmbCategoryChange(cmbCategory) ;
+        sedAddOrderKg.Value := 1;
+        sedOrderGrams.Value := 0;
+        cmbSelectPickupCountry.ItemIndex := -1;
+        cmbSelectDropOffCountry.ItemIndex := -1;
+       cmbSelectPickupCountryChange(cmbSelectPickupCountry);
+       cmbSelectDropOffCountryChange(cmbSelectDropOffCountry) ;
 end;
 
 procedure TfrmVolitant_Express.BitBtnBackToPlaceOrderPageClick(Sender: TObject);
@@ -723,7 +731,6 @@ begin
 
     // initialise the username class
     objUsername := TUsername.Create(edtCName.Text , cmbCountryBased.Items[cmbCountrybased.ItemIndex],dtpEstablishedDate.Date );
-
     sUsernameCreated := objUsername.ToString ; // Call the ToString Function
     edtGUsername.Text := sUsernameCreated ;
     
@@ -731,7 +738,7 @@ begin
     repeat
       bUsernameFound := False;
       tblCompany.First ;
-      while not tblCompany.eof do
+      while not tblCompany.eof and not bUsernameFound do
       begin
         if tblCompany['Username'] = sUsernameCreated then // Check for a duplicate username
         begin
@@ -740,7 +747,7 @@ begin
           sUsernameCreated := sUsernameCreated + IntToStr(RandomRange(1, 1000) ) ;   // Generate a new random number for after the undersocre
 
             objUsername.SetUsername(sUsernameCreated) ; // Update the username to the object
-            break; // exit the loop to save time
+          //  break; // exit the loop to save time
         end;
         tblCompany.Next ;
       end;
@@ -894,7 +901,7 @@ begin
       redOrderSummary.SelAttributes.Color := clPurple ;
       redOrderSummary.Lines.Add('Your Order ID: ' + IntToStr(tblOrders['OrderID']) ) ;
       // Write to History log the prices of the order at that time
-        AssignFile(tFile, 'History_Log'+inttostr(tblOrders['OrderID']) + '.txt');
+        AssignFile(tFile, 'History_Log/'+inttostr(tblOrders['OrderID']) + '.txt');
         Rewrite(tFile) ;
         Writeln(tFile, FloatToStr(rItemCostNow) ) ;
         Writeln(tFile, FloatToStr(rFuelCostNow) ) ;
@@ -993,6 +1000,21 @@ begin
   tblCompany['Defualt Hours'] := iDefaultHours ;
   tblCompany.Post ;
   iID := tblCompany['CompanyID'] ;
+  ShowMessage('Your Registration was successfull!.'+#13+'You will now be directed to the Home page') ;
+  // Clear all of the registration fields
+  edtCName.Clear ;
+  chkGovernment.Checked := False;
+  cmbCountryBased.ItemIndex :=-1;
+  edtCreatePassword.Clear ;
+  edtConfirmPass.Clear ;
+  imgBasedFlag.Visible := False;
+  edtRegEmail.Clear ;
+  chkNewsLetter.Checked := FAlse;
+  dtpEstablishedDate.Date := Today;
+  sedRegDefaultHours.Value := 24;
+  // Set the register page controll to the starting page
+  pgcRegister.ActivePage.TabVisible := False;
+  tsDetails.TabVisible := True;
 // Go to the Home page
 tsRegister.TabVisible := false;
 tsHome.TabVisible := True ;
@@ -1157,13 +1179,18 @@ begin
     iRandom := RandomRange(100, 1000);
     if Inputbox('Enter code to confirm deletion', 'Code: '+ IntToStr(iRandom), '' ) = IntToStr(iRandom)  then // Confirm that you want to delete the account by typing over the given code
     begin
-      if DeleteAccount(sedEnterCompanyID.Value) then  // If the Deletion was a success
+      if DeleteAccount(iID) then  // If the Deletion was a success
       begin
          ShowMessage('Account of your Company deleted successfully.'+#13+ 'You will now be logged out. Goodbye') ;
          // Take user of deleted account to the welcome page
          tsManageCompany.TabVisible := False;
          tsWelcome.TabVisible := True;
          Exit;
+      end
+      else
+      begin // if account could not be deleated
+        ShowMessage('No updates were made');
+        exit;
       end;
     end
     else
@@ -2069,7 +2096,7 @@ begin
       redCompanyOut.lines.Add('Government: ' + sGovernment) ; // Government agency
       redCompanyOut.lines.Add('Newsletter: '+ sNewsletter) ; // Newsletter
       redCompanyOut.lines.Add('Registration Date: ' + DateToStr(tblCompany['Regdate']) ) ;  // Reg date
-      redCompanyOut.lines.Add('Company Age: ' + IntToStr(YearsBetween(Date, tblCompany['Establishment Date']) ) ) ;// date of establishment
+      redCompanyOut.lines.Add('Company Age: ' + IntToStr(YearsBetween(Date, tblCompany['Establishment Date']) ) + ' years' ) ;// date of establishment
       redCompanyOut.lines.Add('Default Hours: ' + IntToStr(tblCompany['Defualt Hours']) ) ;  // The companies defualt hours
       redCompanyOut.Lines.Add('Suspended: '+ sSuspended ) ; // suspended
 
@@ -2121,6 +2148,10 @@ begin
            iID := tblCompany['CompanyID'] ; // Set the ID variable
            bAccountFound := True;
            ShowMessage('Logged in succesfully!');
+            // clear the login input fiels
+          chkLoginAsAdmin.Checked := False;
+          edtPasswordLogin.Clear ;
+          edtUsernameLogin.Clear ;
             // Change the tabsheets
            tsLogin.TabVisible := False;
            tsHome.TabVisible := True ;
@@ -2136,7 +2167,6 @@ begin
     if not bAccountFound  then
     begin
        Showmessage('Invalid Password or username!') ;
-       exit;
     end;
   end
   else
@@ -2151,6 +2181,10 @@ begin
         // Change tabsheets
         tsLogin.TabVisible := FAlse;
         tsAdmin.TabVisible := True ;
+         // clear the login input fiels
+        chkLoginAsAdmin.Checked := False;
+        edtPasswordLogin.Clear ;
+        edtUsernameLogin.Clear ;
         // Set the admin name feature
         lblAdmin.Caption := 'Welcome, ADMIN named '+ tblAdmins['Username'] ;
           // apply account permissions
@@ -2223,7 +2257,6 @@ begin
     if not bAccountFound then  // If admin login failed
     begin
       ShowMessage('Invalid login details to login as an admin') ;
-      exit;
     end;
   end;
 end;
@@ -2295,7 +2328,7 @@ tsHome.TabVisible := False;
     end;
     tblCompany.Next ;
   end;
-
+chkUserDeleteAcoount.Checked := False;
 tsManageCompany.TabVisible := true;
 end;
 
@@ -3055,6 +3088,12 @@ begin
     ShowMessage('Newsletters must be a min of 10 characters in length');
     exit;
   end;
+  // Ensure that email message is not to long
+  if Length(memNewsLetterMessage.Text) > 1000  then
+  begin
+    ShowMessage('Email message too long. May only contain up to 1000 characters') ;
+    Exit;
+  end;
 
   sEmails := '' ;
   tblCompany.First ;
@@ -3304,13 +3343,13 @@ procedure TfrmVolitant_Express.btnTOpaymentClick(Sender: TObject);
 var
   bPayFound, bItemFound : boolean;
   sItemName : string ;
+  iOrderIndexID : integer;
 begin
 // Go to the page to manage payments page from the home page
   lstPayment.Clear ;
   // Load all payable orders into the list box
   tblOrders.First ;
   bPayFound := False;
-  bItemFound := false;
   sItemName := '';
   while not tblOrders.Eof do  // Search for orders
   begin
@@ -3321,9 +3360,10 @@ begin
         bPayFound := True;
         // Get the item name of the order
         tblItems.First ;
+          bItemFound := false;
         while not tblItems.Eof and (bItemFound = false) do // Loop thru item table to find the item in the order
         begin
-          if tblItems['itemID'] = tblOrders['ItemID'] then // If a matching order is found
+          if tblItems['ItemID'] = tblOrders['ItemID'] then // If a matching order is found
           begin
             bItemFound := True ;
             sItemName := tblItems['Item Name'];
@@ -3331,7 +3371,9 @@ begin
 
           tblItems.Next ;
         end;
+        iOrderIndexID := tblOrders.RecNo ;
         lstPayment.Items.Add('OrderID: '+ IntToStr(tblOrders['OrderID'])+ ' --Item: '+ sItemName+ ' --TotalCost: ' + FloatToStrF(CalcOrderPrice(tblOrders['OrderID']), ffCurrency, 10,2 ) + ' --FROM ' + tblOrders['Pickup Country'] + ' -TO- ' + tblOrders['Drop of Country'] ) ;
+        tblOrders.RecNo := iOrderIndexID ;
       end;
     end;
     tblOrders.Next ;
@@ -3342,7 +3384,7 @@ tsPayment.TabVisible := True ;
 btnPrintPaymentConfirmation.Enabled := False ;
 redPaymentConfirm.Clear ;
   if not bPayFound then  //  display a message if no payments to be made were found
-  ShowMessage('Lucky you, all your order are paid, or, unlucky us; youve not made an order yet :)') ;
+  ShowMessage('Lucky you, all your orders are paid, or, unlucky us; youve not made an order yet :)') ;
 end;
 
 procedure TfrmVolitant_Express.btnToPlanesClick(Sender: TObject);
@@ -3792,7 +3834,7 @@ begin
   ShowMessage('Welcome label theme updated');
 end;
 
-procedure TfrmVolitant_Express.Button1Click(Sender: TObject);
+procedure TfrmVolitant_Express.btnTestClick(Sender: TObject);
 var
   rBaseCost : real;
    sPrevent_Copy : string;
@@ -4450,19 +4492,21 @@ begin
   frmVolitant_Express.Left := Round(Screen.Width /2) - Round(frmVolitant_Express.Width / 2) ;
   frmVolitant_Express.Top :=  Round(Screen.HEight / 2) - Round(frmVolitant_Express.Height / 2)  ;
   Application.Title := 'Volitant Express';   // Change the title that will be used in say showmessages
+  btnItemOrderPrice.ShowHint := True;
+  btnItemOrderPrice.Hint := 'Sort from highest to lowest price';
 // Set up the tab sheets
-{
-tsRegister.TabVisible := False;
-tsLogin.TabVisible := False;
-tsIntroVideo.TabVisible := False;
-tsGallery.TabVisible := False;
-tsAdmin.TabVisible := False;
-tsHome.TabVisible := False;
-tsPayment.TabVisible := False;
-tsPOrder.TabVisible := False;
-tsManageCompany.TabVisible := False;
-tsHistory.TabVisible := False;
-                               // Dont add the sum page to list, will cause errors due to activepage.tabvisible
+    // Program pages
+  tsRegister.TabVisible := False;
+  tsLogin.TabVisible := False;
+  tsIntroVideo.TabVisible := False;
+  tsGallery.TabVisible := False;
+  tsAdmin.TabVisible := False;
+  tsHome.TabVisible := False;
+  tsPayment.TabVisible := False;
+  tsPOrder.TabVisible := False;
+  tsManageCompany.TabVisible := False;
+  tsHistory.TabVisible := False;
+   // Admin Pages. Dont add the sum page to list, will cause errors due to activepage.tabvisible
   tsItemsAdmin.TabVisible := False;
   tsPlanesAdmin.TabVisible := False;
   tsOrdersAdmin.TabVisible := False;
@@ -4471,12 +4515,11 @@ tsHistory.TabVisible := False;
   tsCustomAdmin.TabVisible := False;
   tsThemeAdmin.TabVisible := False;
   tsGrid.TabVisible := False;
-  tsAdminManage.TabVisible := False;    }
-
+  tsAdminManage.TabVisible := False;
+  // Minor other pages
   tsContact.TabVisible := False;
   tsLastInfo.TabVisible := False;
   tsRegConfirm.TabVisible := False;
-
   // Set sonme starting variablles
   bTimer := False;
   iImageCount := 0;
@@ -4536,12 +4579,11 @@ tsHistory.TabVisible := False;
       CloseFile(tFile);
     end;
     // Add programs tabstops
-      //Group Boxes
-      grbChooseItems.TabOrder := 0;
-      grbChooseOrderWeight.TabOrder := 1;
-      grbSelectOrderCountries.TabOrder := 2;
-      grbChoosePickupTime.TabOrder := 3;
-      btnOrderToSummary.TabOrder := 4;
+      //Login page
+      edtUsernameLogin.TabOrder := 0;
+      edtPasswordLogin.TabOrder := 1;
+      chkLoginAsAdmin.TabOrder := 2;
+      btnLogin.TabOrder := 3;
       // Register page
         // Company details
         edtCName.TabOrder := 0;
@@ -4557,6 +4599,12 @@ tsHistory.TabVisible := False;
         dtpEstablishedDate.TabOrder := 0;
         sedRegDefaultHours.TabOrder := 1;
     // Place order
+     //Group Boxes
+      grbChooseItems.TabOrder := 0;
+      grbChooseOrderWeight.TabOrder := 1;
+      grbSelectOrderCountries.TabOrder := 2;
+      grbChoosePickupTime.TabOrder := 3;
+      btnOrderToSummary.TabOrder := 4;
       // Choose items
       cmbCategory.TabOrder := 0;
       lstSelectTransportItem.TabOrder := 1;
@@ -5104,7 +5152,8 @@ procedure TfrmVolitant_Express.SetOrderStatusItemIndex(pStatus: string);
 var
   I: Integer;
 begin
-  for I := 0 to 4 do
+// Procedure to set the status in the radio group of orders status updating related things
+  for I := 0 to rgpOrderStatus.Items.Count-1 do
   begin
     if rgpOrderStatus.Items[i] = pStatus then
     rgpOrderStatus.ItemIndex := i ;
