@@ -1,24 +1,27 @@
-This is my IT PAT for 2025, written in Delphi, in my grade 12 year of High School
+# Volitant Express
+This is my IT PAT for 2025, written in Delphi, in my grade 12 year of High School   
+The Topic was Transportation Management related  
+Developed By Robert van der Spoel
 
-The Topic was Transportation Management related
-
-Robert van der Spoel
-Volitant Express
-Readme
+## Overview
 
 My program allows a user to place an order for transport of an item around the world- between any 2 countries. Then the admins of VE can login and manage the order, by changing the status and so on. So then the customer companies can transport their items and goods around the world- Savely and efficiently.
 
-To login as a user
-Username: RobertTOWNSA09_512
-Password: ERT22@!ROB
-To Login as an admin (all permissions)
-*Click checkbox to login as an admin
-Username: admin
-Password: admin
-To login as an admin (with some permissions)
-Username: Roberts
-Password: QWERTY33
-*You must close the program in order to ‘Logout’
+### Login Details
+
+To login as a user  
+Username: RobertTOWNSA09_512  
+Password: ERT22@!ROB  
+To Login as an admin (all permissions)  
+*Click checkbox to login as an admin  
+Username: admin  
+Password: admin  
+To login as an admin (with some permissions)  
+Username: Roberts  
+Password: QWERTY33  
+**You must close the program in order to ‘Logout’**  
+
+### Things to Know
 
 Things to know about the admin pages
 -	On login, the page will open on the “Summary Page” . Press the “Reload Page” button to load the summary page.
@@ -33,3 +36,5 @@ Other cool features
 o	Check the color dialogue for custom colors
 -	Check the FindPlane Function for an awesome algorithm
 -	Check the status bars on the admin summary page
+
+##### Please note that ceratain ways of coding had to be applied to allign with my education system curriculem- such as that I was not allowed to use Breaks
